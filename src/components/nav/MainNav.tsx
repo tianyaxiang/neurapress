@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
+import { ThemeToggle } from '@/components/theme-toggle'
 
 const navigation = [
   { name: '微信公众号', href: '/wechat' },
@@ -13,7 +14,7 @@ export function MainNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="border-b border-gray-200 bg-white">
+    <nav className="border-b border-gray-200 bg-background">
       <div className="container mx-auto">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
@@ -32,7 +33,7 @@ export function MainNav() {
                       "px-3 py-2 text-sm font-medium rounded-md",
                       pathname === item.href
                         ? "bg-primary text-primary-foreground"
-                        : "text-gray-700 hover:text-gray-900 hover:bg-gray-100"
+                        : "text-foreground hover:text-foreground hover:bg-accent"
                     )}
                   >
                     {item.name}
@@ -41,10 +42,11 @@ export function MainNav() {
               </div>
             </div>
           </div>
-          <div className="hidden md:block">
-            <p className="text-sm text-muted-foreground">
+          <div className="flex items-center space-x-4">
+            <p className="text-sm text-muted-foreground hidden md:block">
               专业的内容转换工具
             </p>
+            <ThemeToggle />
           </div>
         </div>
       </div>

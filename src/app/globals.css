@@ -108,41 +108,162 @@
   --tw-prose-quotes: #666666;
 }
 
-/* 预览内容样式 */
+/* 预览内容样式优化 */
 .preview-content {
-  word-break: break-all;
+  word-break: break-word;
   white-space: pre-wrap;
+  font-size: 15px;
+  line-height: 1.75;
+  color: hsl(var(--foreground));
+  padding: 1.5rem;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.preview-content h1,
+.preview-content h2,
+.preview-content h3,
+.preview-content h4,
+.preview-content h5,
+.preview-content h6 {
+  font-weight: 600;
+  line-height: 1.25;
+  margin-top: 2em;
+  margin-bottom: 1em;
+  color: hsl(var(--foreground));
+}
+
+.preview-content h1 {
+  font-size: 1.5em;
+}
+
+.preview-content h2 {
+  font-size: 1.3em;
+}
+
+.preview-content h3 {
+  font-size: 1.1em;
+}
+
+.preview-content p {
+  margin: 1.2em 0;
+  color: hsl(var(--foreground));
 }
 
 .preview-content img {
   max-width: 100%;
   height: auto;
-  margin: 1em auto;
+  margin: 1.5em auto;
   display: block;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.preview-content img:hover {
+  transform: scale(1.02);
 }
 
 .preview-content pre {
   white-space: pre-wrap;
   word-wrap: break-word;
+  background: hsl(var(--muted));
+  border-radius: 6px;
+  padding: 1em;
+  margin: 1.5em 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.9em;
+  line-height: 1.6;
+  overflow-x: auto;
 }
 
-/* 优化预览区域滚动效果 */
+.preview-content code {
+  background: hsl(var(--muted));
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 0.9em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.preview-content blockquote {
+  margin: 1.5em 0;
+  padding: 0.8em 1em;
+  border-left: 4px solid hsl(var(--primary));
+  background: hsl(var(--muted));
+  border-radius: 0 4px 4px 0;
+  color: hsl(var(--muted-foreground));
+}
+
+.preview-content ul,
+.preview-content ol {
+  margin: 1.2em 0;
+  padding-left: 1.5em;
+  color: hsl(var(--foreground));
+}
+
+.preview-content li {
+  margin: 0.5em 0;
+}
+
+.preview-content table {
+  width: 100%;
+  margin: 1.5em 0;
+  border-collapse: collapse;
+}
+
+.preview-content th,
+.preview-content td {
+  padding: 0.75em;
+  border: 1px solid hsl(var(--border));
+}
+
+.preview-content th {
+  background: hsl(var(--muted));
+  font-weight: 600;
+}
+
+/* 预览区域滚动条优化 */
 .preview-container {
   scrollbar-width: thin;
-  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  scrollbar-color: hsl(var(--muted-foreground)) hsl(var(--muted));
 }
 
 .preview-container::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 .preview-container::-webkit-scrollbar-track {
-  background: transparent;
+  background: hsl(var(--muted));
+  border-radius: 4px;
 }
 
 .preview-container::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 3px;
+  background-color: hsl(var(--muted-foreground));
+  border-radius: 4px;
+  border: 2px solid hsl(var(--muted));
+}
+
+.preview-container::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--foreground));
+}
+
+/* 预览区域响应式布局 */
+@media (max-width: 768px) {
+  .preview-content {
+    padding: 0.75rem;
+    font-size: 14px;
+  }
+  
+  .preview-content img {
+    margin: 1em auto;
+  }
+  
+  .preview-content pre {
+    margin: 1em 0;
+    padding: 0.75em;
+    font-size: 0.85em;
+  }
 }
 
 /* 模板预览卡片样式 */
@@ -173,31 +294,558 @@
   opacity: 1;
 }
 
-/* ByteMD 编辑器样式 */
-.bytemd-preview {
-  @apply prose max-w-none p-4;
+/* ByteMD 编辑器样式优化 */
+.bytemd {
+  height: 100% !important;
+  border: none !important;
+  background: transparent !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
-.prose-modern .bytemd-preview {
-  --tw-prose-body: #374151;
-  --tw-prose-headings: #111827;
-  --tw-prose-links: #2563eb;
-  --tw-prose-code: #374151;
-  --tw-prose-quotes: #4b5563;
+.bytemd-toolbar {
+  background: #fff !important;
+  border-bottom: 1px solid #e5e7eb !important;
+  padding: 8px !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10 !important;
 }
 
-.prose-elegant .bytemd-preview {
-  --tw-prose-body: #4a5568;
-  --tw-prose-headings: #2d3748;
-  --tw-prose-links: #4299e1;
-  --tw-prose-code: #4a5568;
-  --tw-prose-quotes: #718096;
+.bytemd-toolbar-left {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 4px !important;
 }
 
-.prose-minimal .bytemd-preview {
-  --tw-prose-body: #1a1a1a;
-  --tw-prose-headings: #000000;
-  --tw-prose-links: #0066cc;
-  --tw-prose-code: #1a1a1a;
-  --tw-prose-quotes: #666666;
+.bytemd-toolbar-right {
+  display: flex !important;
+  gap: 4px !important;
+}
+
+.bytemd-toolbar-icon {
+  padding: 6px !important;
+  margin: 0 !important;
+  border-radius: 4px !important;
+  color: #4b5563 !important;
+  transition: all 0.2s ease !important;
+}
+
+.bytemd-toolbar-icon:hover {
+  background: #f3f4f6 !important;
+  color: #111827 !important;
+}
+
+.bytemd-toolbar-icon.active {
+  background: #f3f4f6 !important;
+  color: #2563eb !important;
+}
+
+.bytemd-status {
+  background: #fff !important;
+  border-top: 1px solid #e5e7eb !important;
+  padding: 4px 12px !important;
+  color: #6b7280 !important;
+  font-size: 12px !important;
+  position: sticky !important;
+  bottom: 0 !important;
+  z-index: 10 !important;
+}
+
+.bytemd-editor {
+  background: #fff !important;
+  flex: 1 !important;
+  overflow: auto !important;
+  padding: 0 16px !important;
+}
+
+.CodeMirror {
+  height: 100% !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  color: #374151 !important;
+  padding: 16px 0 !important;
+}
+
+.CodeMirror-lines {
+  padding: 0 !important;
+}
+
+.CodeMirror-line {
+  padding: 0 !important;
+}
+
+.CodeMirror-cursor {
+  border-left: 2px solid #2563eb !important;
+}
+
+.CodeMirror-selected {
+  background: rgba(37, 99, 235, 0.1) !important;
+}
+
+/* Markdown 语法高亮 */
+.cm-s-default .cm-header {
+  color: #1e40af !important;
+  font-weight: 600 !important;
+}
+
+.cm-s-default .cm-quote {
+  color: #059669 !important;
+  font-style: italic !important;
+}
+
+.cm-s-default .cm-link {
+  color: #2563eb !important;
+  text-decoration: none !important;
+}
+
+.cm-s-default .cm-url {
+  color: #6b7280 !important;
+}
+
+.cm-s-default .cm-code,
+.cm-s-default .cm-comment {
+  color: #dc2626 !important;
+  background: rgba(0, 0, 0, 0.05) !important;
+  padding: 2px 4px !important;
+  border-radius: 3px !important;
+}
+
+.cm-s-default .cm-strong {
+  color: #111827 !important;
+  font-weight: 600 !important;
+}
+
+.cm-s-default .cm-em {
+  color: #4b5563 !important;
+  font-style: italic !important;
+}
+
+/* 编辑器滚动条优化 */
+.bytemd-editor ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.bytemd-editor ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.bytemd-editor ::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.bytemd-editor ::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* 编辑器暗色主题支持 */
+.dark .bytemd {
+  background: hsl(var(--background)) !important;
+}
+
+.dark .bytemd-toolbar {
+  background: hsl(var(--background)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+.dark .bytemd-toolbar-icon {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.dark .bytemd-toolbar-icon:hover {
+  background: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+}
+
+.dark .bytemd-toolbar-icon.active {
+  background: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+}
+
+.dark .bytemd-status {
+  background: hsl(var(--background)) !important;
+  border-color: hsl(var(--border)) !important;
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.dark .bytemd-editor {
+  background: hsl(var(--background)) !important;
+}
+
+.dark .CodeMirror {
+  color: hsl(var(--foreground)) !important;
+  background: hsl(var(--background)) !important;
+}
+
+.dark .CodeMirror-selected {
+  background: hsl(var(--accent))/.2 !important;
+}
+
+.dark .CodeMirror-line::selection,
+.dark .CodeMirror-line > span::selection,
+.dark .CodeMirror-line > span > span::selection {
+  background: hsl(var(--accent))/.2 !important;
+}
+
+.dark .cm-s-default .cm-header {
+  color: hsl(var(--primary)) !important;
+}
+
+.dark .cm-s-default .cm-quote {
+  color: hsl(var(--accent-foreground)) !important;
+}
+
+.dark .cm-s-default .cm-link {
+  color: hsl(var(--primary)) !important;
+}
+
+.dark .cm-s-default .cm-url {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.dark .cm-s-default .cm-code,
+.dark .cm-s-default .cm-comment {
+  color: hsl(var(--destructive)) !important;
+  background: hsl(var(--muted)) !important;
+  border-radius: 3px;
+  padding: 0 3px;
+}
+
+.dark .cm-s-default .cm-strong {
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark .cm-s-default .cm-em {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* 编辑器容器样式优化 */
+.editor-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.editor-container .bytemd {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100% !important;
+}
+
+.editor-container .bytemd-toolbar {
+  flex-shrink: 0;
+}
+
+.editor-container .bytemd-editor {
+  flex: 1;
+  overflow: auto;
+  height: auto !important;
+}
+
+/* 预览容器样式优化 */
+.preview-container {
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-container .preview-header {
+  flex-shrink: 0;
+}
+
+.preview-container .preview-content {
+  padding: 20px;
+  overflow-wrap: break-word;
+  font-size: 15px;
+  line-height: 1.75;
+  color: #333;
+  height: 100%;
+  overflow-y: auto;
+}
+
+
+
+
+
+.editor-container .bytemd-editor::-webkit-scrollbar-thumb,
+.preview-container .preview-content::-webkit-scrollbar-thumb,
+.CodeMirror-vscrollbar::-webkit-scrollbar-thumb,
+.CodeMirror-hscrollbar::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground));
+  border-radius: 4px;
+  border: 2px solid hsl(var(--muted));
+}
+
+.editor-container .bytemd-editor::-webkit-scrollbar-thumb:hover,
+.preview-container .preview-content::-webkit-scrollbar-thumb:hover,
+.CodeMirror-vscrollbar::-webkit-scrollbar-thumb:hover,
+.CodeMirror-hscrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--foreground));
+}
+
+/* 暗黑模式下的滚动条样式 */
+.dark .editor-container .bytemd-editor,
+.dark .preview-container .preview-content,
+.dark .CodeMirror-vscrollbar,
+.dark .CodeMirror-hscrollbar {
+  scrollbar-color: hsl(var(--muted-foreground)) hsl(var(--muted));
+}
+
+.dark .editor-container .bytemd-editor::-webkit-scrollbar-track,
+.dark .preview-container .preview-content::-webkit-scrollbar-track,
+.dark .CodeMirror-vscrollbar::-webkit-scrollbar-track,
+.dark .CodeMirror-hscrollbar::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+}
+
+.dark .editor-container .bytemd-editor::-webkit-scrollbar-thumb,
+.dark .preview-container .preview-content::-webkit-scrollbar-thumb,
+.dark .CodeMirror-vscrollbar::-webkit-scrollbar-thumb,
+.dark .CodeMirror-hscrollbar::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground));
+  border: 2px solid hsl(var(--muted));
+}
+
+.dark .editor-container .bytemd-editor::-webkit-scrollbar-thumb:hover,
+.dark .preview-container .preview-content::-webkit-scrollbar-thumb:hover,
+.dark .CodeMirror-vscrollbar::-webkit-scrollbar-thumb:hover,
+.dark .CodeMirror-hscrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--foreground));
+}
+
+/* 编辑器内部滚动条样式 */
+.CodeMirror-vscrollbar,
+.CodeMirror-hscrollbar {
+  display: block !important;
+}
+
+.CodeMirror-vscrollbar {
+  width: 8px !important;
+}
+
+.CodeMirror-hscrollbar {
+  height: 8px !important;
+}
+
+/* 隐藏默认滚动条 */
+.CodeMirror-scroll {
+  margin-right: -8px !important;
+  margin-bottom: -8px !important;
+}
+
+/* 暗黑模式下的预览内容样式 */
+.dark .preview-content {
+  color: hsl(var(--foreground));
+}
+
+.dark .preview-content h1,
+.dark .preview-content h2,
+.dark .preview-content h3,
+.dark .preview-content h4,
+.dark .preview-content h5,
+.dark .preview-content h6 {
+  color: hsl(var(--foreground));
+}
+
+.dark .preview-content p {
+  color: hsl(var(--foreground));
+}
+
+.dark .preview-content pre {
+  background: hsl(var(--muted));
+  border: 1px solid hsl(var(--border));
+}
+
+.dark .preview-content code {
+  background: hsl(var(--muted));
+  color: hsl(var(--accent-foreground));
+}
+
+.dark .preview-content blockquote {
+  background: hsl(var(--muted));
+  border-left-color: hsl(var(--primary));
+  color: hsl(var(--muted-foreground));
+}
+
+.dark .preview-content img {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark .preview-content th {
+  background: hsl(var(--muted));
+}
+
+.dark .preview-content td,
+.dark .preview-content th {
+  border-color: hsl(var(--border));
+}
+
+/* 暗黑模式下的编辑器样式 */
+.dark .bytemd {
+  background: hsl(var(--background)) !important;
+}
+
+.dark .bytemd-toolbar {
+  background: hsl(var(--background)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+.dark .bytemd-toolbar-icon {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.dark .bytemd-toolbar-icon:hover {
+  background: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+}
+
+.dark .bytemd-toolbar-icon.active {
+  background: hsl(var(--accent)) !important;
+  color: hsl(var(--accent-foreground)) !important;
+}
+
+.dark .bytemd-status {
+  background: hsl(var(--background)) !important;
+  border-color: hsl(var(--border)) !important;
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.dark .bytemd-editor {
+  background: hsl(var(--background)) !important;
+}
+
+.dark .CodeMirror {
+  color: hsl(var(--foreground)) !important;
+  background: hsl(var(--background)) !important;
+}
+
+.dark .CodeMirror-cursor {
+  border-left-color: hsl(var(--primary)) !important;
+}
+
+.dark .CodeMirror-selected {
+  background: hsl(var(--accent))/.2 !important;
+}
+
+.dark .CodeMirror-line::selection,
+.dark .CodeMirror-line > span::selection,
+.dark .CodeMirror-line > span > span::selection {
+  background: hsl(var(--accent))/.2 !important;
+}
+
+.dark .cm-s-default .cm-header {
+  color: hsl(var(--primary)) !important;
+}
+
+.dark .cm-s-default .cm-quote {
+  color: hsl(var(--accent-foreground)) !important;
+}
+
+.dark .cm-s-default .cm-link {
+  color: hsl(var(--primary)) !important;
+}
+
+.dark .cm-s-default .cm-url {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.dark .cm-s-default .cm-code,
+.dark .cm-s-default .cm-comment {
+  color: hsl(var(--destructive)) !important;
+  background: hsl(var(--muted)) !important;
+  border-radius: 3px;
+  padding: 0 3px;
+}
+
+.dark .cm-s-default .cm-strong {
+  color: hsl(var(--foreground)) !important;
+}
+
+.dark .cm-s-default .cm-em {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* 暗黑模式下的滚动条样式 */
+.dark .editor-container .bytemd-editor::-webkit-scrollbar,
+.dark .preview-container ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.dark .editor-container .bytemd-editor::-webkit-scrollbar-track,
+.dark .preview-container ::-webkit-scrollbar-track {
+  background: hsl(var(--background));
+  border-radius: 4px;
+}
+
+.dark .editor-container .bytemd-editor::-webkit-scrollbar-thumb,
+.dark .preview-container ::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted));
+  border-radius: 4px;
+  border: 2px solid hsl(var(--background));
+}
+
+.dark .editor-container .bytemd-editor::-webkit-scrollbar-thumb:hover,
+.dark .preview-container ::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground));
+}
+
+/* 暗黑模式下的UI元素样式 */
+.dark .template-preview-card {
+  background: hsl(var(--background));
+  border-color: hsl(var(--border));
+}
+
+.dark .template-preview-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dark .template-preview-card::before {
+  background: linear-gradient(to right, hsl(var(--primary)), hsl(var(--primary-foreground)));
+}
+
+/* 暗黑模式下的分割线样式 */
+.dark .h-px {
+  background: hsl(var(--border));
+}
+
+/* 暗黑模式下的阴影样式 */
+.dark .shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* 暗黑模式下的选择框样式 */
+.dark select {
+  background-color: hsl(var(--background));
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+
+.dark select:focus {
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 2px hsl(var(--primary)/.2);
+}
+
+.dark select option {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+/* 暗黑模式下的按钮悬停效果 */
+.dark .hover\:bg-muted\/90:hover {
+  background-color: hsl(var(--muted)/.9);
+}
+
+.dark .hover\:bg-primary\/90:hover {
+  background-color: hsl(var(--primary)/.9);
+}
+
+/* 暗黑模式下的加载动画 */
+.dark .animate-spin {
+  color: hsl(var(--primary));
 } 
