@@ -1,0 +1,16 @@
+.wechat-template {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell;
+  line-height: 1.75;
+  letter-spacing: 0.05em;
+}
+
+.wechat-template h1 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 1em;
+}
+
+.wechat-template p {
+  margin-bottom: 1em;
+  color: #333;
+} 

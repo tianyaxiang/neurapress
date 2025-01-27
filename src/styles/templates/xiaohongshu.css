@@ -1,0 +1,15 @@
+.xiaohongshu-template {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen;
+  line-height: 1.6;
+}
+
+.xiaohongshu-template h1 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 0.5em;
+}
+
+.xiaohongshu-template p {
+  margin-bottom: 0.8em;
+  color: #222;
+} 
