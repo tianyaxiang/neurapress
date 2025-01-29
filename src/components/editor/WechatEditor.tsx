@@ -1,13 +1,6 @@
 'use client'
 
-import { Editor } from '@bytemd/react'
-import gfm from '@bytemd/plugin-gfm'
-import highlight from '@bytemd/plugin-highlight'
-import breaks from '@bytemd/plugin-breaks'
-import frontmatter from '@bytemd/plugin-frontmatter'
-import math from '@bytemd/plugin-math'
-import mermaid from '@bytemd/plugin-mermaid'
-import { useState, useCallback, useEffect, useRef, useMemo, Suspense } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { templates } from '@/config/wechat-templates'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/components/ui/use-toast'
@@ -19,15 +12,15 @@ import { useAutoSave } from './hooks/useAutoSave'
 import { EditorToolbar } from './components/EditorToolbar'
 import { EditorPreview } from './components/EditorPreview'
 import { MobileToolbar } from './components/MobileToolbar'
+import { MarkdownToolbar } from './components/MarkdownToolbar'
 import { type PreviewSize } from './constants'
-import 'bytemd/dist/index.css'
 import 'highlight.js/styles/github.css'
 import 'katex/dist/katex.css'
-import type { BytemdPlugin } from 'bytemd'
 
 export default function WechatEditor() {
   const { toast } = useToast()
   const editorRef = useRef<HTMLDivElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
   const previewRef = useRef<HTMLDivElement>(null)
   const [value, setValue] = useState('')
   const [selectedTemplate, setSelectedTemplate] = useState<string>('creative')
@@ -37,11 +30,43 @@ export default function WechatEditor() {
   const [isConverting, setIsConverting] = useState(false)
   const [isDraft, setIsDraft] = useState(false)
   const [previewContent, setPreviewContent] = useState('')
-  const [plugins, setPlugins] = useState<BytemdPlugin[]>([])
+  const [cursorPosition, setCursorPosition] = useState<{ start: number; end: number }>({ start: 0, end: 0 })
 
   // 使用自定义 hooks
   const { handleScroll } = useEditorSync(editorRef)
   const { handleEditorChange } = useAutoSave(value, setIsDraft)
+
+  // 处理编辑器输入
+  const handleInput = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value
+    setValue(newValue)
+    handleEditorChange(newValue)
+    // 保存光标位置
+    setCursorPosition({
+      start: e.target.selectionStart,
+      end: e.target.selectionEnd
+    })
+  }, [handleEditorChange])
+
+  // 处理Tab键
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Tab') {
+      e.preventDefault()
+      const textarea = e.currentTarget
+      const start = textarea.selectionStart
+      const end = textarea.selectionEnd
+
+      // 插入两个空格作为缩进
+      const newValue = value.substring(0, start) + '  ' + value.substring(end)
+      setValue(newValue)
+      handleEditorChange(newValue)
+
+      // 恢复光标位置
+      requestAnimationFrame(() => {
+        textarea.selectionStart = textarea.selectionEnd = start + 2
+      })
+    }
+  }, [value, handleEditorChange])
 
   // 获取预览内容
   const getPreviewContent = useCallback(() => {
@@ -91,6 +116,35 @@ export default function WechatEditor() {
     }
   }, [value, toast])
 
+  // 监听快捷键保存事件
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault()
+        handleSave()
+      }
+    }
+    
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [handleSave])
+
+  // 延迟更新预览内容
+  useEffect(() => {
+    if (!showPreview) return
+    
+    setIsConverting(true)
+    const updatePreview = async () => {
+      try {
+        const content = getPreviewContent()
+        setPreviewContent(content)
+      } finally {
+        setIsConverting(false)
+      }
+    }
+    updatePreview()
+  }, [value, selectedTemplate, styleOptions, showPreview, getPreviewContent])
+
   // 加载已保存的内容
   useEffect(() => {
     const draftContent = localStorage.getItem('wechat_editor_draft')
@@ -108,18 +162,6 @@ export default function WechatEditor() {
       setValue(savedContent)
     }
   }, [toast])
-
-  // 监听快捷键保存事件
-  useEffect(() => {
-    const handleSaveShortcut = (e: CustomEvent<string>) => {
-      handleSave()
-    }
-    
-    window.addEventListener('bytemd-save', handleSaveShortcut as EventListener)
-    return () => {
-      window.removeEventListener('bytemd-save', handleSaveShortcut as EventListener)
-    }
-  }, [handleSave])
 
   const copyContent = useCallback(() => {
     const content = getPreviewContent()
@@ -203,80 +245,7 @@ export default function WechatEditor() {
         })
       }
     }
-  }, [selectedTemplate, toast, previewRef])
-
-  // 创建编辑器插件
-  const createEditorPlugin = useCallback((): BytemdPlugin => {
-    return {
-      actions: [
-        {
-          title: '保存',
-          icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>',
-          handler: {
-            type: 'action',
-            click: (ctx: any) => {
-              const event = new CustomEvent('bytemd-save', { detail: ctx.editor.getValue() })
-              window.dispatchEvent(event)
-            }
-          }
-        }
-      ]
-    }
-  }, [])
-
-  // 加载插件
-  useEffect(() => {
-    const loadPlugins = async () => {
-      try {
-        const [gfmPlugin, breaksPlugin, frontmatterPlugin, mathPlugin, mermaidPlugin, highlightPlugin] = await Promise.all([
-          import('@bytemd/plugin-gfm').then(m => m.default()),
-          import('@bytemd/plugin-breaks').then(m => m.default()),
-          import('@bytemd/plugin-frontmatter').then(m => m.default()),
-          import('@bytemd/plugin-math').then(m => m.default({
-            katexOptions: { throwOnError: false, output: 'html' }
-          })),
-          import('@bytemd/plugin-mermaid').then(m => m.default({ theme: 'default' })),
-          import('@bytemd/plugin-highlight').then(m => m.default())
-        ])
-
-        setPlugins([
-          gfmPlugin,
-          breaksPlugin,
-          frontmatterPlugin,
-          mathPlugin,
-          mermaidPlugin,
-          highlightPlugin,
-          createEditorPlugin()
-        ])
-      } catch (error) {
-        console.error('Failed to load editor plugins:', error)
-        toast({
-          variant: "destructive",
-          title: "加载失败",
-          description: "编辑器插件加载失败，部分功能可能无法使用",
-          duration: 5000,
-        })
-      }
-    }
-
-    loadPlugins()
-  }, [createEditorPlugin, toast])
-
-  // 延迟更新预览内容
-  useEffect(() => {
-    if (!showPreview) return
-    
-    setIsConverting(true)
-    const updatePreview = async () => {
-      try {
-        const content = getPreviewContent()
-        setPreviewContent(content)
-      } finally {
-        setIsConverting(false)
-      }
-    }
-    updatePreview()
-  }, [value, selectedTemplate, styleOptions, showPreview, getPreviewContent])
+  }, [selectedTemplate, toast])
 
   // 检测是否为移动设备
   const isMobile = useCallback(() => {
@@ -332,6 +301,43 @@ export default function WechatEditor() {
     setIsDraft(false)
   }, [isDraft, toast])
 
+  // 处理工具栏插入文本
+  const handleToolbarInsert = useCallback((text: string, options?: { wrap?: boolean; placeholder?: string; suffix?: string }) => {
+    const textarea = textareaRef.current
+    if (!textarea) return
+
+    const start = textarea.selectionStart
+    const end = textarea.selectionEnd
+    const selectedText = value.substring(start, end)
+    
+    let newText = ''
+    let newCursorPos = 0
+
+    if (options?.wrap && selectedText) {
+      // 如果有选中文本且需要包裹
+      newText = value.substring(0, start) + 
+                text + selectedText + (options.suffix || text) + 
+                value.substring(end)
+      newCursorPos = start + text.length + selectedText.length + (options.suffix?.length || text.length)
+    } else {
+      // 插入新文本
+      const insertText = selectedText || options?.placeholder || ''
+      newText = value.substring(0, start) + 
+                text + insertText + (options?.suffix || '') + 
+                value.substring(end)
+      newCursorPos = start + text.length + insertText.length + (options?.suffix?.length || 0)
+    }
+
+    setValue(newText)
+    handleEditorChange(newText)
+
+    // 恢复焦点并设置光标位置
+    requestAnimationFrame(() => {
+      textarea.focus()
+      textarea.setSelectionRange(newCursorPos, newCursorPos)
+    })
+  }, [value, handleEditorChange])
+
   return (
     <div className="h-full flex flex-col">
       <EditorToolbar 
@@ -355,32 +361,25 @@ export default function WechatEditor() {
         <div 
           ref={editorRef}
           className={cn(
-            "editor-container bg-background transition-all duration-300 ease-in-out",
+            "editor-container bg-background transition-all duration-300 ease-in-out flex flex-col",
             showPreview 
               ? "h-[50%] sm:h-full sm:w-1/2 border-b sm:border-r" 
               : "h-full w-full",
             selectedTemplate && templates.find(t => t.id === selectedTemplate)?.styles
           )}
-          style={{
-            display: 'flex',
-            flexDirection: 'column'
-          }}
         >
-          <Suspense fallback={<div className="flex-1 flex items-center justify-center">加载编辑器...</div>}>
-            <div className="flex-1 overflow-auto">
-              <Editor
-                value={value}
-                plugins={plugins}
-                onChange={(v) => {
-                  setValue(v)
-                  handleEditorChange(v)
-                }}
-                uploadImages={async (files: File[]) => {
-                  return []
-                }}
-              />
-            </div>
-          </Suspense>
+          <MarkdownToolbar onInsert={handleToolbarInsert} />
+          <div className="flex-1">
+            <textarea
+              ref={textareaRef}
+              value={value}
+              onChange={handleInput}
+              onKeyDown={handleKeyDown}
+              className="w-full h-full resize-none outline-none p-4 font-mono text-base leading-relaxed"
+              placeholder="开始写作..."
+              spellCheck={false}
+            />
+          </div>
         </div>
         
         {showPreview && (
