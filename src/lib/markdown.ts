@@ -74,7 +74,9 @@ export function convertToWechat(markdown: string, options: RendererOptions = {})
   customRenderer.heading = function({ text, depth }: Tokens.Heading) {
     const style = options.block?.[`h${depth}` as keyof typeof options.block]
     const styleStr = cssPropertiesToString(style)
-    return `<h${depth}${styleStr ? ` style="${styleStr}"` : ''}>${text}</h${depth}>`
+    const tokens = marked.Lexer.lexInline(text)
+    const content = marked.Parser.parseInline(tokens, { renderer: customRenderer })
+    return `<h${depth}${styleStr ? ` style="${styleStr}"` : ''}>${content}</h${depth}>`
   }
 
   customRenderer.paragraph = function({ text }: Tokens.Paragraph) {
