@@ -14,8 +14,6 @@ import { EditorPreview } from './components/EditorPreview'
 import { MobileToolbar } from './components/MobileToolbar'
 import { MarkdownToolbar } from './components/MarkdownToolbar'
 import { type PreviewSize } from './constants'
-import 'highlight.js/styles/github.css'
-import 'katex/dist/katex.css'
 
 export default function WechatEditor() {
   const { toast } = useToast()
