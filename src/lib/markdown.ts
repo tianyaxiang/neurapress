@@ -65,9 +65,6 @@ marked.setOptions({
 })
 
 export function convertToWechat(markdown: string, options: RendererOptions = {}): string {
-  // 预处理 markdown
-  markdown = preprocessMarkdown(markdown)
-  
   // 创建渲染器
   const customRenderer = new marked.Renderer()
 
@@ -82,8 +79,10 @@ export function convertToWechat(markdown: string, options: RendererOptions = {})
 
   customRenderer.paragraph = function({ text }: Tokens.Paragraph) {
     const style = options.block?.p
-    const styleStr = cssPropertiesToString(style)   
-    return `<p${styleStr ? ` style="${styleStr}"` : ''}>${text}</p>`
+    const styleStr = cssPropertiesToString(style)
+    const tokens = marked.Lexer.lexInline(text)
+    const content = marked.Parser.parseInline(tokens, { renderer: customRenderer })
+    return `<p${styleStr ? ` style="${styleStr}"` : ''}>${content}</p>`
   }
 
   customRenderer.blockquote = function({ text }: Tokens.Blockquote) {
@@ -133,13 +132,17 @@ export function convertToWechat(markdown: string, options: RendererOptions = {})
     const tag = ordered ? 'ol' : 'ul'
     const style = options.block?.[ordered ? 'ol' : 'ul']
     const styleStr = cssPropertiesToString(style)
-    return `<${tag}${styleStr ? ` style="${styleStr}"` : ''}>${body.raw}</${tag}>`
+    const tokens = marked.Lexer.lexInline(body.raw)
+    const content = marked.Parser.parseInline(tokens, { renderer: customRenderer })
+    return `<${tag}${styleStr ? ` style="${styleStr}"` : ''}>${content}</${tag}>`
   }
 
   customRenderer.listitem = function(item: Tokens.ListItem) {
     const style = options.inline?.listitem
     const styleStr = cssPropertiesToString(style)
-    return `<li${styleStr ? ` style="${styleStr}"` : ''}>${item.text}</li>`
+    const tokens = marked.Lexer.lexInline(item.text)
+    const content = marked.Parser.parseInline(tokens, { renderer: customRenderer })
+    return `<li${styleStr ? ` style="${styleStr}"` : ''}>${content}</li>`
   }
 
   // Convert Markdown to HTML using the custom renderer
