@@ -7,7 +7,7 @@ import breaks from '@bytemd/plugin-breaks'
 import frontmatter from '@bytemd/plugin-frontmatter'
 import math from '@bytemd/plugin-math'
 import mermaid from '@bytemd/plugin-mermaid'
-import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
+import { useState, useCallback, useEffect, useRef, useMemo, Suspense } from 'react'
 import { templates } from '@/config/wechat-templates'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/components/ui/use-toast'
@@ -36,10 +36,40 @@ export default function WechatEditor() {
   const [previewSize, setPreviewSize] = useState<PreviewSize>('medium')
   const [isConverting, setIsConverting] = useState(false)
   const [isDraft, setIsDraft] = useState(false)
+  const [previewContent, setPreviewContent] = useState('')
+  const [plugins, setPlugins] = useState<BytemdPlugin[]>([])
 
   // 使用自定义 hooks
   const { handleScroll } = useEditorSync(editorRef)
   const { handleEditorChange } = useAutoSave(value, setIsDraft)
+
+  // 获取预览内容
+  const getPreviewContent = useCallback(() => {
+    if (!value) return ''
+    
+    const template = templates.find(t => t.id === selectedTemplate)
+    const mergedOptions = {
+      ...styleOptions,
+      ...(template?.options || {})
+    }
+    
+    const html = convertToWechat(value, mergedOptions)
+    if (!template?.transform) return html
+    
+    try {
+      const transformed = template.transform(html)
+      if (transformed && typeof transformed === 'object') {
+        const result = transformed as { html?: string; content?: string }
+        if (result.html) return result.html
+        if (result.content) return result.content
+        return JSON.stringify(transformed)
+      }
+      return transformed || html
+    } catch (error) {
+      console.error('Template transformation error:', error)
+      return html
+    }
+  }, [value, selectedTemplate, styleOptions])
 
   // 手动保存
   const handleSave = useCallback(() => {
@@ -91,33 +121,6 @@ export default function WechatEditor() {
     }
   }, [handleSave])
 
-  const getPreviewContent = useCallback(() => {
-    if (!value) return ''
-    
-    const template = templates.find(t => t.id === selectedTemplate)
-    const mergedOptions = {
-      ...styleOptions,
-      ...(template?.options || {})
-    }
-    
-    const html = convertToWechat(value, mergedOptions)
-    if (!template?.transform) return html
-    
-    try {
-      const transformed = template.transform(html)
-      if (transformed && typeof transformed === 'object') {
-        const result = transformed as { html?: string; content?: string }
-        if (result.html) return result.html
-        if (result.content) return result.content
-        return JSON.stringify(transformed)
-      }
-      return transformed || html
-    } catch (error) {
-      console.error('Template transformation error:', error)
-      return html
-    }
-  }, [value, selectedTemplate, styleOptions])
-
   const copyContent = useCallback(() => {
     const content = getPreviewContent()
     navigator.clipboard.writeText(content)
@@ -135,7 +138,7 @@ export default function WechatEditor() {
   }, [getPreviewContent, toast])
 
   const handleCopy = useCallback(async () => {
-    const previewContent = editorRef.current?.querySelector('.bytemd-preview .markdown-body')
+    const previewContent = previewRef.current?.querySelector('.preview-content') as HTMLElement | null
     if (!previewContent) {
       toast({
         variant: "destructive",
@@ -153,6 +156,16 @@ export default function WechatEditor() {
       const template = templates.find(t => t.id === selectedTemplate)
       if (template) {
         tempDiv.className = template.styles
+      }
+
+      if (!tempDiv.innerHTML.trim()) {
+        toast({
+          variant: "destructive",
+          title: "复制失败",
+          description: "预览内容为空",
+          duration: 2000
+        })
+        return
       }
 
       const htmlBlob = new Blob([tempDiv.innerHTML], { type: 'text/html' })
@@ -174,14 +187,23 @@ export default function WechatEditor() {
       })
     } catch (err) {
       console.error('Copy error:', err)
-      toast({
-        variant: "destructive",
-        title: "复制失败",
-        description: "无法访问剪贴板，请检查浏览器权限",
-        action: <ToastAction altText="重试">重试</ToastAction>,
-      })
+      try {
+        await navigator.clipboard.writeText(previewContent.innerText)
+        toast({
+          title: "复制成功",
+          description: "已复制预览内容（仅文本）",
+          duration: 2000
+        })
+      } catch (fallbackErr) {
+        toast({
+          variant: "destructive",
+          title: "复制失败",
+          description: "无法访问剪贴板，请检查浏览器权限",
+          action: <ToastAction altText="重试">重试</ToastAction>,
+        })
+      }
     }
-  }, [selectedTemplate, toast])
+  }, [selectedTemplate, toast, previewRef])
 
   // 创建编辑器插件
   const createEditorPlugin = useCallback((): BytemdPlugin => {
@@ -202,26 +224,63 @@ export default function WechatEditor() {
     }
   }, [])
 
-  // 使用创建的插件
-  const plugins = useMemo(() => [
-    gfm(),
-    breaks(),
-    frontmatter(),
-    math({
-      katexOptions: {
-        throwOnError: false,
-        output: 'html'
+  // 加载插件
+  useEffect(() => {
+    const loadPlugins = async () => {
+      try {
+        const [gfmPlugin, breaksPlugin, frontmatterPlugin, mathPlugin, mermaidPlugin, highlightPlugin] = await Promise.all([
+          import('@bytemd/plugin-gfm').then(m => m.default()),
+          import('@bytemd/plugin-breaks').then(m => m.default()),
+          import('@bytemd/plugin-frontmatter').then(m => m.default()),
+          import('@bytemd/plugin-math').then(m => m.default({
+            katexOptions: { throwOnError: false, output: 'html' }
+          })),
+          import('@bytemd/plugin-mermaid').then(m => m.default({ theme: 'default' })),
+          import('@bytemd/plugin-highlight').then(m => m.default())
+        ])
+
+        setPlugins([
+          gfmPlugin,
+          breaksPlugin,
+          frontmatterPlugin,
+          mathPlugin,
+          mermaidPlugin,
+          highlightPlugin,
+          createEditorPlugin()
+        ])
+      } catch (error) {
+        console.error('Failed to load editor plugins:', error)
+        toast({
+          variant: "destructive",
+          title: "加载失败",
+          description: "编辑器插件加载失败，部分功能可能无法使用",
+          duration: 5000,
+        })
       }
-    }),
-    mermaid({
-      theme: 'default'
-    }),
-    highlight(),
-    createEditorPlugin()
-  ], [createEditorPlugin])
+    }
+
+    loadPlugins()
+  }, [createEditorPlugin, toast])
+
+  // 延迟更新预览内容
+  useEffect(() => {
+    if (!showPreview) return
+    
+    setIsConverting(true)
+    const updatePreview = async () => {
+      try {
+        const content = getPreviewContent()
+        setPreviewContent(content)
+      } finally {
+        setIsConverting(false)
+      }
+    }
+    updatePreview()
+  }, [value, selectedTemplate, styleOptions, showPreview, getPreviewContent])
 
   // 检测是否为移动设备
   const isMobile = useCallback(() => {
+    if (typeof window === 'undefined') return false
     return window.innerWidth < 640
   }, [])
 
@@ -307,16 +366,21 @@ export default function WechatEditor() {
             flexDirection: 'column'
           }}
         >
-          <div className="flex-1 overflow-auto">
-            <Editor
-              value={value}
-              plugins={plugins}
-              onChange={handleEditorChange}
-              uploadImages={async (files: File[]) => {
-                return []
-              }}
-            />
-          </div>
+          <Suspense fallback={<div className="flex-1 flex items-center justify-center">加载编辑器...</div>}>
+            <div className="flex-1 overflow-auto">
+              <Editor
+                value={value}
+                plugins={plugins}
+                onChange={(v) => {
+                  setValue(v)
+                  handleEditorChange(v)
+                }}
+                uploadImages={async (files: File[]) => {
+                  return []
+                }}
+              />
+            </div>
+          </Suspense>
         </div>
         
         {showPreview && (
@@ -325,7 +389,7 @@ export default function WechatEditor() {
             selectedTemplate={selectedTemplate}
             previewSize={previewSize}
             isConverting={isConverting}
-            previewContent={getPreviewContent()}
+            previewContent={previewContent}
             onPreviewSizeChange={setPreviewSize}
           />
         )}
