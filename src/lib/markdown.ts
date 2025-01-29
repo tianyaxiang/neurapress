@@ -1,11 +1,6 @@
-import { marked, type Tokens } from 'marked'
+import { Marked } from 'marked'
 import type { CSSProperties } from 'react'
-
-// 配置 marked 选项
-marked.setOptions({
-  gfm: true,
-  breaks: true
-})
+import type { Tokens } from 'marked'
 
 // 将 React CSSProperties 转换为 CSS 字符串
 function cssPropertiesToString(style: React.CSSProperties = {}): string {
@@ -43,129 +38,144 @@ function baseStylesToString(base: RendererOptions['base'] = {}): string {
   return styles.join(';')
 }
 
+// 预处理函数
+function preprocessMarkdown(markdown: string): string {
+  // 处理 ** 语法，但排除已经是 HTML 的部分
+  return markdown.replace(/(?<!<[^>]*)\*\*([^*]+)\*\*(?![^<]*>)/g, '<strong>$1</strong>')
+}
+
+// Initialize marked instance
+const marked = new Marked()
+
+// 创建基础渲染器
+const baseRenderer = new marked.Renderer()
+
+// 重写 strong 渲染器
+baseRenderer.strong = function(text) {
+  return `<strong>${text}</strong>`
+}
+
+// 应用配置和渲染器
+marked.setOptions({
+  gfm: true,
+  breaks: true,
+  async: false,
+  pedantic: false,
+  renderer: baseRenderer
+})
+
 export function convertToWechat(markdown: string, options: RendererOptions = {}): string {
-  const renderer = new marked.Renderer()
-  // 标题渲染
-  renderer.heading = ({ text, depth }: Tokens.Heading) => {
+  // 预处理 markdown
+  markdown = preprocessMarkdown(markdown)
+  
+  // 创建渲染器
+  const customRenderer = new marked.Renderer()
+
+  // 继承基础渲染器
+  Object.setPrototypeOf(customRenderer, baseRenderer)
+
+  customRenderer.heading = function({ text, depth }: Tokens.Heading) {
     const style = options.block?.[`h${depth}` as keyof typeof options.block]
     const styleStr = cssPropertiesToString(style)
     return `<h${depth}${styleStr ? ` style="${styleStr}"` : ''}>${text}</h${depth}>`
   }
 
-  // 段落渲染
-  renderer.paragraph = (text) => {
+  customRenderer.paragraph = function({ text }: Tokens.Paragraph) {
     const style = options.block?.p
     const styleStr = cssPropertiesToString(style)   
-    const content = typeof text === 'object' ? (text.text || text.toString()) : text
-
-    return `<p${styleStr ? ` style="${styleStr}"` : ''}>${content}</p>`
+    return `<p${styleStr ? ` style="${styleStr}"` : ''}>${text}</p>`
   }
 
-  // 引用渲染
-  renderer.blockquote = (quote) => {
+  customRenderer.blockquote = function({ text }: Tokens.Blockquote) {
     const style = options.block?.blockquote
     const styleStr = cssPropertiesToString(style)
-    const content = typeof quote === 'object' ? (quote.text || quote.toString()) : quote
-
-    return `<blockquote${styleStr ? ` style="${styleStr}"` : ''}>${content}</blockquote>`
+    return `<blockquote${styleStr ? ` style="${styleStr}"` : ''}>${text}</blockquote>`
   }
 
-  // 代码块渲染
-  renderer.code = ({ text, lang = '' }: { text: string; lang?: string }) => {
+  customRenderer.code = function({ text, lang }: Tokens.Code) {
     const style = options.block?.code_pre
     const styleStr = cssPropertiesToString(style)
-    return `<pre${styleStr ? ` style="${styleStr}"` : ''}><code class="language-${lang}">${text}</code></pre>`
+    return `<pre${styleStr ? ` style="${styleStr}"` : ''}><code class="language-${lang || ''}">${text}</code></pre>`
   }
 
-  // 行内代码渲染
-  renderer.codespan = (code) => {
+  customRenderer.codespan = function({ text }: Tokens.Codespan) {
     const style = options.inline?.codespan
     const styleStr = cssPropertiesToString(style)
-    return `<code${styleStr ? ` style="${styleStr}"` : ''}>${code}</code>`
+    return `<code${styleStr ? ` style="${styleStr}"` : ''}>${text}</code>`
   }
 
-  // 强调（斜体）渲染
-  renderer.em = (text) => {
+  customRenderer.em = function({ text }: Tokens.Em) {
     const style = options.inline?.em
     const styleStr = cssPropertiesToString(style)
     return `<em${styleStr ? ` style="${styleStr}"` : ''}>${text}</em>`
   }
 
-  // 加粗渲染
-  renderer.strong = (text) => {
+  customRenderer.strong = function({ text }: Tokens.Strong) {
     const style = options.inline?.strong
     const styleStr = cssPropertiesToString(style)
     return `<strong${styleStr ? ` style="${styleStr}"` : ''}>${text}</strong>`
   }
 
-  // 链接渲染
-  renderer.link = ({ href, title, tokens }: Tokens.Link) => {
+  customRenderer.link = function({ href, title, text }: Tokens.Link) {
     const style = options.inline?.link
     const styleStr = cssPropertiesToString(style)
-    const text = tokens?.map(t => 'text' in t ? t.text : '').join('') || ''
     return `<a href="${href}"${title ? ` title="${title}"` : ''}${styleStr ? ` style="${styleStr}"` : ''}>${text}</a>`
   }
 
-  // 图片渲染
-  renderer.image = ({ href, title, text }: Tokens.Image) => {
+  customRenderer.image = function({ href, title, text }: Tokens.Image) {
     const style = options.block?.image
     const styleStr = cssPropertiesToString(style)
     return `<img src="${href}"${title ? ` title="${title}"` : ''} alt="${text}"${styleStr ? ` style="${styleStr}"` : ''} />`
   }
 
-  // 列表渲染
-  renderer.list = (token: Tokens.List) => {
-    const tag = token.ordered ? 'ol' : 'ul'
-    const style = options.block?.[token.ordered ? 'ol' : 'ul']
+  customRenderer.list = function(body: Tokens.List) {
+    const ordered = body.ordered
+    const tag = ordered ? 'ol' : 'ul'
+    const style = options.block?.[ordered ? 'ol' : 'ul']
     const styleStr = cssPropertiesToString(style)
-    return `<${tag}${styleStr ? ` style="${styleStr}"` : ''}>${token.items.map(item => item.text).join('')}</${tag}>`
+    return `<${tag}${styleStr ? ` style="${styleStr}"` : ''}>${body.raw}</${tag}>`
   }
 
-  // 列表项渲染
-  renderer.listitem = (text) => {
+  customRenderer.listitem = function(item: Tokens.ListItem) {
     const style = options.inline?.listitem
     const styleStr = cssPropertiesToString(style)
-    return `<li${styleStr ? ` style="${styleStr}"` : ''}>${text}</li>`
+    return `<li${styleStr ? ` style="${styleStr}"` : ''}>${item.text}</li>`
   }
 
-  marked.use({ renderer })
+  // Convert Markdown to HTML using the custom renderer
+  const html = marked.parse(markdown, { renderer: customRenderer }) as string
 
-  // 转换 Markdown 为 HTML
-  const html = marked.parse(markdown, { async: false }) as string
-
-  // 应用基础样式
+  // Apply base styles
   const baseStyles = baseStylesToString(options.base)
   return baseStyles ? `<div style="${baseStyles}">${html}</div>` : html
 }
 
-// 转换为小红书格式
 export function convertToXiaohongshu(markdown: string): string {
-  // 配置小红书特定的样式
-  const xiaohongshuRenderer = new marked.Renderer()
+  // 预处理 markdown
+  markdown = preprocessMarkdown(markdown)
+
+  const renderer = new marked.Renderer()
   
-  xiaohongshuRenderer.heading = ({ text, depth }: Tokens.Heading) => {
+  // 自定义渲染规则
+  renderer.heading = function({ text, depth }: Tokens.Heading) {
     const fontSize = {
-      1: '20px',
-      2: '18px',
-      3: '16px',
-      4: '15px',
-      5: '14px',
-      6: '14px'
-    }[depth]
+      [1]: '20px',
+      [2]: '18px',
+      [3]: '16px',
+      [4]: '15px',
+      [5]: '14px',
+      [6]: '14px'
+    }[depth] || '14px'
 
     return `<h${depth} style="margin-top: 25px; margin-bottom: 12px; font-weight: bold; font-size: ${fontSize}; color: #222;">${text}</h${depth}>`
   }
 
-  xiaohongshuRenderer.paragraph = (text) => {
+  renderer.paragraph = function({ text }: Tokens.Paragraph) {
     return `<p style="margin-bottom: 16px; line-height: 1.6; font-size: 15px; color: #222;">${text}</p>`
   }
 
-  marked.setOptions({ renderer: xiaohongshuRenderer })
-
-  let html = marked(markdown)
-  html = `<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif; color: #222; line-height: 1.6;">${html}</div>`
-
-  return html
+  // 使用自定义渲染器转换 Markdown
+  return marked.parse(markdown, { renderer }) as string
 }
 
 type RendererOptions = {
