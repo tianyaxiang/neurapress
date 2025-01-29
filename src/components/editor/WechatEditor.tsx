@@ -371,7 +371,24 @@ export default function WechatEditor() {
               />
             </div>
             <button
-              onClick={handleCopy}
+              onClick={() => {
+                handleCopy()
+                  .then(() => {
+                    toast({
+                      title: "复制成功",
+                      description: "已复制预览内容到剪贴板",
+                      duration: 2000
+                    })
+                  })
+                  .catch(() => {
+                    toast({
+                      variant: "destructive",
+                      title: "复制失败",
+                      description: "无法访问剪贴板，请检查浏览器权限",
+                      duration: 2000
+                    })
+                  })
+              }}
               className="flex items-center justify-center gap-1 px-2 py-1 rounded-md text-xs text-primary hover:bg-muted transition-colors"
             >
               <Copy className="h-3.5 w-3.5" />
