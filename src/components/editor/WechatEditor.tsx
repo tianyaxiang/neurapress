@@ -15,6 +15,8 @@ import { MobileToolbar } from './components/MobileToolbar'
 import { MarkdownToolbar } from './components/MarkdownToolbar'
 import { type PreviewSize } from './constants'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { WechatStylePicker } from '@/components/template/WechatStylePicker'
+import { Copy } from 'lucide-react'
 
 export default function WechatEditor() {
   const { toast } = useToast()
@@ -339,62 +341,78 @@ export default function WechatEditor() {
 
   return (
     <div className="h-full flex flex-col">
-      <EditorToolbar 
-        value={value}
-        isDraft={isDraft}
-        showPreview={showPreview}
-        selectedTemplate={selectedTemplate}
-        onSave={handleSave}
-        onCopy={copyContent}
-        onCopyPreview={handleCopy}
-        onNewArticle={handleNewArticle}
-        onArticleSelect={handleArticleSelect}
-        onTemplateSelect={setSelectedTemplate}
-        onTemplateChange={() => setValue(value)}
-        onStyleOptionsChange={setStyleOptions}
-        onPreviewToggle={() => setShowPreview(!showPreview)}
-        styleOptions={styleOptions}
-      />
+      <div className="hidden sm:block">
+        <EditorToolbar 
+          value={value}
+          isDraft={isDraft}
+          showPreview={showPreview}
+          selectedTemplate={selectedTemplate}
+          onSave={handleSave}
+          onCopy={copyContent}
+          onCopyPreview={handleCopy}
+          onNewArticle={handleNewArticle}
+          onArticleSelect={handleArticleSelect}
+          onTemplateSelect={setSelectedTemplate}
+          onTemplateChange={() => setValue(value)}
+          onStyleOptionsChange={setStyleOptions}
+          onPreviewToggle={() => setShowPreview(!showPreview)}
+          styleOptions={styleOptions}
+        />
+      </div>
       
       <div className="flex-1 flex flex-col sm:flex-row overflow-hidden">
-        {/* Mobile Tabs */}
+        {/* Mobile View */}
         <div className="sm:hidden flex-1 flex flex-col">
+          <div className="flex items-center justify-between p-2 border-b bg-background">
+            <div className="flex-1 mr-2">
+              <WechatStylePicker 
+                value={selectedTemplate} 
+                onSelect={setSelectedTemplate}
+              />
+            </div>
+            <button
+              onClick={handleCopy}
+              className="flex items-center justify-center gap-1 px-2 py-1 rounded-md text-xs text-primary hover:bg-muted transition-colors"
+            >
+              <Copy className="h-3.5 w-3.5" />
+              复制
+            </button>
+          </div>
           <Tabs defaultValue="editor" className="flex-1 flex flex-col">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="editor">编辑</TabsTrigger>
               <TabsTrigger value="preview">预览</TabsTrigger>
             </TabsList>
-            <TabsContent value="editor" className="flex-1 flex flex-col data-[state=inactive]:hidden">
+            <TabsContent value="editor" className="flex-1 data-[state=inactive]:hidden">
               <div 
                 ref={editorRef}
                 className={cn(
-                  "editor-container bg-background flex-1 flex flex-col",
+                  "h-full overflow-y-auto",
                   selectedTemplate && templates.find(t => t.id === selectedTemplate)?.styles
                 )}
               >
-                <MarkdownToolbar onInsert={handleToolbarInsert} />
-                <div className="flex-1">
-                  <textarea
-                    ref={textareaRef}
-                    value={value}
-                    onChange={handleInput}
-                    onKeyDown={handleKeyDown}
-                    className="w-full h-full resize-none outline-none p-4 font-mono text-base leading-relaxed"
-                    placeholder="开始写作..."
-                    spellCheck={false}
-                  />
-                </div>
+                <textarea
+                  ref={textareaRef}
+                  value={value}
+                  onChange={handleInput}
+                  onKeyDown={handleKeyDown}
+                  className="w-full h-full resize-none outline-none p-4 font-mono text-base leading-relaxed"
+                  placeholder="开始写作..."
+                  spellCheck={false}
+                />
               </div>
             </TabsContent>
-            <TabsContent value="preview" className="flex-1 flex flex-col data-[state=inactive]:hidden">
-              <EditorPreview 
-                previewRef={previewRef}
-                selectedTemplate={selectedTemplate}
-                previewSize={previewSize}
-                isConverting={isConverting}
-                previewContent={previewContent}
-                onPreviewSizeChange={setPreviewSize}
-              />
+            <TabsContent value="preview" className="flex-1 data-[state=inactive]:hidden">
+              <div className="h-full overflow-y-auto">
+                <EditorPreview 
+                  previewRef={previewRef}
+                  selectedTemplate={selectedTemplate}
+                  previewSize={previewSize}
+                  isConverting={isConverting}
+                  previewContent={previewContent}
+                  onPreviewSizeChange={setPreviewSize}
+                />
+              </div>
             </TabsContent>
           </Tabs>
         </div>
@@ -436,18 +454,6 @@ export default function WechatEditor() {
             />
           )}
         </div>
-      </div>
-
-      {/* Only show mobile toolbar on desktop */}
-      <div className="hidden sm:block">
-        <MobileToolbar 
-          showPreview={showPreview}
-          isDraft={isDraft}
-          onPreviewToggle={() => setShowPreview(!showPreview)}
-          onSave={handleSave}
-          onCopy={copyContent}
-          onCopyPreview={handleCopy}
-        />
       </div>
     </div>
   )

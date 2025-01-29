@@ -1,7 +1,7 @@
-import { Copy, Save, Settings, Image, Link } from 'lucide-react'
+import { Copy, Save, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useState } from 'react'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { WechatStylePicker } from '../../template/WechatStylePicker'
 
 interface MobileToolbarProps {
   showPreview: boolean
@@ -10,8 +10,8 @@ interface MobileToolbarProps {
   onSave: () => void
   onCopy: () => void
   onCopyPreview: () => void
-  onImageUpload?: (file: File) => Promise<string>
-  onLinkInsert?: (url: string) => void
+  selectedTemplate: string
+  onTemplateSelect: (template: string) => void
 }
 
 export function MobileToolbar({
@@ -21,98 +21,61 @@ export function MobileToolbar({
   onSave,
   onCopy,
   onCopyPreview,
-  onImageUpload,
-  onLinkInsert
+  selectedTemplate,
+  onTemplateSelect
 }: MobileToolbarProps) {
   return (
-    <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t">
-      <div className="flex items-center justify-between p-2">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={onSave}
-            className={cn(
-              "flex flex-col items-center gap-1 px-2 py-1 rounded-md text-xs transition-colors relative",
-              isDraft 
-                ? "text-primary"
-                : "text-muted-foreground"
-            )}
-          >
-            <Save className="h-5 w-5" />
-            保存
-            {isDraft && <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full" />}
-          </button>
+    <div className="bg-background border-t">
+      <div className="flex flex-col">
+        <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="p-2">
+            <WechatStylePicker 
+              value={selectedTemplate} 
+              onSelect={onTemplateSelect}
+            />
+          </div>
+        </div>
+        <div className="flex items-center justify-between p-2 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <button
             onClick={onCopyPreview}
-            className="flex flex-col items-center gap-1 px-2 py-1 rounded-md text-xs text-muted-foreground transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm bg-primary text-primary-foreground hover:bg-primary/90 transition-colors mr-2"
           >
-            <Copy className="h-5 w-5" />
-            复制
+            <Copy className="h-4 w-4" />
+            复制预览
           </button>
-        </div>
 
-        <Sheet>
-          <SheetTrigger asChild>
-            <button className="p-1 rounded-md text-muted-foreground">
-              <Settings className="h-5 w-5" />
-            </button>
-          </SheetTrigger>
-          <SheetContent side="bottom" className="h-[40vh]">
-            <div className="grid grid-cols-4 gap-4 p-4">
-              <button
-                onClick={onCopy}
-                className="flex flex-col items-center gap-2 p-3 rounded-lg border hover:bg-muted/80"
-              >
-                <Copy className="h-6 w-6" />
-                <span className="text-xs">复制源码</span>
+          <Sheet>
+            <SheetTrigger asChild>
+              <button className="flex items-center justify-center p-2 rounded-md text-muted-foreground hover:bg-muted/80">
+                <Settings className="h-4 w-4" />
               </button>
-              <button
-                onClick={onCopyPreview}
-                className="flex flex-col items-center gap-2 p-3 rounded-lg border hover:bg-muted/80"
-              >
-                <Copy className="h-6 w-6" />
-                <span className="text-xs">复制预览</span>
-              </button>
-              {onImageUpload && (
+            </SheetTrigger>
+            <SheetContent side="bottom" className="h-[30vh]">
+              <div className="flex flex-col gap-4 p-4">
                 <button
-                  onClick={() => {
-                    const input = document.createElement('input')
-                    input.type = 'file'
-                    input.accept = 'image/*'
-                    input.onchange = async (e) => {
-                      const file = (e.target as HTMLInputElement).files?.[0]
-                      if (file && onImageUpload) {
-                        try {
-                          await onImageUpload(file)
-                        } catch (error) {
-                          console.error('Image upload failed:', error)
-                        }
-                      }
-                    }
-                    input.click()
-                  }}
-                  className="flex flex-col items-center gap-2 p-3 rounded-lg border hover:bg-muted/80"
+                  onClick={onSave}
+                  className={cn(
+                    "flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm transition-colors",
+                    isDraft 
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-muted-foreground"
+                  )}
                 >
-                  <Image className="h-6 w-6" />
-                  <span className="text-xs">插入图片</span>
+                  <Save className="h-4 w-4" />
+                  保存文章
+                  {isDraft && <span className="w-2 h-2 bg-primary-foreground rounded-full" />}
                 </button>
-              )}
-              {onLinkInsert && (
                 <button
-                  onClick={() => {
-                    const url = window.prompt('请输入链接地址')
-                    if (url && onLinkInsert) {
-                      onLinkInsert(url)
-                    }
-                  }}
-                  className="flex flex-col items-center gap-2 p-3 rounded-lg border hover:bg-muted/80"
+                  onClick={onCopy}
+                  className="flex items-center justify-center gap-2 px-4 py-2 rounded-md bg-muted text-muted-foreground text-sm"
                 >
-                  <Link className="h-6 w-6" />
-                  <span className="text-xs">插入链接</span>
+                  <Copy className="h-4 w-4" />
+                  复制源码
                 </button>
-              )}
-            </div>
-          </SheetContent>
-        </Sheet>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
       </div>
     </div>
   )
