@@ -1,4 +1,4 @@
-import { Copy, Save, Smartphone, Settings, Image, Link, ZoomIn, ZoomOut } from 'lucide-react'
+import { Copy, Save, Settings, Image, Link } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState } from 'react'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
@@ -24,61 +24,10 @@ export function MobileToolbar({
   onImageUpload,
   onLinkInsert
 }: MobileToolbarProps) {
-  const [zoom, setZoom] = useState(100)
-
-  const handleZoomIn = () => {
-    setZoom(prev => Math.min(prev + 10, 200))
-  }
-
-  const handleZoomOut = () => {
-    setZoom(prev => Math.max(prev - 10, 50))
-  }
-
-  const handleImageUpload = async () => {
-    if (!onImageUpload) return
-
-    const input = document.createElement('input')
-    input.type = 'file'
-    input.accept = 'image/*'
-    input.onchange = async (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0]
-      if (file) {
-        try {
-          const url = await onImageUpload(file)
-          // 处理上传成功后的图片URL
-        } catch (error) {
-          console.error('Image upload failed:', error)
-        }
-      }
-    }
-    input.click()
-  }
-
-  const handleLinkInsert = () => {
-    if (!onLinkInsert) return
-    
-    const url = window.prompt('请输入链接地址')
-    if (url) {
-      onLinkInsert(url)
-    }
-  }
-
   return (
     <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t">
       <div className="flex items-center justify-between p-2">
         <div className="flex items-center gap-2">
-          <button
-            onClick={onPreviewToggle}
-            className={cn(
-              "flex flex-col items-center gap-1 px-2 py-1 rounded-md text-xs transition-colors relative",
-              showPreview 
-                ? "text-primary"
-                : "text-muted-foreground"
-            )}
-          >
-            <Smartphone className="h-5 w-5" />
-            {showPreview ? '编辑' : '预览'}
-          </button>
           <button
             onClick={onSave}
             className={cn(
@@ -92,69 +41,78 @@ export function MobileToolbar({
             保存
             {isDraft && <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full" />}
           </button>
+          <button
+            onClick={onCopyPreview}
+            className="flex flex-col items-center gap-1 px-2 py-1 rounded-md text-xs text-muted-foreground transition-colors"
+          >
+            <Copy className="h-5 w-5" />
+            复制
+          </button>
         </div>
 
-        <div className="flex items-center gap-2">
-          {showPreview && (
-            <>
+        <Sheet>
+          <SheetTrigger asChild>
+            <button className="p-1 rounded-md text-muted-foreground">
+              <Settings className="h-5 w-5" />
+            </button>
+          </SheetTrigger>
+          <SheetContent side="bottom" className="h-[40vh]">
+            <div className="grid grid-cols-4 gap-4 p-4">
               <button
-                onClick={handleZoomOut}
-                className="p-1 rounded-md text-muted-foreground"
-                disabled={zoom <= 50}
+                onClick={onCopy}
+                className="flex flex-col items-center gap-2 p-3 rounded-lg border hover:bg-muted/80"
               >
-                <ZoomOut className="h-5 w-5" />
+                <Copy className="h-6 w-6" />
+                <span className="text-xs">复制源码</span>
               </button>
-              <span className="text-xs text-muted-foreground">{zoom}%</span>
               <button
-                onClick={handleZoomIn}
-                className="p-1 rounded-md text-muted-foreground"
-                disabled={zoom >= 200}
+                onClick={onCopyPreview}
+                className="flex flex-col items-center gap-2 p-3 rounded-lg border hover:bg-muted/80"
               >
-                <ZoomIn className="h-5 w-5" />
+                <Copy className="h-6 w-6" />
+                <span className="text-xs">复制预览</span>
               </button>
-            </>
-          )}
-          
-          <Sheet>
-            <SheetTrigger asChild>
-              <button className="p-1 rounded-md text-muted-foreground">
-                <Settings className="h-5 w-5" />
-              </button>
-            </SheetTrigger>
-            <SheetContent side="bottom" className="h-[40vh]">
-              <div className="grid grid-cols-4 gap-4 p-4">
+              {onImageUpload && (
                 <button
-                  onClick={handleImageUpload}
+                  onClick={() => {
+                    const input = document.createElement('input')
+                    input.type = 'file'
+                    input.accept = 'image/*'
+                    input.onchange = async (e) => {
+                      const file = (e.target as HTMLInputElement).files?.[0]
+                      if (file && onImageUpload) {
+                        try {
+                          await onImageUpload(file)
+                        } catch (error) {
+                          console.error('Image upload failed:', error)
+                        }
+                      }
+                    }
+                    input.click()
+                  }}
                   className="flex flex-col items-center gap-2 p-3 rounded-lg border hover:bg-muted/80"
                 >
                   <Image className="h-6 w-6" />
                   <span className="text-xs">插入图片</span>
                 </button>
+              )}
+              {onLinkInsert && (
                 <button
-                  onClick={handleLinkInsert}
+                  onClick={() => {
+                    const url = window.prompt('请输入链接地址')
+                    if (url && onLinkInsert) {
+                      onLinkInsert(url)
+                    }
+                  }}
                   className="flex flex-col items-center gap-2 p-3 rounded-lg border hover:bg-muted/80"
                 >
                   <Link className="h-6 w-6" />
                   <span className="text-xs">插入链接</span>
                 </button>
-                <button
-                  onClick={onCopy}
-                  className="flex flex-col items-center gap-2 p-3 rounded-lg border hover:bg-muted/80"
-                >
-                  <Copy className="h-6 w-6" />
-                  <span className="text-xs">复制源码</span>
-                </button>
-                <button
-                  onClick={onCopyPreview}
-                  className="flex flex-col items-center gap-2 p-3 rounded-lg border hover:bg-muted/80"
-                >
-                  <Copy className="h-6 w-6" />
-                  <span className="text-xs">复制预览</span>
-                </button>
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
+              )}
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
     </div>
   )

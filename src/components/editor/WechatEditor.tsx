@@ -14,6 +14,7 @@ import { EditorPreview } from './components/EditorPreview'
 import { MobileToolbar } from './components/MobileToolbar'
 import { MarkdownToolbar } from './components/MarkdownToolbar'
 import { type PreviewSize } from './constants'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 export default function WechatEditor() {
   const { toast } = useToast()
@@ -356,50 +357,98 @@ export default function WechatEditor() {
       />
       
       <div className="flex-1 flex flex-col sm:flex-row overflow-hidden">
-        <div 
-          ref={editorRef}
-          className={cn(
-            "editor-container bg-background transition-all duration-300 ease-in-out flex flex-col",
-            showPreview 
-              ? "h-[50%] sm:h-full sm:w-1/2 border-b sm:border-r" 
-              : "h-full w-full",
-            selectedTemplate && templates.find(t => t.id === selectedTemplate)?.styles
-          )}
-        >
-          <MarkdownToolbar onInsert={handleToolbarInsert} />
-          <div className="flex-1">
-            <textarea
-              ref={textareaRef}
-              value={value}
-              onChange={handleInput}
-              onKeyDown={handleKeyDown}
-              className="w-full h-full resize-none outline-none p-4 font-mono text-base leading-relaxed"
-              placeholder="开始写作..."
-              spellCheck={false}
-            />
-          </div>
+        {/* Mobile Tabs */}
+        <div className="sm:hidden flex-1 flex flex-col">
+          <Tabs defaultValue="editor" className="flex-1 flex flex-col">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="editor">编辑</TabsTrigger>
+              <TabsTrigger value="preview">预览</TabsTrigger>
+            </TabsList>
+            <TabsContent value="editor" className="flex-1 flex flex-col data-[state=inactive]:hidden">
+              <div 
+                ref={editorRef}
+                className={cn(
+                  "editor-container bg-background flex-1 flex flex-col",
+                  selectedTemplate && templates.find(t => t.id === selectedTemplate)?.styles
+                )}
+              >
+                <MarkdownToolbar onInsert={handleToolbarInsert} />
+                <div className="flex-1">
+                  <textarea
+                    ref={textareaRef}
+                    value={value}
+                    onChange={handleInput}
+                    onKeyDown={handleKeyDown}
+                    className="w-full h-full resize-none outline-none p-4 font-mono text-base leading-relaxed"
+                    placeholder="开始写作..."
+                    spellCheck={false}
+                  />
+                </div>
+              </div>
+            </TabsContent>
+            <TabsContent value="preview" className="flex-1 flex flex-col data-[state=inactive]:hidden">
+              <EditorPreview 
+                previewRef={previewRef}
+                selectedTemplate={selectedTemplate}
+                previewSize={previewSize}
+                isConverting={isConverting}
+                previewContent={previewContent}
+                onPreviewSizeChange={setPreviewSize}
+              />
+            </TabsContent>
+          </Tabs>
         </div>
-        
-        {showPreview && (
-          <EditorPreview 
-            previewRef={previewRef}
-            selectedTemplate={selectedTemplate}
-            previewSize={previewSize}
-            isConverting={isConverting}
-            previewContent={previewContent}
-            onPreviewSizeChange={setPreviewSize}
-          />
-        )}
+
+        {/* Desktop Split View */}
+        <div className="hidden sm:flex flex-1 flex-row">
+          <div 
+            ref={editorRef}
+            className={cn(
+              "editor-container bg-background transition-all duration-300 ease-in-out flex flex-col",
+              showPreview 
+                ? "h-full w-1/2 border-r" 
+                : "h-full w-full",
+              selectedTemplate && templates.find(t => t.id === selectedTemplate)?.styles
+            )}
+          >
+            <MarkdownToolbar onInsert={handleToolbarInsert} />
+            <div className="flex-1">
+              <textarea
+                ref={textareaRef}
+                value={value}
+                onChange={handleInput}
+                onKeyDown={handleKeyDown}
+                className="w-full h-full resize-none outline-none p-4 font-mono text-base leading-relaxed"
+                placeholder="开始写作..."
+                spellCheck={false}
+              />
+            </div>
+          </div>
+          
+          {showPreview && (
+            <EditorPreview 
+              previewRef={previewRef}
+              selectedTemplate={selectedTemplate}
+              previewSize={previewSize}
+              isConverting={isConverting}
+              previewContent={previewContent}
+              onPreviewSizeChange={setPreviewSize}
+            />
+          )}
+        </div>
       </div>
 
-      <MobileToolbar 
-        showPreview={showPreview}
-        isDraft={isDraft}
-        onPreviewToggle={() => setShowPreview(!showPreview)}
-        onSave={handleSave}
-        onCopy={copyContent}
-        onCopyPreview={handleCopy}
-      />
+      {/* Only show mobile toolbar on desktop */}
+      <div className="hidden sm:block">
+        <MobileToolbar 
+          showPreview={showPreview}
+          isDraft={isDraft}
+          onPreviewToggle={() => setShowPreview(!showPreview)}
+          onSave={handleSave}
+          onCopy={copyContent}
+          onCopyPreview={handleCopy}
+        />
+      </div>
     </div>
   )
 }
