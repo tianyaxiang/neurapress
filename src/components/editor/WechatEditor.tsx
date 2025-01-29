@@ -10,7 +10,7 @@ import mermaid from '@bytemd/plugin-mermaid'
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { templates } from '@/config/wechat-templates'
 import { cn } from '@/lib/utils'
-import { Copy, Smartphone, Loader2, Save } from 'lucide-react'
+import { Copy, Smartphone, Loader2, Save, Plus } from 'lucide-react'
 import { WechatStylePicker } from '../template/WechatStylePicker'
 import { StyleConfigDialog } from './StyleConfigDialog'
 import { convertToWechat } from '@/lib/markdown'
@@ -22,6 +22,7 @@ import 'bytemd/dist/index.css'
 import 'highlight.js/styles/github.css'
 import 'katex/dist/katex.css'
 import type { BytemdPlugin } from 'bytemd'
+import { ArticleList } from './ArticleList'
 
 const PREVIEW_SIZES = {
   small: { width: '360px', label: '小屏' },
@@ -40,7 +41,7 @@ export default function WechatEditor() {
   const editorRef = useRef<HTMLDivElement>(null)
   const previewRef = useRef<HTMLDivElement>(null)
   const [value, setValue] = useState('')
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('')
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('creative')
   const [showPreview, setShowPreview] = useState(true)
   const [styleOptions, setStyleOptions] = useState<RendererOptions>({})
   const [previewSize, setPreviewSize] = useState<PreviewSize>('medium')
@@ -234,7 +235,8 @@ export default function WechatEditor() {
   }
 
   const handleCopy = async () => {
-    const previewContent = document.querySelector('.preview-content')
+    // 使用 bytemd 编辑器的预览区域
+    const previewContent = editorRef.current?.querySelector('.bytemd-preview .markdown-body')
     if (!previewContent) {
       toast({
         variant: "destructive",
@@ -248,67 +250,120 @@ export default function WechatEditor() {
     try {
       // 创建一个临时容器
       const tempDiv = document.createElement('div')
-      
-      // 使用与预览相同的转换逻辑
-      const template = templates.find(t => t.id === selectedTemplate)    
+      tempDiv.innerHTML = previewContent.innerHTML
 
+      // 应用模板样式
+      const template = templates.find(t => t.id === selectedTemplate)
+      if (template) {
+        tempDiv.className = template.styles
+      }
+
+      // 处理图片
+      const images = tempDiv.querySelectorAll('img')
+      images.forEach(img => {
+        // 确保图片使用绝对路径
+        if (img.src.startsWith('/')) {
+          img.src = window.location.origin + img.src
+        }
+      })
+
+      // 处理代码块
+      const codeBlocks = tempDiv.querySelectorAll('pre code')
+      codeBlocks.forEach(code => {
+        if (code.parentElement) {
+          code.parentElement.style.whiteSpace = 'pre-wrap'
+          code.parentElement.style.wordWrap = 'break-word'
+        }
+      })
+
+      // 应用样式选项
       const mergedOptions = {
         ...styleOptions,
         ...(template?.options || {})
       }
-      // 使用相同的转换逻辑获取内容
-      const html = convertToWechat(value, mergedOptions)
-      let finalHtml = html
-    
-      if (template?.transform) {
-        try {
-          const transformed = template.transform(html)
-          if (transformed && typeof transformed === 'object') {
-            const result = transformed as { html?: string; content?: string }
-            if (result.html) finalHtml = result.html
-            else if (result.content) finalHtml = result.content
-            else finalHtml = JSON.stringify(transformed)
-          } else {
-            finalHtml = transformed || html
-          }
-        } catch (error) {
-          console.error('Template transformation error:', error)
-          finalHtml = html
+
+      // 应用标题样式
+      const headings = tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6')
+      headings.forEach(heading => {
+        const level = heading.tagName.toLowerCase()
+        const style = mergedOptions.block?.[level as keyof RendererOptions['block']]
+        if (style && heading instanceof HTMLElement) {
+          Object.assign(heading.style, style)
         }
-      }
-      
-      // 设置转换后的内容
-      tempDiv.innerHTML = finalHtml
+      })
 
-      // 应用模板样式类
-      if (template) {
-        tempDiv.className = template.styles
-      }
-      alert(tempDiv.innerHTML)
+      // 应用段落样式
+      const paragraphs = tempDiv.querySelectorAll('p')
+      paragraphs.forEach(p => {
+        if (mergedOptions.block?.p && p instanceof HTMLElement) {
+          Object.assign(p.style, mergedOptions.block.p)
+        }
+      })
 
-      // 使用 Blob 和 Clipboard API 复制
-      const blob = new Blob([tempDiv.innerHTML], { type: 'text/html' })
+      // 应用引用样式
+      const blockquotes = tempDiv.querySelectorAll('blockquote')
+      blockquotes.forEach(quote => {
+        if (mergedOptions.block?.blockquote && quote instanceof HTMLElement) {
+          Object.assign(quote.style, mergedOptions.block.blockquote)
+        }
+      })
+
+      // 应用行内代码样式
+      const inlineCodes = tempDiv.querySelectorAll(':not(pre) > code')
+      inlineCodes.forEach(code => {
+        if (mergedOptions.inline?.codespan && code instanceof HTMLElement) {
+          Object.assign(code.style, mergedOptions.inline.codespan)
+        }
+      })
+
+      // 使用 Clipboard API 复制
+      const htmlBlob = new Blob([tempDiv.innerHTML], { type: 'text/html' })
+      const textBlob = new Blob([tempDiv.innerText], { type: 'text/plain' })
+
       await navigator.clipboard.write([
         new ClipboardItem({
-          'text/html': blob
+          'text/html': htmlBlob,
+          'text/plain': textBlob
         })
       ])
 
       toast({
         title: "复制成功",
         description: template 
-          ? "已复制预览内容（使用当前模板样式）" 
-          : "已复制预览内容（无样式）",
+          ? "已复制预览内容（包含样式）" 
+          : "已复制预览内容",
         duration: 2000
       })
     } catch (err) {
-      toast({
-        variant: "destructive",
-        title: "复制失败",
-        description: "无法访问剪贴板，请检查浏览器权限",
-        action: <ToastAction altText="重试">重试</ToastAction>,
-      })
       console.error('Copy error:', err)
+      // 降级处理：尝试使用 execCommand
+      try {
+        const tempDiv = document.createElement('div')
+        tempDiv.innerHTML = previewContent.innerHTML
+        document.body.appendChild(tempDiv)
+        const range = document.createRange()
+        range.selectNode(tempDiv)
+        const selection = window.getSelection()
+        if (selection) {
+          selection.removeAllRanges()
+          selection.addRange(range)
+          document.execCommand('copy')
+          selection.removeAllRanges()
+        }
+        document.body.removeChild(tempDiv)
+        toast({
+          title: "复制成功",
+          description: "已复制预览内容（兼容模式）",
+          duration: 2000
+        })
+      } catch (fallbackErr) {
+        toast({
+          variant: "destructive",
+          title: "复制失败",
+          description: "无法访问剪贴板，请检查浏览器权限",
+          action: <ToastAction altText="重试">重试</ToastAction>,
+        })
+      }
     }
   }
 
@@ -377,7 +432,6 @@ export default function WechatEditor() {
           handler: {
             type: 'action',
             click: (ctx: any) => {
-              // 触发自定义事件
               const event = new CustomEvent('bytemd-save', { detail: ctx.editor.getValue() })
               window.dispatchEvent(event)
             }
@@ -388,46 +442,42 @@ export default function WechatEditor() {
           icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>',
           handler: {
             type: 'action',
-            click: async (ctx: any) => {
-              const previewContent = ctx.preview?.querySelector('.markdown-body')
-              if (!previewContent) {
-                toast({
-                  variant: "destructive",
-                  title: "复制失败",
-                  description: "未找到预览内容",
-                  duration: 2000
-                })
-                return
+            click: handleCopy
+          }
+        },
+        {
+          title: '复制源码',
+          icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>',
+          handler: {
+            type: 'action',
+            click: copyContent
+          }
+        },
+        {
+          title: '预览尺寸',
+          icon: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 3H3v18h18V3z"></path><path d="M21 13H3"></path><path d="M12 3v18"></path></svg>',
+          handler: {
+            type: 'dropdown',
+            actions: Object.entries(PREVIEW_SIZES).map(([key, { label }]) => ({
+              title: label,
+              handler: {
+                type: 'action',
+                click: () => {
+                  setPreviewSize(key as PreviewSize)
+                  const previewContent = editorRef.current?.querySelector('.bytemd-preview .markdown-body')
+                  if (previewContent) {
+                    const container = previewContent.parentElement
+                    if (container) {
+                      const size = PREVIEW_SIZES[key as PreviewSize]
+                      container.style.maxWidth = size.width
+                      container.style.margin = '0 auto'
+                      container.style.transition = 'max-width 0.3s ease'
+                      container.style.textAlign = 'center'
+                    }
+                  }
+                }
               }
-
-              try {
-                // 创建一个临时容器
-                const tempDiv = document.createElement('div')
-                tempDiv.innerHTML = previewContent.innerHTML
-                
-                // 使用 Blob 和 Clipboard API 复制
-                const blob = new Blob([tempDiv.innerHTML], { type: 'text/html' })
-                await navigator.clipboard.write([
-                  new ClipboardItem({
-                    'text/html': blob
-                  })
-                ])
-
-                toast({
-                  title: "复制成功",
-                  description: "已复制预览内容（包含样式）",
-                  duration: 2000
-                })
-              } catch (err) {
-                toast({
-                  variant: "destructive",
-                  title: "复制失败",
-                  description: "无法访问剪贴板，请检查浏览器权限",
-                  action: <ToastAction altText="重试">重试</ToastAction>,
-                })
-                console.error('Copy error:', err)
-              }
-            }
+            }))
           }
         }
       ],
@@ -460,9 +510,18 @@ export default function WechatEditor() {
         if (selectedTemplate) {
           applyTemplateStyles(markdownBody, selectedTemplate, styleOptions)
         }
+
+        // 设置预览容器宽度
+        const container = markdownBody.parentElement
+        if (container) {
+          const size = PREVIEW_SIZES[previewSize]
+          container.style.maxWidth = size.width
+          container.style.margin = '0 auto'
+          container.style.transition = 'max-width 0.3s ease'
+        }
       }
     }
-  }, [selectedTemplate, styleOptions])
+  }, [selectedTemplate, styleOptions, handleCopy, copyContent, previewSize, setPreviewSize, editorRef])
 
   // 使用创建的插件
   const plugins = useMemo(() => [
@@ -489,93 +548,179 @@ export default function WechatEditor() {
     createEditorPlugin()
   ], [createEditorPlugin])
 
+  // 检测是否为移动设备
+  const isMobile = useCallback(() => {
+    return window.innerWidth < 640
+  }, [])
+
+  // 自动切换预览模式
+  useEffect(() => {
+    const handleResize = () => {
+      if (isMobile()) {
+        setPreviewSize('full')
+      }
+    }
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [isMobile])
+
+  // 处理文章选择
+  const handleArticleSelect = useCallback((article: { content: string, template: string }) => {
+    setValue(article.content)
+    setSelectedTemplate(article.template)
+    setIsDraft(false)
+    toast({
+      title: "加载成功",
+      description: "已加载选中的文章",
+      duration: 2000
+    })
+  }, [toast])
+
+  // 处理新建文章
+  const handleNewArticle = useCallback(() => {
+    // 如果有未保存的内容，提示用户
+    if (isDraft) {
+      toast({
+        title: "提示",
+        description: "当前文章未保存，是否继续？",
+        action: (
+          <ToastAction altText="继续" onClick={() => {
+            setValue('# 新文章\n\n开始写作...')
+            setIsDraft(false)
+          }}>
+            继续
+          </ToastAction>
+        ),
+        duration: 5000,
+      })
+      return
+    }
+
+    // 直接新建
+    setValue('# 新文章\n\n开始写作...')
+    setIsDraft(false)
+  }, [isDraft, toast])
+
   return (
-    <div className="h-[calc(100vh-4rem)]">
-      <div className="border-b bg-background sticky top-0 z-20">
-        <div className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <WechatStylePicker 
-                value={selectedTemplate} 
-                onSelect={setSelectedTemplate} 
-              />
-              <div className="h-6 w-px bg-border" />
-              <TemplateManager onTemplateChange={handleTemplateChange} />
-              <div className="h-6 w-px bg-border" />
-              <StyleConfigDialog
-                value={styleOptions}
-                onChange={setStyleOptions}
-              />
-              <div className="h-6 w-px bg-border" />
-              <button
-                onClick={() => setShowPreview(!showPreview)}
-                className={cn(
-                  "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors",
-                  showPreview 
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                    : "bg-muted text-muted-foreground hover:bg-muted/90"
+    <div className="h-full flex flex-col">
+      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-20">
+        <div className="container mx-auto">
+          <div className="p-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
+                <ArticleList 
+                  onSelect={handleArticleSelect}
+                  currentContent={value}
+                  onNew={handleNewArticle}
+                />
+                <button
+                  onClick={handleNewArticle}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors w-full sm:w-auto justify-center bg-muted text-muted-foreground hover:bg-muted/90"
+                >
+                  <Plus className="h-4 w-4" />
+                  新建文章
+                </button>
+                <WechatStylePicker 
+                  value={selectedTemplate} 
+                  onSelect={setSelectedTemplate} 
+                />
+                <div className="hidden sm:block h-6 w-px bg-border" />
+                <TemplateManager onTemplateChange={handleTemplateChange} />
+                <div className="hidden sm:block h-6 w-px bg-border" />
+                <StyleConfigDialog
+                  value={styleOptions}
+                  onChange={setStyleOptions}
+                />
+                <div className="hidden sm:block h-6 w-px bg-border" />
+                <button
+                  onClick={() => setShowPreview(!showPreview)}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors w-full sm:w-auto justify-center",
+                    showPreview 
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                      : "bg-muted text-muted-foreground hover:bg-muted/90"
+                  )}
+                >
+                  <Smartphone className="h-4 w-4" />
+                  {showPreview ? '编辑' : '预览'}
+                </button>
+              </div>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                {isDraft && (
+                  <span className="text-sm text-muted-foreground">未保存</span>
                 )}
-              >
-                <Smartphone className="h-4 w-4" />
-                {showPreview ? '隐藏预览' : '显示预览'}
-              </button>
-            </div>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={handleSave}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-muted text-muted-foreground hover:bg-muted/90 text-sm transition-colors"
-              >
-                <Save className="h-4 w-4" />
-                保存
-              </button>
-              <button
-                onClick={copyContent}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-muted text-muted-foreground hover:bg-muted/90 text-sm transition-colors"
-              >
-                <Copy className="h-4 w-4" />
-                复制源码
-              </button>
-              <button
-                onClick={handleCopy}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-sm transition-colors"
-              >
-                <Copy className="h-4 w-4" />
-                复制预览
-              </button>
+                <button
+                  onClick={handleSave}
+                  className={cn(
+                    "inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors flex-1 sm:flex-none",
+                    isDraft 
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                      : "bg-muted text-muted-foreground hover:bg-muted/90"
+                  )}
+                >
+                  <Save className="h-4 w-4" />
+                  <span>保存</span>
+                </button>
+                <button
+                  onClick={copyContent}
+                  className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md bg-muted text-muted-foreground hover:bg-muted/90 text-sm transition-colors flex-1 sm:flex-none"
+                >
+                  <Copy className="h-4 w-4" />
+                  <span>复制源码</span>
+                </button>
+                <button
+                  onClick={handleCopy}
+                  className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-sm transition-colors flex-1 sm:flex-none"
+                >
+                  <Copy className="h-4 w-4" />
+                  <span>复制预览</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
       
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex-1 flex flex-col sm:flex-row overflow-hidden sm:pb-0 pb-16">
         <div 
           ref={editorRef}
           className={cn(
-            "editor-container border-r bg-background transition-all duration-300 ease-in-out overflow-hidden",
-            showPreview ? "w-1/2" : "w-full",
+            "editor-container bg-background transition-all duration-300 ease-in-out",
+            showPreview 
+              ? "h-[calc(50vh-4rem)] sm:h-[calc(100vh-7.5rem)] sm:w-1/2 border-b sm:border-r" 
+              : "h-[calc(100vh-10rem)] sm:h-[calc(100vh-7.5rem)] w-full",
             selectedTemplate && templates.find(t => t.id === selectedTemplate)?.styles
           )}
+          style={{
+            display: 'flex',
+            flexDirection: 'column'
+          }}
         >
-          <Editor
-            value={value}
-            plugins={plugins}
-            onChange={handleEditorChange}
-            uploadImages={async (files: File[]) => {
-              return []
-            }}
-          />
+          <div className="flex-1 overflow-auto">
+            <Editor
+              value={value}
+              plugins={plugins}
+              onChange={handleEditorChange}
+              uploadImages={async (files: File[]) => {
+                return []
+              }}
+            />
+          </div>
         </div>
         
         {showPreview && (
           <div 
             ref={previewRef}
             className={cn(
-              "preview-container bg-background transition-all duration-300 ease-in-out w-1/2 flex flex-col",
+              "preview-container bg-background transition-all duration-300 ease-in-out flex flex-col",
+              "h-[calc(50vh-4rem)] sm:h-[calc(100vh-7.5rem)] sm:w-1/2",
               "markdown-body",
               selectedTemplate && templates.find(t => t.id === selectedTemplate)?.styles
             )}
           >
-            <div className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b px-4 py-2 flex items-center justify-between z-10">
+            <div className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b px-4 py-2 flex items-center justify-between z-10 sticky top-0">
               <div className="text-sm text-muted-foreground">预览效果</div>
               <div className="flex items-center gap-2">
                 <select
@@ -591,30 +736,82 @@ export default function WechatEditor() {
             </div>
             
             <div className="flex-1 overflow-y-auto">
-              <div 
-                className={cn(
-                  "bg-background mx-auto",
-                  previewSize === 'full' ? '' : 'border shadow-sm'
-                )}
-                style={{ width: PREVIEW_SIZES[previewSize].width }}
-              >
-                {isConverting ? (
-                  <div className="flex items-center justify-center p-8">
-                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                  </div>
-                ) : (
-                  <div className={cn(
-                    "preview-content py-6 px-6",
-                    "prose prose-slate dark:prose-invert max-w-none",
-                    selectedTemplate && templates.find(t => t.id === selectedTemplate)?.styles
-                  )}>
-                    <div dangerouslySetInnerHTML={{ __html: getPreviewContent() }} />
-                  </div>
-                )}
+              <div className="min-h-full py-8 px-4">
+                <div 
+                  className={cn(
+                    "bg-background mx-auto rounded-lg transition-all duration-300",
+                    previewSize === 'full' ? '' : 'border shadow-sm'
+                  )}
+                  style={{ 
+                    width: PREVIEW_SIZES[previewSize].width,
+                    maxWidth: '100%'
+                  }}
+                >
+                  {isConverting ? (
+                    <div className="flex items-center justify-center p-8">
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    </div>
+                  ) : (
+                    <div className={cn(
+                      "preview-content py-4",
+                      "prose prose-slate dark:prose-invert max-w-none",
+                      selectedTemplate && templates.find(t => t.id === selectedTemplate)?.styles
+                    )}>
+                      <div className="px-6" dangerouslySetInnerHTML={{ __html: getPreviewContent() }} />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         )}
+      </div>
+
+      {/* 移动端底部工具栏 */}
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t p-2 flex justify-around">
+        <button
+          onClick={() => setShowPreview(!showPreview)}
+          className={cn(
+            "flex flex-col items-center gap-1 px-2 py-1 rounded-md text-xs transition-colors relative",
+            showPreview 
+              ? "text-primary"
+              : "text-muted-foreground"
+          )}
+        >
+          <Smartphone className="h-5 w-5" />
+          {showPreview ? '编辑' : '预览'}
+        </button>
+        <button
+          onClick={handleSave}
+          className={cn(
+            "flex flex-col items-center gap-1 px-2 py-1 rounded-md text-xs transition-colors relative",
+            isDraft 
+              ? "text-primary"
+              : "text-muted-foreground"
+          )}
+        >
+          <Save className="h-5 w-5" />
+          保存
+          {isDraft && <span className="absolute -top-1 -right-1 w-2 h-2 bg-primary rounded-full" />}
+        </button>
+        <button
+          onClick={copyContent}
+          className="flex flex-col items-center gap-1 px-2 py-1 rounded-md text-xs text-muted-foreground transition-colors relative"
+        >
+          <Copy className="h-5 w-5" />
+          源码
+        </button>
+        <button
+          onClick={handleCopy}
+          className={cn(
+            "flex flex-col items-center gap-1 px-2 py-1 rounded-md text-xs transition-colors relative",
+            "hover:bg-primary/10 active:bg-primary/20",
+            showPreview ? "text-primary" : "text-muted-foreground"
+          )}
+        >
+          <Copy className="h-5 w-5" />
+          复制预览
+        </button>
       </div>
     </div>
   )

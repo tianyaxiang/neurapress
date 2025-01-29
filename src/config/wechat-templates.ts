@@ -309,11 +309,7 @@ export const templates: Template[] = [
         }
       }
     },
-    transform: (html) => `
-      <section style="font-family: system-ui, sans-serif;">
-        ${html}
-      </section>
-    `
+    transform: (html) => html
   },
   {
     id: 'minimal',
