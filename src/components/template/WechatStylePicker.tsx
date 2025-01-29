@@ -51,18 +51,18 @@ export function WechatStylePicker({ value, onSelect }: WechatStylePickerProps) {
                   template.styles
                 )}>
                   <h1 style={{
-                    ...template.styleConfig?.block?.h1,
-                    fontSize: template.styleConfig?.block?.h1?.fontSize || '1.2em'
+                    ...template.options?.block?.h1,
+                    fontSize: template.options?.block?.h1?.fontSize || '1.2em'
                   }}>
                     标题示例
                   </h1>
                   <p style={{
-                    ...template.styleConfig?.block?.p,
-                    fontSize: template.styleConfig?.block?.p?.fontSize || '1em'
+                    ...template.options?.block?.p,
+                    fontSize: template.options?.block?.p?.fontSize || '1em'
                   }}>
                     这是一段示例文本，展示不同样式模板的效果。
                   </p>
-                  <blockquote style={template.styleConfig?.block?.blockquote}>
+                  <blockquote style={template.options?.block?.blockquote}>
                     引用文本示例
                   </blockquote>
                 </div>

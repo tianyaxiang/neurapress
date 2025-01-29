@@ -67,7 +67,7 @@ export function EditorToolbar({
               <div className="hidden sm:block h-6 w-px bg-border" />
               <StyleConfigDialog
                 value={styleOptions}
-                onChange={onStyleOptionsChange}
+                onChangeAction={onStyleOptionsChange}
               />
               <div className="hidden sm:block h-6 w-px bg-border" />
               <button

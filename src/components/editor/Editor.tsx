@@ -2,6 +2,8 @@
 
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
+import Link from '@tiptap/extension-link'
+import Image from '@tiptap/extension-image'
 import { useState } from 'react'
 import { TemplateSelector } from '../template/TemplateSelector'
 import { templates } from '@/config/templates'
@@ -12,7 +14,13 @@ const Editor = () => {
   const [preview, setPreview] = useState(false)
 
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit,
+      Link.configure({
+        openOnClick: false,
+      }),
+      Image,
+    ],
     content: '<p>开始编辑...</p>',
     editorProps: {
       attributes: {

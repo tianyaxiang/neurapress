@@ -4,9 +4,7 @@ import type { CSSProperties } from 'react'
 // 配置 marked 选项
 marked.setOptions({
   gfm: true,
-  breaks: true,
-  headerIds: false,
-  mangle: false,
+  breaks: true
 })
 
 // 将 React CSSProperties 转换为 CSS 字符串
@@ -48,12 +46,11 @@ function baseStylesToString(base: RendererOptions['base'] = {}): string {
 export function convertToWechat(markdown: string, options: RendererOptions = {}): string {
   const renderer = new marked.Renderer()
   // 标题渲染
-  renderer.heading = ({ tokens, depth }: { tokens: Tokens.Generic[]; depth: number }) => {
-    const style = options.block?.[`h${depth}` as keyof RendererOptions['block']]
+  renderer.heading = ({ text, depth }: Tokens.Heading) => {
+    const style = options.block?.[`h${depth}` as keyof typeof options.block]
     const styleStr = cssPropertiesToString(style)
-    const content = tokens.map(token => token.text).join('')
-    return `<h${depth}${styleStr ? ` style="${styleStr}"` : ''}>${content}</h${depth}>`
-  } 
+    return `<h${depth}${styleStr ? ` style="${styleStr}"` : ''}>${text}</h${depth}>`
+  }
 
   // 段落渲染
   renderer.paragraph = (text) => {
@@ -102,17 +99,18 @@ export function convertToWechat(markdown: string, options: RendererOptions = {})
   }
 
   // 链接渲染
-  renderer.link = (href, title, text) => {
+  renderer.link = ({ href, title, tokens }: Tokens.Link) => {
     const style = options.inline?.link
     const styleStr = cssPropertiesToString(style)
+    const text = tokens?.map(t => 'text' in t ? t.text : '').join('') || ''
     return `<a href="${href}"${title ? ` title="${title}"` : ''}${styleStr ? ` style="${styleStr}"` : ''}>${text}</a>`
   }
 
   // 图片渲染
-  renderer.image = (href, title, text) => {
+  renderer.image = ({ href, title, text }: Tokens.Image) => {
     const style = options.block?.image
     const styleStr = cssPropertiesToString(style)
-    return `<img src="${href}" alt="${text}"${title ? ` title="${title}"` : ''}${styleStr ? ` style="${styleStr}"` : ''} />`
+    return `<img src="${href}"${title ? ` title="${title}"` : ''} alt="${text}"${styleStr ? ` style="${styleStr}"` : ''} />`
   }
 
   // 列表渲染
@@ -145,7 +143,7 @@ export function convertToXiaohongshu(markdown: string): string {
   // 配置小红书特定的样式
   const xiaohongshuRenderer = new marked.Renderer()
   
-  xiaohongshuRenderer.heading = (text, level) => {
+  xiaohongshuRenderer.heading = ({ text, depth }: Tokens.Heading) => {
     const fontSize = {
       1: '20px',
       2: '18px',
@@ -153,9 +151,9 @@ export function convertToXiaohongshu(markdown: string): string {
       4: '15px',
       5: '14px',
       6: '14px'
-    }[level]
+    }[depth]
 
-    return `<h${level} style="margin-top: 25px; margin-bottom: 12px; font-weight: bold; font-size: ${fontSize}; color: #222;">${text}</h${level}>`
+    return `<h${depth} style="margin-top: 25px; margin-bottom: 12px; font-weight: bold; font-size: ${fontSize}; color: #222;">${text}</h${depth}>`
   }
 
   xiaohongshuRenderer.paragraph = (text) => {

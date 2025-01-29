@@ -13,50 +13,44 @@ const stylePresets = {
   default: {
     name: '默认样式',
     options: {
-      fontSize: {
-        h1: '24px',
-        h2: '20px',
-        h3: '18px',
-        paragraph: '15px',
-        code: '14px'
+      base: {
+        primaryColor: '#333333',
+        textAlign: 'left',
+        lineHeight: '1.75'
       },
-      colors: {
-        text: '#333333',
-        heading: '#1a1a1a',
-        link: '#576b95',
-        code: '#333333',
-        quote: '#666666'
+      block: {
+        h1: { fontSize: '24px', color: '#1a1a1a' },
+        h2: { fontSize: '20px', color: '#1a1a1a' },
+        h3: { fontSize: '18px', color: '#1a1a1a' },
+        p: { fontSize: '15px', color: '#333333' },
+        code_pre: { fontSize: '14px', color: '#333333' }
       },
-      spacing: {
-        paragraph: '20px',
-        heading: '30px',
-        list: '20px',
-        quote: '20px'
+      inline: {
+        link: { color: '#576b95' },
+        codespan: { color: '#333333' },
+        em: { color: '#666666' }
       }
     }
   },
   modern: {
     name: '现代简约',
     options: {
-      fontSize: {
-        h1: '28px',
-        h2: '24px',
-        h3: '20px',
-        paragraph: '16px',
-        code: '15px'
+      base: {
+        primaryColor: '#2d3748',
+        textAlign: 'left',
+        lineHeight: '1.8'
       },
-      colors: {
-        text: '#2d3748',
-        heading: '#1a202c',
-        link: '#4299e1',
-        code: '#2d3748',
-        quote: '#718096'
+      block: {
+        h1: { fontSize: '28px', color: '#1a202c' },
+        h2: { fontSize: '24px', color: '#1a202c' },
+        h3: { fontSize: '20px', color: '#1a202c' },
+        p: { fontSize: '16px', color: '#2d3748' },
+        code_pre: { fontSize: '15px', color: '#2d3748' }
       },
-      spacing: {
-        paragraph: '24px',
-        heading: '36px',
-        list: '24px',
-        quote: '24px'
+      inline: {
+        link: { color: '#4299e1' },
+        codespan: { color: '#2d3748' },
+        em: { color: '#718096' }
       }
     }
   }
@@ -64,16 +58,16 @@ const stylePresets = {
 
 interface StyleConfigDialogProps {
   value: RendererOptions
-  onChange: (options: RendererOptions) => void
+  onChangeAction: (options: RendererOptions) => void
 }
 
-export function StyleConfigDialog({ value, onChange }: StyleConfigDialogProps) {
+export function StyleConfigDialog({ value, onChangeAction }: StyleConfigDialogProps) {
   const [currentOptions, setCurrentOptions] = useState<RendererOptions>(value)
 
   const handlePresetChange = (preset: keyof typeof stylePresets) => {
     const newOptions = stylePresets[preset].options
     setCurrentOptions(newOptions)
-    onChange(newOptions)
+    onChangeAction(newOptions)
   }
 
   const handleOptionChange = (
@@ -89,7 +83,7 @@ export function StyleConfigDialog({ value, onChange }: StyleConfigDialogProps) {
       }
     }
     setCurrentOptions(newOptions)
-    onChange(newOptions)
+    onChangeAction(newOptions)
   }
 
   return (
@@ -107,9 +101,9 @@ export function StyleConfigDialog({ value, onChange }: StyleConfigDialogProps) {
         <Tabs defaultValue="presets" className="w-full">
           <TabsList>
             <TabsTrigger value="presets">预设样式</TabsTrigger>
-            <TabsTrigger value="font">字体</TabsTrigger>
-            <TabsTrigger value="colors">颜色</TabsTrigger>
-            <TabsTrigger value="spacing">间距</TabsTrigger>
+            <TabsTrigger value="base">基础</TabsTrigger>
+            <TabsTrigger value="block">块级元素</TabsTrigger>
+            <TabsTrigger value="inline">行内元素</TabsTrigger>
           </TabsList>
 
           <TabsContent value="presets" className="space-y-4">
@@ -122,10 +116,10 @@ export function StyleConfigDialog({ value, onChange }: StyleConfigDialogProps) {
                 >
                   <h3 className="font-medium mb-2">{preset.name}</h3>
                   <div className="space-y-2">
-                    <p style={{ fontSize: preset.options.fontSize.paragraph, color: preset.options.colors.text }}>
+                    <p style={{ fontSize: preset.options.block?.p?.fontSize, color: preset.options.block?.p?.color }}>
                       正文示例
                     </p>
-                    <h2 style={{ fontSize: preset.options.fontSize.h2, color: preset.options.colors.heading }}>
+                    <h2 style={{ fontSize: preset.options.block?.h2?.fontSize, color: preset.options.block?.h2?.color }}>
                       标题示例
                     </h2>
                   </div>
@@ -134,50 +128,42 @@ export function StyleConfigDialog({ value, onChange }: StyleConfigDialogProps) {
             </div>
           </TabsContent>
 
-          <TabsContent value="font" className="space-y-4">
+          <TabsContent value="base" className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              {Object.entries(currentOptions.fontSize || {}).map(([key, value]) => (
+              {currentOptions.base && Object.entries(currentOptions.base).map(([key, value]) => (
                 <div key={key} className="space-y-2">
                   <Label>{key}</Label>
                   <Input
                     value={value}
-                    onChange={(e) => handleOptionChange('fontSize', key, e.target.value)}
+                    onChange={(e) => handleOptionChange('base', key, e.target.value)}
                   />
                 </div>
               ))}
             </div>
           </TabsContent>
 
-          <TabsContent value="colors" className="space-y-4">
+          <TabsContent value="block" className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              {Object.entries(currentOptions.colors || {}).map(([key, value]) => (
+              {currentOptions.block && Object.entries(currentOptions.block).map(([key, value]) => (
                 <div key={key} className="space-y-2">
                   <Label>{key}</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      value={value}
-                      onChange={(e) => handleOptionChange('colors', key, e.target.value)}
-                    />
-                    <Input
-                      type="color"
-                      value={value}
-                      className="w-12"
-                      onChange={(e) => handleOptionChange('colors', key, e.target.value)}
-                    />
-                  </div>
+                  <Input
+                    value={JSON.stringify(value)}
+                    onChange={(e) => handleOptionChange('block', key, e.target.value)}
+                  />
                 </div>
               ))}
             </div>
           </TabsContent>
 
-          <TabsContent value="spacing" className="space-y-4">
+          <TabsContent value="inline" className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              {Object.entries(currentOptions.spacing || {}).map(([key, value]) => (
+              {currentOptions.inline && Object.entries(currentOptions.inline).map(([key, value]) => (
                 <div key={key} className="space-y-2">
                   <Label>{key}</Label>
                   <Input
-                    value={value}
-                    onChange={(e) => handleOptionChange('spacing', key, e.target.value)}
+                    value={JSON.stringify(value)}
+                    onChange={(e) => handleOptionChange('inline', key, e.target.value)}
                   />
                 </div>
               ))}

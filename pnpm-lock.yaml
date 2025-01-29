@@ -42,10 +42,10 @@ importers:
         specifier: ^1.1.7
         version: 1.1.7(@types/react-dom@18.3.5(@types/react@18.3.18))(@types/react@18.3.18)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@tiptap/extension-image':
-        specifier: ^2.2.4
+        specifier: ^2.11.3
         version: 2.11.3(@tiptap/core@2.11.3(@tiptap/pm@2.11.3))
       '@tiptap/extension-link':
-        specifier: ^2.2.4
+        specifier: ^2.11.3
         version: 2.11.3(@tiptap/core@2.11.3(@tiptap/pm@2.11.3))(@tiptap/pm@2.11.3)
       '@tiptap/pm':
         specifier: ^2.2.4

@@ -73,9 +73,23 @@ export function TemplateManager({ onTemplateChange }: TemplateManagerProps) {
       description: newTemplate.description || '',
       styles: newTemplate.styles || '',
       options: {
-        fontSize: {},
-        colors: {},
-        spacing: {}
+        base: {
+          primaryColor: '#000000',
+          textAlign: 'left',
+          lineHeight: '1.75'
+        },
+        block: {
+          h1: { fontSize: '24px', color: '#1a1a1a' },
+          h2: { fontSize: '20px', color: '#1a1a1a' },
+          h3: { fontSize: '18px', color: '#1a1a1a' },
+          p: { fontSize: '15px', color: '#333333' },
+          code_pre: { fontSize: '14px', color: '#333333' }
+        },
+        inline: {
+          link: { color: '#576b95' },
+          codespan: { color: '#333333' },
+          em: { color: '#666666' }
+        }
       },
       transform: (html) => html
     }
@@ -91,25 +105,7 @@ export function TemplateManager({ onTemplateChange }: TemplateManagerProps) {
       name: template.name,
       description: template.description,
       styles: template.styles,
-      styleConfig: {
-        base: {
-          '--md-primary-color': template.options.base?.primaryColor || '#000000',
-          'text-align': template.options.base?.textAlign || 'left',
-          'line-height': template.options.base?.lineHeight || '1.75'
-        },
-        block: {
-          h1: template.options.block?.h1,
-          h2: template.options.block?.h2,
-          h3: template.options.block?.h3,
-          // ... 其他块级元素
-        },
-        inline: {
-          strong: template.options.inline?.strong,
-          em: template.options.inline?.em,
-          codespan: template.options.inline?.codespan,
-          // ... 其他内联元素
-        }
-      }
+      options: template.options
     }))
 
     const data = JSON.stringify(exportData, null, 2)
@@ -135,30 +131,12 @@ export function TemplateManager({ onTemplateChange }: TemplateManagerProps) {
           name: data.name,
           description: data.description,
           styles: data.styles,
-          options: {
-            base: {
-              primaryColor: data.styleConfig.base['--md-primary-color'],
-              textAlign: data.styleConfig.base['text-align'],
-              lineHeight: data.styleConfig.base['line-height']
-            },
-            block: {
-              h1: data.styleConfig.block.h1,
-              h2: data.styleConfig.block.h2,
-              h3: data.styleConfig.block.h3,
-              // ... 其他块级元素
-            },
-            inline: {
-              strong: data.styleConfig.inline.strong,
-              em: data.styleConfig.inline.em,
-              codespan: data.styleConfig.inline.codespan,
-              // ... 其他内联元素
-            }
-          },
+          options: data.options,
           transform: (html: string) => {
             return `
               <section>
                 <style>
-                  :root { --md-primary-color: ${data.styleConfig.base['--md-primary-color']}; }
+                  :root { --md-primary-color: ${data.options.base.primaryColor}; }
                 </style>
                 ${html}
               </section>
