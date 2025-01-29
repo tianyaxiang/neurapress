@@ -605,7 +605,7 @@ export default function WechatEditor() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-20">
+      <div className="flex-none border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-20">
         <div className="container mx-auto">
           <div className="p-4">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -683,14 +683,14 @@ export default function WechatEditor() {
         </div>
       </div>
       
-      <div className="flex-1 flex flex-col sm:flex-row overflow-hidden sm:pb-0 pb-16">
+      <div className="flex-1 flex flex-col sm:flex-row overflow-hidden">
         <div 
           ref={editorRef}
           className={cn(
             "editor-container bg-background transition-all duration-300 ease-in-out",
             showPreview 
-              ? "h-[calc(50vh-4rem)] sm:h-[calc(100vh-7.5rem)] sm:w-1/2 border-b sm:border-r" 
-              : "h-[calc(100vh-10rem)] sm:h-[calc(100vh-7.5rem)] w-full",
+              ? "h-[50%] sm:h-full sm:w-1/2 border-b sm:border-r" 
+              : "h-full w-full",
             selectedTemplate && templates.find(t => t.id === selectedTemplate)?.styles
           )}
           style={{
@@ -715,7 +715,7 @@ export default function WechatEditor() {
             ref={previewRef}
             className={cn(
               "preview-container bg-background transition-all duration-300 ease-in-out flex flex-col",
-              "h-[calc(50vh-4rem)] sm:h-[calc(100vh-7.5rem)] sm:w-1/2",
+              "h-[50%] sm:h-full sm:w-1/2",
               "markdown-body",
               selectedTemplate && templates.find(t => t.id === selectedTemplate)?.styles
             )}

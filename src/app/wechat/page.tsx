@@ -10,8 +10,8 @@ import { ThemeToggle } from '@/components/theme/ThemeToggle'
 
 export default function WechatPage() {
   return (
-    <main className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <main className="h-full bg-background flex flex-col">
+      <header className="flex-none sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 max-w-screen-2xl items-center px-4">
           <div className="flex items-center flex-1 gap-2">
             <div className="md:hidden">
@@ -65,7 +65,7 @@ export default function WechatPage() {
           </nav>
         </div>
       </header>
-      <div className="relative h-[calc(100vh-3.5rem)]">
+      <div className="flex-1 relative">
         <WechatEditor />
       </div>
     </main>
