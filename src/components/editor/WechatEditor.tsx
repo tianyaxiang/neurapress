@@ -219,7 +219,18 @@ export default function WechatEditor() {
       // 替换所有元素中的 CSS 变量
       const replaceVariables = (element: HTMLElement) => {
         const style = window.getComputedStyle(element)
-        const properties = ['color', 'background-color', 'border-color', 'border-left-color']
+        const properties = ['color', 'background-color', 'border-color', 'border-left-color', 'font-size']
+        
+        // 获取元素的计算样式
+        const computedStyle = window.getComputedStyle(element)
+        // 保留原始样式
+        const originalStyle = element.getAttribute('style') || ''
+        
+        // 如果是段落元素，确保应用字体大小
+        if (element.tagName.toLowerCase() === 'p') {
+           // alert(element.style.fontSize )
+          element.style.fontSize = '15px'
+        }
         
         properties.forEach(prop => {
           const value = style.getPropertyValue(prop)
@@ -229,6 +240,9 @@ export default function WechatEditor() {
               finalValue = finalValue.replace(`var(${variable})`, replacement)
             })
             element.style[prop as any] = finalValue
+          } else if (prop === 'font-size' && !element.style.fontSize) {
+            // 如果没有字体大小，从计算样式中获取
+            element.style.fontSize = computedStyle.fontSize
           }
         })
 
@@ -250,8 +264,8 @@ export default function WechatEditor() {
       // 创建并写入剪贴板
       await navigator.clipboard.write([
         new ClipboardItem({
-          'text/html': new Blob([tempDiv.innerHTML], { type: 'text/html' }),
-          'text/plain': new Blob([tempDiv.innerText], { type: 'text/plain' })
+          'text/html': new Blob([previewContent.innerHTML], { type: 'text/html' }),
+          'text/plain': new Blob([previewContent.innerText], { type: 'text/plain' })
         })
       ])
 

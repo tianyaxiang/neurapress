@@ -53,16 +53,16 @@ export function WechatStylePicker({ value, onSelect }: WechatStylePickerProps) {
                   <h1 style={{
                     ...template.options?.block?.h1,
                     fontSize: template.options?.block?.h1?.fontSize || '1.2em'
-                  }}>
+                  } as React.CSSProperties}>
                     标题示例
                   </h1>
                   <p style={{
                     ...template.options?.block?.p,
                     fontSize: template.options?.block?.p?.fontSize || '1em'
-                  }}>
+                  } as React.CSSProperties}>
                     这是一段示例文本，展示不同样式模板的效果。
                   </p>
-                  <blockquote style={template.options?.block?.blockquote}>
+                  <blockquote style={template.options?.block?.blockquote as React.CSSProperties}>
                     引用文本示例
                   </blockquote>
                 </div>

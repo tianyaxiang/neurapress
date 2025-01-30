@@ -65,7 +65,7 @@ export const templates: Template[] = [
           borderRadius: '6px',
           color: 'rgba(0,0,0,0.5)',
           background: 'var(--blockquote-background)',
-          marginBottom: '1em'
+          margin: '0 0 1em 0'
         },
         code_pre: {
           fontSize: '14px',
@@ -201,7 +201,7 @@ export const templates: Template[] = [
           fontSize: '15px',
           color: '#4a5568',
           margin: '20px 0',
-          lineHeight: 1.6,
+          lineHeight: 1.75,
           borderLeft: '3px solid #4299e1',
           paddingLeft: '1em'
         },
