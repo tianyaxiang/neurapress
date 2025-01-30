@@ -6,12 +6,12 @@ import { cn } from "@/lib/utils"
 import { templates } from '@/config/wechat-templates'
 
 export function WechatTemplateSelector({ 
-  onSelect 
+  onSelectAction 
 }: { 
-  onSelect: (template: string) => void 
+  onSelectAction: (template: string) => void 
 }) {
   return (
-    <SelectPrimitive.Root onValueChange={onSelect}>
+    <SelectPrimitive.Root onValueChange={onSelectAction}>
       <SelectPrimitive.Trigger className="inline-flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium border border-input hover:bg-accent hover:text-accent-foreground min-w-[120px]">
         <SelectPrimitive.Value placeholder="选择样式..." />
         <SelectPrimitive.Icon>

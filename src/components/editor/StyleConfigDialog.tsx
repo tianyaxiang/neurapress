@@ -2,59 +2,27 @@
 
 import { useState } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Settings } from 'lucide-react'
 import { type RendererOptions } from '@/lib/markdown'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
-const stylePresets = {
-  default: {
-    name: '默认样式',
-    options: {
-      base: {
-        primaryColor: '#333333',
-        textAlign: 'left',
-        lineHeight: '1.75'
-      },
-      block: {
-        h1: { fontSize: '24px', color: '#1a1a1a' },
-        h2: { fontSize: '20px', color: '#1a1a1a' },
-        h3: { fontSize: '18px', color: '#1a1a1a' },
-        p: { fontSize: '15px', color: '#333333' },
-        code_pre: { fontSize: '14px', color: '#333333' }
-      },
-      inline: {
-        link: { color: '#576b95' },
-        codespan: { color: '#333333' },
-        em: { color: '#666666' }
-      }
-    }
-  },
-  modern: {
-    name: '现代简约',
-    options: {
-      base: {
-        primaryColor: '#2d3748',
-        textAlign: 'left',
-        lineHeight: '1.8'
-      },
-      block: {
-        h1: { fontSize: '28px', color: '#1a202c' },
-        h2: { fontSize: '24px', color: '#1a202c' },
-        h3: { fontSize: '20px', color: '#1a202c' },
-        p: { fontSize: '16px', color: '#2d3748' },
-        code_pre: { fontSize: '15px', color: '#2d3748' }
-      },
-      inline: {
-        link: { color: '#4299e1' },
-        codespan: { color: '#2d3748' },
-        em: { color: '#718096' }
-      }
-    }
-  }
-}
+const themeColors = [
+  { name: '经典黑', value: '#1a1a1a' },
+  { name: '深蓝', value: '#1e40af' },
+  { name: '墨绿', value: '#065f46' },
+  { name: '深紫', value: '#5b21b6' },
+  { name: '酒红', value: '#991b1b' },
+  { name: '海蓝', value: '#0369a1' },
+  { name: '森绿', value: '#166534' },
+  { name: '靛蓝', value: '#1e3a8a' },
+  { name: '玫红', value: '#9d174d' },
+  { name: '橙色', value: '#c2410c' },
+  { name: '棕褐', value: '#713f12' },
+  { name: '石墨', value: '#374151' },
+]
 
 interface StyleConfigDialogProps {
   value: RendererOptions
@@ -63,27 +31,58 @@ interface StyleConfigDialogProps {
 
 export function StyleConfigDialog({ value, onChangeAction }: StyleConfigDialogProps) {
   const [currentOptions, setCurrentOptions] = useState<RendererOptions>(value)
-
-  const handlePresetChange = (preset: keyof typeof stylePresets) => {
-    const newOptions = stylePresets[preset].options
-    setCurrentOptions(newOptions)
-    onChangeAction(newOptions)
-  }
+  const [customizedFields, setCustomizedFields] = useState<Set<string>>(new Set())
 
   const handleOptionChange = (
     category: keyof RendererOptions,
     subcategory: string,
-    value: string
+    value: string | null
   ) => {
+    setCustomizedFields(prev => {
+      const next = new Set(prev)
+      if (value === null) {
+        next.delete(`${category}.${subcategory}`)
+      } else {
+        next.add(`${category}.${subcategory}`)
+      }
+      return next
+    })
+
     const newOptions = {
       ...currentOptions,
       [category]: {
         ...currentOptions[category],
-        [subcategory]: value
+        [subcategory]: value === null ? undefined : value
       }
     }
+
+    // 如果是主题颜色变更，同时更新标题颜色
+    if (category === 'base' && subcategory === 'themeColor') {
+      if (value === null) {
+        // 重置为模板默认值
+        newOptions.block = {
+          ...newOptions.block,
+          h1: { ...(newOptions.block?.h1 || {}), color: undefined },
+          h2: { ...(newOptions.block?.h2 || {}), color: undefined },
+          h3: { ...(newOptions.block?.h3 || {}), color: undefined }
+        }
+      } else {
+        newOptions.block = {
+          ...newOptions.block,
+          h1: { ...(newOptions.block?.h1 || {}), color: value },
+          h2: { ...(newOptions.block?.h2 || {}), color: value },
+          h3: { ...(newOptions.block?.h3 || {}), color: value }
+        }
+      }
+    }
+
     setCurrentOptions(newOptions)
     onChangeAction(newOptions)
+  }
+
+  const resetToDefault = (field: string) => {
+    const [category, subcategory] = field.split('.')
+    handleOptionChange(category as keyof RendererOptions, subcategory, null)
   }
 
   return (
@@ -94,82 +93,137 @@ export function StyleConfigDialog({ value, onChangeAction }: StyleConfigDialogPr
           样式设置
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>样式配置</DialogTitle>
         </DialogHeader>
-        <Tabs defaultValue="presets" className="w-full">
-          <TabsList>
-            <TabsTrigger value="presets">预设样式</TabsTrigger>
-            <TabsTrigger value="base">基础</TabsTrigger>
-            <TabsTrigger value="block">块级元素</TabsTrigger>
-            <TabsTrigger value="inline">行内元素</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="presets" className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              {Object.entries(stylePresets).map(([key, preset]) => (
-                <div
-                  key={key}
-                  className="p-4 border rounded-lg cursor-pointer hover:border-primary"
-                  onClick={() => handlePresetChange(key as keyof typeof stylePresets)}
-                >
-                  <h3 className="font-medium mb-2">{preset.name}</h3>
-                  <div className="space-y-2">
-                    <p style={{ fontSize: preset.options.block?.p?.fontSize, color: preset.options.block?.p?.color }}>
-                      正文示例
-                    </p>
-                    <h2 style={{ fontSize: preset.options.block?.h2?.fontSize, color: preset.options.block?.h2?.color }}>
-                      标题示例
-                    </h2>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </TabsContent>
-
-          <TabsContent value="base" className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              {currentOptions.base && Object.entries(currentOptions.base).map(([key, value]) => (
-                <div key={key} className="space-y-2">
-                  <Label>{key}</Label>
-                  <Input
-                    value={value}
-                    onChange={(e) => handleOptionChange('base', key, e.target.value)}
+        
+        <div className="space-y-6">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>主题颜色（标题）</Label>
+                {customizedFields.has('base.themeColor') && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => resetToDefault('base.themeColor')}
+                  >
+                    重置
+                  </Button>
+                )}
+              </div>
+              <div className="grid grid-cols-6 gap-2 mb-2">
+                {themeColors.map((color) => (
+                  <button
+                    key={color.value}
+                    className={`w-8 h-8 rounded-full border-2 transition-all ${
+                      currentOptions.base?.themeColor === color.value
+                        ? 'border-primary scale-110'
+                        : 'border-transparent hover:scale-105'
+                    }`}
+                    style={{ backgroundColor: color.value }}
+                    onClick={() => handleOptionChange('base', 'themeColor', color.value)}
+                    title={color.name}
                   />
-                </div>
-              ))}
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  type="color"
+                  value={currentOptions.base?.themeColor || '#1a1a1a'}
+                  className="w-16 h-8 p-1"
+                  onChange={(e) => handleOptionChange('base', 'themeColor', e.target.value)}
+                />
+                <Input
+                  value={currentOptions.base?.themeColor || '#1a1a1a'}
+                  onChange={(e) => handleOptionChange('base', 'themeColor', e.target.value)}
+                />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                此颜色将应用于一级到三级标题
+              </p>
             </div>
-          </TabsContent>
 
-          <TabsContent value="block" className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              {currentOptions.block && Object.entries(currentOptions.block).map(([key, value]) => (
-                <div key={key} className="space-y-2">
-                  <Label>{key}</Label>
-                  <Input
-                    value={JSON.stringify(value)}
-                    onChange={(e) => handleOptionChange('block', key, e.target.value)}
-                  />
-                </div>
-              ))}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>字体大小</Label>
+                {customizedFields.has('base.fontSize') && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => resetToDefault('base.fontSize')}
+                  >
+                    重置
+                  </Button>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <Input
+                  type="number"
+                  min="12"
+                  max="24"
+                  value={parseInt(currentOptions.base?.fontSize || '15')}
+                  className="w-24"
+                  onChange={(e) => handleOptionChange('base', 'fontSize', `${e.target.value}px`)}
+                />
+                <span className="flex items-center">px</span>
+              </div>
             </div>
-          </TabsContent>
 
-          <TabsContent value="inline" className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              {currentOptions.inline && Object.entries(currentOptions.inline).map(([key, value]) => (
-                <div key={key} className="space-y-2">
-                  <Label>{key}</Label>
-                  <Input
-                    value={JSON.stringify(value)}
-                    onChange={(e) => handleOptionChange('inline', key, e.target.value)}
-                  />
-                </div>
-              ))}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>文本对齐</Label>
+                {customizedFields.has('base.textAlign') && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => resetToDefault('base.textAlign')}
+                  >
+                    重置
+                  </Button>
+                )}
+              </div>
+              <Select 
+                value={currentOptions.base?.textAlign || 'left'}
+                onValueChange={(value: string) => handleOptionChange('base', 'textAlign', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="left">左对齐</SelectItem>
+                  <SelectItem value="center">居中对齐</SelectItem>
+                  <SelectItem value="right">右对齐</SelectItem>
+                  <SelectItem value="justify">两端对齐</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          </TabsContent>
-        </Tabs>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>行高</Label>
+                {customizedFields.has('base.lineHeight') && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => resetToDefault('base.lineHeight')}
+                  >
+                    重置
+                  </Button>
+                )}
+              </div>
+              <Input
+                type="number"
+                min="1"
+                max="3"
+                step="0.1"
+                value={parseFloat(String(currentOptions.base?.lineHeight || '1.75'))}
+                onChange={(e) => handleOptionChange('base', 'lineHeight', e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   )

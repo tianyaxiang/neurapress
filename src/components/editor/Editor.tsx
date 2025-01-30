@@ -6,8 +6,16 @@ import Link from '@tiptap/extension-link'
 import Image from '@tiptap/extension-image'
 import { useState } from 'react'
 import { TemplateSelector } from '../template/TemplateSelector'
-import { templates } from '@/config/templates'
 import { cn } from '@/lib/utils'
+
+const templates = [
+  {
+    id: 'wechat',
+    transform: (html: string) => html, // Add your transform logic here
+    styles: 'wechat-specific-styles'
+  }
+  // Add more templates as needed
+]
 
 const Editor = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<string>('')
