@@ -210,7 +210,7 @@ export default function WechatEditor() {
         styleContainer.style.cssText = `
           max-width: 780px;
           margin: 0 auto;
-          padding: 20px;
+          padding: 0 20px;
           box-sizing: border-box;
         `
         styleContainer.innerHTML = tempDiv.innerHTML

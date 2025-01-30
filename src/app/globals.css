@@ -115,112 +115,12 @@
   font-size: 15px;
   line-height: 1.75;
   color: hsl(var(--foreground));
-  padding: 1.5rem;
+  padding:1rem 1.5rem;
   max-width: 100%;
   margin: 0 auto;
 }
 
-.preview-content h1,
-.preview-content h2,
-.preview-content h3,
-.preview-content h4,
-.preview-content h5,
-.preview-content h6 {
-  font-weight: 600;
-  line-height: 1.25;
-  margin-top: 2em;
-  margin-bottom: 1em;
-  color: hsl(var(--foreground));
-}
 
-.preview-content h1 {
-  font-size: 1.5em;
-}
-
-.preview-content h2 {
-  font-size: 1.3em;
-}
-
-.preview-content h3 {
-  font-size: 1.1em;
-}
-
-.preview-content p {
-  margin: 1.2em 0;
-  color: hsl(var(--foreground));
-}
-
-.preview-content img {
-  max-width: 100%;
-  height: auto;
-  margin: 1.5em auto;
-  display: block;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease;
-}
-
-.preview-content img:hover {
-  transform: scale(1.02);
-}
-
-.preview-content pre {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  background: hsl(var(--muted));
-  border-radius: 6px;
-  padding: 1em;
-  margin: 1.5em 0;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.9em;
-  line-height: 1.6;
-  overflow-x: auto;
-}
-
-.preview-content code {
-  background: hsl(var(--muted));
-  padding: 0.2em 0.4em;
-  border-radius: 3px;
-  font-size: 0.9em;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-}
-
-.preview-content blockquote {
-  margin: 1.5em 0;
-  padding: 0.8em 1em;
-  border-left: 4px solid hsl(var(--primary));
-  background: hsl(var(--muted));
-  border-radius: 0 4px 4px 0;
-  color: hsl(var(--muted-foreground));
-}
-
-.preview-content ul,
-.preview-content ol {
-  margin: 1.2em 0;
-  padding-left: 1.5em;
-  color: hsl(var(--foreground));
-}
-
-.preview-content li {
-  margin: 0.5em 0;
-}
-
-.preview-content table {
-  width: 100%;
-  margin: 1.5em 0;
-  border-collapse: collapse;
-}
-
-.preview-content th,
-.preview-content td {
-  padding: 0.75em;
-  border: 1px solid hsl(var(--border));
-}
-
-.preview-content th {
-  background: hsl(var(--muted));
-  font-weight: 600;
-}
 
 /* 预览区域滚动条优化 */
 .preview-container {
