@@ -158,14 +158,7 @@ export const templates: Template[] = [
         }
       }
     },
-    transform: (html) => `
-      <section style="font-family: 'Georgia', serif;">
-        <style>
-          :root { --md-primary-color: #16a34a; }
-        </style>
-        ${html}
-      </section>
-    `
+    transform: (html) => html
   },
   {
     id: 'modern',
@@ -233,13 +226,8 @@ export const templates: Template[] = [
         }
       }
     },
-    transform: (html) => `
-      <section style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-        <div style="max-width: 100%; margin: 0 auto; color: #374151;">
-          ${html}
-        </div>
-      </section>
-    `
+    transform: (html) => html
+
   },
   {
     id: 'creative',
@@ -376,10 +364,98 @@ export const templates: Template[] = [
         }
       }
     },
-    transform: (html) => `
-      <section style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-        ${html}
-      </section>
-    `
+    transform: (html) => html
+
+  },
+  {
+    id: 'ios-notes',
+    name: '备忘录风格',
+    description: '仿 iOS 备忘录风格',
+    styles: 'prose-ios-notes',
+    options: {
+      base: {
+        primaryColor: '#FF9500',
+        textAlign: 'left',
+        lineHeight: '1.6'
+      },
+      block: {
+        h1: {
+          fontSize: '24px',
+          color: '#1C1C1E',
+          margin: '32px 0 16px',
+          fontWeight: '600',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text"'
+        },
+        h2: {
+          fontSize: '20px',
+          color: '#1C1C1E',
+          margin: '24px 0 12px',
+          fontWeight: '600',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text"'
+        },
+        h3: {
+          fontSize: '18px',
+          color: '#1C1C1E',
+          margin: '20px 0 10px',
+          fontWeight: '600',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text"'
+        },
+        p: {
+          fontSize: '17px',
+          color: '#333333',
+          margin: '16px 0',
+          lineHeight: 1.6,
+          fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text"'
+        },
+        blockquote: {
+          fontSize: '17px',
+          color: '#666666',
+          borderLeft: '4px solid #FF9500',
+          background: '#FAFAFA',
+          padding: '12px 16px',
+          margin: '16px 0',
+          borderRadius: '4px'
+        },
+        code_pre: {
+          fontSize: '15px',
+          background: '#F2F2F7',
+          padding: '12px 16px',
+          borderRadius: '8px',
+          margin: '16px 0',
+          fontFamily: 'Menlo, Monaco, "SF Mono", monospace'
+        },
+        ul: {
+          paddingLeft: '24px',
+          margin: '16px 0'
+        },
+        ol: {
+          paddingLeft: '24px',
+          margin: '16px 0'
+        }
+      },
+      inline: {
+        strong: {
+          color: '#1C1C1E',
+          fontWeight: '600'
+        },
+        em: {
+          color: '#666666',
+          fontStyle: 'italic'
+        },
+        link: {
+          color: '#007AFF',
+          textDecoration: 'none'
+        },
+        codespan: {
+          color: '#E73C3E',
+          background: '#F2F2F7',
+          padding: '2px 6px',
+          borderRadius: '4px',
+          fontSize: '90%',
+          fontFamily: 'Menlo, Monaco, "SF Mono", monospace'
+        }
+      }
+    },
+    transform: (html) => html
   }
 ] 

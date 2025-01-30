@@ -40,8 +40,11 @@ function baseStylesToString(base: RendererOptions['base'] = {}): string {
 
 // 预处理函数
 function preprocessMarkdown(markdown: string): string {
-  // 处理 ** 语法，但排除已经是 HTML 的部分
-  return markdown.replace(/(?<!<[^>]*)\*\*([^*]+)\*\*(?![^<]*>)/g, '<strong>$1</strong>')
+  return markdown
+    // 处理 ** 语法，但排除已经是 HTML 的部分
+    .replace(/(?<!<[^>]*)\*\*([^*]+)\*\*(?![^<]*>)/g, '<strong>$1</strong>')
+    // 处理无序列表的 - 标记，但排除代码块内的部分
+    .replace(/^(?!\s*```)([ \t]*)-\s+/gm, '$1• ')
 }
 
 // Initialize marked instance
@@ -129,23 +132,49 @@ export function convertToWechat(markdown: string, options: RendererOptions = {})
     return `<img src="${href}"${title ? ` title="${title}"` : ''} alt="${text}"${styleStr ? ` style="${styleStr}"` : ''} />`
   }
 
-  customRenderer.list = function(body: Tokens.List) {
-    const ordered = body.ordered
-    const tag = ordered ? 'ol' : 'ul'
-    const style = options.block?.[ordered ? 'ol' : 'ul']
-    const styleStr = cssPropertiesToString(style)
-    const tokens = marked.Lexer.lexInline(body.raw)
-    const content = marked.Parser.parseInline(tokens, { renderer: customRenderer })
-    return `<${tag}${styleStr ? ` style="${styleStr}"` : ''}>${content}</${tag}>`
-  }
+// 重写 list 方法
+customRenderer.list = function(token: Tokens.List): string {
+    const tag = token.ordered ? 'ol' : 'ul'
+    try {
+      const style = options.block?.[token.ordered ? 'ol' : 'ul']
+      const styleStr = cssPropertiesToString(style)
+      const startAttr = token.ordered && token.start !== 1 ? ` start="${token.start}"` : ''
+      
+      return `<${tag}${startAttr}${styleStr ? ` style="${styleStr}"` : ''}>${token.items.map(item => customRenderer.listitem(item)).join('')}</${tag}>`
+    } catch (error) {
+      console.error(`Error rendering list: ${error}`)
+      return `<${tag}>${token.items.map(item => customRenderer.listitem(item)).join('')}</${tag}>`
+    }
+}
 
-  customRenderer.listitem = function(item: Tokens.ListItem) {
-    const style = options.inline?.listitem
-    const styleStr = cssPropertiesToString(style)
-    const tokens = marked.Lexer.lexInline(item.text)
-    const content = marked.Parser.parseInline(tokens, { renderer: customRenderer })
-    return `<li${styleStr ? ` style="${styleStr}"` : ''}>${content}</li>`
+// 重写 listitem 方法
+customRenderer.listitem = function(item: Tokens.ListItem) {
+    try {
+      const style = options.inline?.listitem
+      const styleStr = cssPropertiesToString(style)
+      
+      // 移除列表项开头的破折号和空格
+      let itemText = item.text.replace(/^- /, '')
+      
+      // 处理任务列表项
+      if (item.task) {
+        const checkbox = `<input type="checkbox"${item.checked ? ' checked=""' : ''} disabled="" /> `
+        itemText = checkbox + itemText
+      }
+      
+      // 使用 Lexer 和 Parser 处理剩余的内联标记
+      const tokens = marked.Lexer.lexInline(itemText)
+      const content = marked.Parser.parseInline(tokens, { renderer: customRenderer })
+      
+      return `<li${styleStr ? ` style="${styleStr}"` : ''}>${content}</li>`
+    } catch (error) {
+      console.error(`Error rendering list item: ${error}`)
+      return `<li>${item.text}</li>`
+    }
   }
+  
+  
+  
 
   // Convert Markdown to HTML using the custom renderer
   const html = marked.parse(markdown, { renderer: customRenderer }) as string
