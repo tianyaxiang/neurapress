@@ -113,6 +113,7 @@ export function convertToWechat(markdown: string, options: RendererOptions = def
 
   customRenderer.paragraph = function({ text }: Tokens.Paragraph) {
     const style = mergedOptions.block?.p
+    
     const styleStr = cssPropertiesToString(style)
     const tokens = marked.Lexer.lexInline(text)
     const content = marked.Parser.parseInline(tokens, { renderer: customRenderer })

@@ -52,8 +52,8 @@ export const templates: Template[] = [
           lineHeight: 1.2
         },
         p: {
-          fontSize:'12px',
           margin: '1.5em 8px',
+          lineHeight: 1.75,
           letterSpacing: '0.1em',
           color: 'hsl(var(--foreground))',
           textAlign: 'justify'
@@ -136,6 +136,15 @@ export const templates: Template[] = [
           textAlign: 'center',
           borderRadius: '4px'
         },
+        h3: {
+          paddingLeft: '8px',
+          borderLeft: '3px solid var(--md-primary-color)',
+          margin: '2em 8px 0.75em 0',
+          color: 'hsl(var(--foreground))',
+          fontSize: '1.1em',
+          fontWeight: 'bold',
+          lineHeight: 1.2
+        },
         p: {
           margin: '1.8em 8px',
           letterSpacing: '0.12em',
@@ -170,7 +179,8 @@ export const templates: Template[] = [
       base: {
         primaryColor: '#4299e1',
         textAlign: 'left',
-        lineHeight: '1.8'
+        lineHeight: '1.8',
+        fontSize: '50px'
       },
       block: {
         h1: {
