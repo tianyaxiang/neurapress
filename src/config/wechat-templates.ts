@@ -52,6 +52,7 @@ export const templates: Template[] = [
           lineHeight: 1.2
         },
         p: {
+          fontSize:'12px',
           margin: '1.5em 8px',
           letterSpacing: '0.1em',
           color: 'hsl(var(--foreground))',

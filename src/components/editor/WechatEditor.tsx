@@ -200,290 +200,64 @@ export default function WechatEditor() {
     }
 
     try {
+      // 创建临时容器来处理样式
       const tempDiv = document.createElement('div')
       tempDiv.innerHTML = previewContent.innerHTML
-
+      // 获取当前模板
       const template = templates.find(t => t.id === selectedTemplate)
-      if (template) {
-        // 添加基础样式容器
-        const styleContainer = document.createElement('div')
-        styleContainer.style.cssText = `
-          max-width: 780px;
-          margin: 0 auto;
-          padding: 0 20px;
-          box-sizing: border-box;
-        `
-        styleContainer.innerHTML = tempDiv.innerHTML
-        tempDiv.innerHTML = ''
-        tempDiv.appendChild(styleContainer)
-
-        // 处理 CSS 变量
-        const cssVariables = {
-          '--md-primary-color': styleOptions.base?.primaryColor || template.options.base?.primaryColor || '#333333',
-          '--foreground': styleOptions.base?.themeColor || template.options.base?.themeColor || '#1a1a1a',
-          '--background': '#ffffff',
-          '--muted': '#f1f5f9',
-          '--muted-foreground': '#64748b',
-          '--border': '#e2e8f0',
-          '--ring': '#3b82f6',
-          '--accent': '#f8fafc',
-          '--accent-foreground': '#0f172a'
-        }
-
-        // 替换 CSS 变量的函数
-        const replaceCSSVariables = (value: string) => {
-          let result = value
-          Object.entries(cssVariables).forEach(([variable, replaceValue]) => {
-            // 处理 var(--xxx) 格式
-            result = result.replace(
-              new RegExp(`var\\(${variable}\\)`, 'g'),
-              replaceValue
-            )
-            // 处理 hsl(var(--xxx)) 格式
-            result = result.replace(
-              new RegExp(`hsl\\(var\\(${variable}\\)\\)`, 'g'),
-              replaceValue
-            )
-            // 处理 rgb(var(--xxx)) 格式
-            result = result.replace(
-              new RegExp(`rgb\\(var\\(${variable}\\)\\)`, 'g'),
-              replaceValue
-            )
-          })
-          return result
-        }
-
-        // 合并基础样式
-        const baseStyles = {
-          fontSize: template.options.base?.fontSize || '15px',
-          lineHeight: template.options.base?.lineHeight || '1.75',
-          textAlign: template.options.base?.textAlign || 'left',
-          color: template.options.base?.themeColor || '#1a1a1a',
-          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
-          ...(styleOptions.base || {})
-        }
-
-        // 处理基础样式中的 CSS 变量
-        Object.entries(baseStyles).forEach(([key, value]) => {
-          if (typeof value === 'string') {
-            baseStyles[key] = replaceCSSVariables(value)
-          }
-        })
-        Object.assign(styleContainer.style, baseStyles)
-
-        // 应用基础样式到所有文本元素
-        const applyBaseStyles = () => {
-          const textElements = styleContainer.querySelectorAll('h1, h2, h3, h4, h5, h6, p, blockquote, li, code, strong, em, a, span')
-          textElements.forEach(element => {
-            if (element instanceof HTMLElement) {
-              // 如果元素没有特定的字体和字号设置，应用基础样式
-              if (!element.style.fontFamily) {
-                element.style.fontFamily = baseStyles.fontFamily
-              }
-              if (!element.style.fontSize) {
-                // 根据元素类型设置不同的字号
-                const tagName = element.tagName.toLowerCase()
-                if (tagName === 'h1') {
-                  element.style.fontSize = '24px'
-                } else if (tagName === 'h2') {
-                  element.style.fontSize = '20px'
-                } else if (tagName === 'h3') {
-                  element.style.fontSize = '18px'
-                } else if (tagName === 'code') {
-                  element.style.fontSize = '14px'
-                } else {
-                  element.style.fontSize = baseStyles.fontSize
-                }
-              }
-              // 确保颜色和行高也被应用
-              if (!element.style.color) {
-                element.style.color = baseStyles.color
-              }
-              if (!element.style.lineHeight) {
-                element.style.lineHeight = baseStyles.lineHeight as string
-              }
-            }
-          })
-        }
-
-        // 合并块级样式
-        const applyBlockStyles = (selector: string, templateStyles: any, customStyles: any) => {
-          styleContainer.querySelectorAll(selector).forEach(element => {
-            const effectiveStyles: Record<string, string> = {}
-
-            // 应用模板样式
-            if (templateStyles) {
-              Object.entries(templateStyles).forEach(([key, value]) => {
-                if (typeof value === 'string') {
-                  effectiveStyles[key] = replaceCSSVariables(value)
-                } else {
-                  effectiveStyles[key] = value as string
-                }
-              })
-            }
-
-            // 应用自定义样式
-            if (customStyles) {
-              Object.entries(customStyles).forEach(([key, value]) => {
-                if (typeof value === 'string') {
-                  effectiveStyles[key] = replaceCSSVariables(value)
-                } else {
-                  effectiveStyles[key] = value as string
-                }
-              })
-            }
-
-            // 确保字体样式被应用
-            if (!effectiveStyles.fontFamily) {
-              effectiveStyles.fontFamily = baseStyles.fontFamily
-            }
-            // 确保字号被应用
-            if (!effectiveStyles.fontSize) {
-              const tagName = (element as HTMLElement).tagName.toLowerCase()
-              if (tagName === 'h1') {
-                effectiveStyles.fontSize = '24px'
-              } else if (tagName === 'h2') {
-                effectiveStyles.fontSize = '20px'
-              } else if (tagName === 'h3') {
-                effectiveStyles.fontSize = '18px'
-              } else if (tagName === 'code') {
-                effectiveStyles.fontSize = '14px'
-              } else {
-                effectiveStyles.fontSize = baseStyles.fontSize
-              }
-            }
-
-            Object.assign((element as HTMLElement).style, effectiveStyles)
-          })
-        }
-
-        // 应用标题样式
-        ;['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].forEach(tag => {
-          applyBlockStyles(
-            tag,
-            template.options.block?.[tag],
-            styleOptions.block?.[tag]
-          )
-        })
-
-        // 应用段落样式
-        applyBlockStyles(
-          'p',
-          template.options.block?.p,
-          styleOptions.block?.p
-        )
-
-        // 应用引用样式
-        applyBlockStyles(
-          'blockquote',
-          template.options.block?.blockquote,
-          styleOptions.block?.blockquote
-        )
-
-        // 应用代码块样式
-        applyBlockStyles(
-          'pre',
-          template.options.block?.code_pre,
-          styleOptions.block?.code_pre
-        )
-
-        // 应用图片样式
-        applyBlockStyles(
-          'img',
-          template.options.block?.image,
-          styleOptions.block?.image
-        )
-
-        // 应用列表样式
-        applyBlockStyles(
-          'ul',
-          template.options.block?.ul,
-          styleOptions.block?.ul
-        )
-        applyBlockStyles(
-          'ol',
-          template.options.block?.ol,
-          styleOptions.block?.ol
-        )
-
-        // 应用内联样式
-        const applyInlineStyles = (selector: string, templateStyles: any, customStyles: any) => {
-          styleContainer.querySelectorAll(selector).forEach(element => {
-            const effectiveStyles: Record<string, string> = {}
-
-            // 应用模板样式
-            if (templateStyles) {
-              Object.entries(templateStyles).forEach(([key, value]) => {
-                if (typeof value === 'string') {
-                  effectiveStyles[key] = replaceCSSVariables(value)
-                } else {
-                  effectiveStyles[key] = value as string
-                }
-              })
-            }
-
-            // 应用自定义样式
-            if (customStyles) {
-              Object.entries(customStyles).forEach(([key, value]) => {
-                if (typeof value === 'string') {
-                  effectiveStyles[key] = replaceCSSVariables(value)
-                } else {
-                  effectiveStyles[key] = value as string
-                }
-              })
-            }
-
-            Object.assign((element as HTMLElement).style, effectiveStyles)
-          })
-        }
-
-        // 应用加粗样式
-        applyInlineStyles(
-          'strong',
-          template.options.inline?.strong,
-          styleOptions.inline?.strong
-        )
-
-        // 应用斜体样式
-        applyInlineStyles(
-          'em',
-          template.options.inline?.em,
-          styleOptions.inline?.em
-        )
-
-        // 应用行内代码样式
-        applyInlineStyles(
-          'code:not(pre code)',
-          template.options.inline?.codespan,
-          styleOptions.inline?.codespan
-        )
-
-        // 应用链接样式
-        applyInlineStyles(
-          'a',
-          template.options.inline?.link,
-          styleOptions.inline?.link
-        )
-
-        // 在应用所有样式后，确保基础样式被正确应用
-        applyBaseStyles()
+      
+      // 处理 CSS 变量
+      const cssVariables = {
+        '--md-primary-color': styleOptions.base?.primaryColor || template?.options.base?.primaryColor || '#333333',
+        '--foreground': styleOptions.base?.themeColor || template?.options.base?.themeColor || '#1a1a1a',
+        '--background': '#ffffff',
+        '--muted': '#f1f5f9',
+        '--muted-foreground': '#64748b',
+        '--blockquote-background': 'rgba(0, 0, 0, 0.05)'
       }
 
-      const htmlBlob = new Blob([tempDiv.innerHTML], { type: 'text/html' })
-      const textBlob = new Blob([tempDiv.innerText], { type: 'text/plain' })
+      // 替换所有元素中的 CSS 变量
+      const replaceVariables = (element: HTMLElement) => {
+        const style = window.getComputedStyle(element)
+        const properties = ['color', 'background-color', 'border-color', 'border-left-color']
+        
+        properties.forEach(prop => {
+          const value = style.getPropertyValue(prop)
+          if (value.includes('var(')) {
+            let finalValue = value
+            Object.entries(cssVariables).forEach(([variable, replacement]) => {
+              finalValue = finalValue.replace(`var(${variable})`, replacement)
+            })
+            element.style[prop as any] = finalValue
+          }
+        })
 
+        // 递归处理子元素
+        Array.from(element.children).forEach(child => {
+          if (child instanceof HTMLElement) {
+            replaceVariables(child)
+          }
+        })
+      }
+
+      // 处理所有元素
+      Array.from(tempDiv.children).forEach(child => {
+        if (child instanceof HTMLElement) {
+          replaceVariables(child)
+        }
+      })
+
+      // 创建并写入剪贴板
       await navigator.clipboard.write([
         new ClipboardItem({
-          'text/html': htmlBlob,
-          'text/plain': textBlob
+          'text/html': new Blob([tempDiv.innerHTML], { type: 'text/html' }),
+          'text/plain': new Blob([tempDiv.innerText], { type: 'text/plain' })
         })
       ])
 
       toast({
         title: "复制成功",
-        description: template 
-          ? "已复制预览内容（包含样式）" 
-          : "已复制预览内容",
+        description: "已复制预览内容",
         duration: 2000
       })
     } catch (err) {
