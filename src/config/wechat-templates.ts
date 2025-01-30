@@ -180,7 +180,7 @@ export const templates: Template[] = [
         primaryColor: '#4299e1',
         textAlign: 'left',
         lineHeight: '1.8',
-        fontSize: '50px'
+        fontSize: '15px'
       },
       block: {
         h1: {
