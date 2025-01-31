@@ -52,9 +52,9 @@ export function EditorPreview({
         selectedTemplate && templates.find(t => t.id === selectedTemplate)?.styles
       )}
     >
-      <div className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b px-4 py-2 flex items-center justify-between z-10 sticky top-0">
-        <div className="text-sm text-muted-foreground">预览效果</div>
-        <div className="flex items-center gap-4">
+      <div className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b flex items-center justify-between z-10 sticky top-0">
+        <div className="text-sm text-muted-foreground px-2 py-1">预览效果</div>
+        <div className="flex items-center gap-4 px-2 py-1">
           <div className="flex items-center gap-2">
             <button
               onClick={handleZoomOut}
