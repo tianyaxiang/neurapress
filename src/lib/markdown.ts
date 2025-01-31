@@ -263,6 +263,12 @@ export interface StyleOptions {
   fontFamily?: string
   WebkitBackgroundClip?: string
   WebkitTextFillColor?: string
+  listStyle?: string
+  '@media (max-width: 768px)'?: {
+    margin?: string
+    padding?: string
+    fontSize?: string
+  }
 }
 
 export interface RendererOptions {

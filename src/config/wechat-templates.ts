@@ -82,6 +82,30 @@ export const templates: Template[] = [
           padding: '1em',
           lineHeight: 1.5,
           margin: '10px 8px',
+          background: '#f6f8fa',
+          border: '1px solid #e5e7eb',
+          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+        },
+        code: {
+          fontSize: '90%',
+          background: 'rgba(27,31,35,.05)',
+          padding: '3px 5px',
+          borderRadius: '4px',
+          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace'
+        },
+        ul: {
+          listStyle: 'disc',
+          paddingLeft: '2em',
+          margin: '1em 0',
+          color: 'rgba(0, 0, 0, 0.3)',
+          fontSize: '15px'
+        },
+        ol: {
+          listStyle: 'decimal',
+          paddingLeft: '2em',
+          margin: '1em 0',
+          color: 'hsl(var(--foreground))',
+          lineHeight: 1.75
         },
         image: {
           display: 'block',
@@ -108,6 +132,11 @@ export const templates: Template[] = [
         link: {        
           fontSize: '15px',
           color: '#576b95'
+        },
+        listitem: {
+          margin: '0.5em 0',
+          lineHeight: 1.75,
+          color: 'hsl(var(--foreground))'
         }
       },
       dark: {
@@ -119,6 +148,8 @@ export const templates: Template[] = [
           h2: { color: 'hsl(var(--foreground))' },
           h3: { color: 'hsl(var(--foreground))' },
           p: { color: 'hsl(var(--foreground))' },
+          ul: { color: 'hsl(var(--foreground))' },
+          ol: { color: 'hsl(var(--foreground))' },
           pre: {
             background: 'hsl(var(--muted))',
             border: '1px solid hsl(var(--border))'
@@ -126,6 +157,11 @@ export const templates: Template[] = [
           code: {
             background: 'hsl(var(--muted))',
             color: 'hsl(var(--accent-foreground))'
+          },
+          code_pre: {
+            background: 'hsl(var(--muted))',
+            border: '1px solid hsl(var(--border))',
+            color: 'hsl(var(--foreground))'
           },
           blockquote: {
             background: 'hsl(var(--muted))',
