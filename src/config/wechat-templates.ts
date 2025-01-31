@@ -52,8 +52,9 @@ export const templates: Template[] = [
           lineHeight: 1.2
         },
         p: {
+          fontSize: '15px',
           margin: '1.5em 8px',
-          lineHeight: 1.75,
+          lineHeight: 2,
           letterSpacing: '0.1em',
           color: 'hsl(var(--foreground))',
           textAlign: 'justify'
@@ -97,7 +98,8 @@ export const templates: Template[] = [
           padding: '3px 5px',
           borderRadius: '4px'
         },
-        link: {
+        link: {        
+          fontSize: '15px',
           color: '#576b95'
         }
       }

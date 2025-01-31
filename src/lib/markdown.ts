@@ -21,9 +21,6 @@ function baseStylesToString(base: RendererOptions['base'] = {}): string {
   if (base.primaryColor) {
     styles.push(`--md-primary-color: ${base.primaryColor}`)
   }
-  if (base.textAlign) {
-    styles.push(`text-align: ${base.textAlign}`)
-  }
   if (base.lineHeight) {
     styles.push(`line-height: ${base.lineHeight}`)
   }
@@ -103,7 +100,8 @@ export function convertToWechat(markdown: string, options: RendererOptions = def
   customRenderer.heading = function({ text, depth }: Tokens.Heading) {
     const style = {
       ...mergedOptions.block?.[`h${depth}`],
-      color: mergedOptions.base?.themeColor // 使用主题颜色
+      color: mergedOptions.base?.themeColor, // 使用主题颜色
+      textAlign: mergedOptions.base?.textAlign // 添加文本对齐
     }
     const styleStr = cssPropertiesToString(style)
     const tokens = marked.Lexer.lexInline(text)
