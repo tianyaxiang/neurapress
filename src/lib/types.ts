@@ -28,4 +28,18 @@ export interface RendererOptions {
     link?: CSSProperties
     listitem?: CSSProperties
   }
+}
+
+export interface StyleOptions {
+  padding?: string
+  maxWidth?: string
+  margin?: string
+  wordBreak?: string
+  whiteSpace?: string
+  color?: string
+  '@media (max-width: 768px)'?: {
+    margin?: string
+    padding?: string
+    fontSize?: string
+  }
 } 

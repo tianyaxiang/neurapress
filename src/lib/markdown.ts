@@ -272,11 +272,31 @@ export interface RendererOptions {
     lineHeight?: string | number
     fontSize?: string
     themeColor?: string
+    padding?: string
+    maxWidth?: string
+    margin?: string
+    wordBreak?: string
+    whiteSpace?: string
+    color?: string
   }
   block?: {
     [key: string]: StyleOptions
   }
   inline?: {
     [key: string]: StyleOptions
+  }
+  dark?: {
+    base?: {
+      color?: string
+    }
+    block?: {
+      [key: string]: {
+        color?: string
+        background?: string
+        border?: string
+        borderLeftColor?: string
+        boxShadow?: string
+      }
+    }
   }
 }

@@ -108,17 +108,6 @@
   --tw-prose-quotes: #666666;
 }
 
-/* 预览内容样式优化 */
-.preview-content {
-  word-break: break-word;
-  white-space: pre-wrap;
-  padding:1rem 1.5rem;
-  max-width: 100%;
-  margin: 0 auto;
-}
-
-
-
 /* 预览区域滚动条优化 */
 .preview-container {
   scrollbar-width: thin;
@@ -143,52 +132,6 @@
 
 .preview-container::-webkit-scrollbar-thumb:hover {
   background-color: hsl(var(--foreground));
-}
-
-/* 预览区域响应式布局 */
-@media (max-width: 768px) {
-  .preview-content {
-    padding: 0.75rem;
-    font-size: 14px;
-  }
-  
-  .preview-content img {
-    margin: 1em auto;
-  }
-  
-  .preview-content pre {
-    margin: 1em 0;
-    padding: 0.75em;
-    font-size: 0.85em;
-  }
-}
-
-/* 模板预览卡片样式 */
-.template-preview-card {
-  position: relative;
-  overflow: hidden;
-  transition: all 0.2s ease;
-}
-
-.template-preview-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.template-preview-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(to right, var(--primary), var(--primary-foreground));
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.template-preview-card:hover::before {
-  opacity: 1;
 }
 
 /* ByteMD 编辑器样式优化 */
@@ -464,10 +407,6 @@
   height: 100%;
   overflow-y: auto;
 }
-
-
-
-
 
 .editor-container .bytemd-editor::-webkit-scrollbar-thumb,
 .preview-container .preview-content::-webkit-scrollbar-thumb,

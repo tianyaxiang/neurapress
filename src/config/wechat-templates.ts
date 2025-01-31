@@ -19,7 +19,14 @@ export const templates: Template[] = [
       base: {
         primaryColor: '#000000',
         textAlign: 'left',
-        lineHeight: '1.75'
+        lineHeight: '1.75',
+        padding: '1rem 1.5rem',
+        maxWidth: '100%',
+        margin: '0 auto',
+        wordBreak: 'break-word',
+        whiteSpace: 'pre-wrap',
+        fontSize: '15px',
+        color: '#333'
       },
       block: {
         h1: {
@@ -74,13 +81,13 @@ export const templates: Template[] = [
           borderRadius: '8px',
           padding: '1em',
           lineHeight: 1.5,
-          margin: '10px 8px'
+          margin: '10px 8px',
         },
         image: {
           display: 'block',
           width: '100%',
           margin: '0.1em auto 0.5em',
-          borderRadius: '4px'
+          borderRadius: '4px',
         }
       },
       inline: {
@@ -101,6 +108,33 @@ export const templates: Template[] = [
         link: {        
           fontSize: '15px',
           color: '#576b95'
+        }
+      },
+      dark: {
+        base: {
+          color: 'hsl(var(--foreground))'
+        },
+        block: {
+          h1: { color: 'hsl(var(--foreground))' },
+          h2: { color: 'hsl(var(--foreground))' },
+          h3: { color: 'hsl(var(--foreground))' },
+          p: { color: 'hsl(var(--foreground))' },
+          pre: {
+            background: 'hsl(var(--muted))',
+            border: '1px solid hsl(var(--border))'
+          },
+          code: {
+            background: 'hsl(var(--muted))',
+            color: 'hsl(var(--accent-foreground))'
+          },
+          blockquote: {
+            background: 'hsl(var(--muted))',
+            borderLeftColor: 'hsl(var(--primary))',
+            color: 'hsl(var(--muted-foreground))'
+          },
+          image: {
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+          }
         }
       }
     },
