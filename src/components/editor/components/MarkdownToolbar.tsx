@@ -98,13 +98,6 @@ export function MarkdownToolbar({ onInsert }: MarkdownToolbarProps) {
     },
     {
       icon: <Code className="h-4 w-4" />,
-      title: '代码',
-      text: '`',
-      wrap: true,
-      placeholder: '代码'
-    },
-    {
-      icon: <Code className="h-4 w-4" />,
       title: '代码块',
       text: '```\n',
       wrap: true,
