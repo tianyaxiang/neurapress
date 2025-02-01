@@ -17,10 +17,7 @@ function cssPropertiesToString(style: StyleOptions = {}): string {
 // 将基础样式选项转换为 CSS 字符串
 function baseStylesToString(base: RendererOptions['base'] = {}): string {
   const styles: string[] = []
-  
-  if (base.primaryColor) {
-    styles.push(`--md-primary-color: ${base.primaryColor}`)
-  }
+
   if (base.lineHeight) {
     styles.push(`line-height: ${base.lineHeight}`)
   }
@@ -84,11 +81,10 @@ const defaultOptions: RendererOptions = {
 }
 
 export function convertToWechat(markdown: string, options: RendererOptions = defaultOptions): string {
-  // 创建渲染器
-  const customRenderer = new marked.Renderer()
-
+  const renderer = new marked.Renderer()
+  
   // 继承基础渲染器
-  Object.setPrototypeOf(customRenderer, baseRenderer)
+  Object.setPrototypeOf(renderer, baseRenderer)
 
   // 合并选项
   const mergedOptions = {
@@ -97,7 +93,7 @@ export function convertToWechat(markdown: string, options: RendererOptions = def
     inline: { ...defaultOptions.inline, ...options.inline }
   }
 
-  customRenderer.heading = function({ text, depth }: Tokens.Heading) {
+  renderer.heading = function({ text, depth }: Tokens.Heading) {
     const style = {
       ...mergedOptions.block?.[`h${depth}`],
       color: mergedOptions.base?.themeColor, // 使用主题颜色
@@ -105,78 +101,77 @@ export function convertToWechat(markdown: string, options: RendererOptions = def
     }
     const styleStr = cssPropertiesToString(style)
     const tokens = marked.Lexer.lexInline(text)
-    const content = marked.Parser.parseInline(tokens, { renderer: customRenderer })
+    const content = marked.Parser.parseInline(tokens, { renderer })
     return `<h${depth}${styleStr ? ` style="${styleStr}"` : ''}>${content}</h${depth}>`
   }
 
-  customRenderer.paragraph = function({ text }: Tokens.Paragraph) {
-    const style = mergedOptions.block?.p
-    
+  renderer.paragraph = function({ text }: Tokens.Paragraph) {
+    const style = mergedOptions.block?.p || {}
     const styleStr = cssPropertiesToString(style)
     const tokens = marked.Lexer.lexInline(text)
-    const content = marked.Parser.parseInline(tokens, { renderer: customRenderer })
-    return `<p${styleStr ? ` style="${styleStr}"` : ''}>${content}</p>`
+    const content = marked.Parser.parseInline(tokens, { renderer })
+    return `<p style="${styleStr}">${content}</p>`
   }
 
-  customRenderer.blockquote = function({ text }: Tokens.Blockquote) {
+  renderer.blockquote = function({ text }: Tokens.Blockquote) {
     const style = mergedOptions.block?.blockquote
     const styleStr = cssPropertiesToString(style)
     return `<blockquote${styleStr ? ` style="${styleStr}"` : ''}>${text}</blockquote>`
   }
 
-  customRenderer.code = function({ text, lang }: Tokens.Code) {
+  renderer.code = function({ text, lang }: Tokens.Code) {
     const style = mergedOptions.block?.code_pre
     const styleStr = cssPropertiesToString(style)
     return `<pre${styleStr ? ` style="${styleStr}"` : ''}><code class="language-${lang || ''}">${text}</code></pre>`
   }
 
-  customRenderer.codespan = function({ text }: Tokens.Codespan) {
+  renderer.codespan = function({ text }: Tokens.Codespan) {
     const style = mergedOptions.inline?.codespan
     const styleStr = cssPropertiesToString(style)
     return `<code${styleStr ? ` style="${styleStr}"` : ''}>${text}</code>`
   }
 
-  customRenderer.em = function({ text }: Tokens.Em) {
+  renderer.em = function({ text }: Tokens.Em) {
     const style = mergedOptions.inline?.em
     const styleStr = cssPropertiesToString(style)
     return `<em${styleStr ? ` style="${styleStr}"` : ''}>${text}</em>`
   }
 
-  customRenderer.strong = function({ text }: Tokens.Strong) {
+  renderer.strong = function({ text }: Tokens.Strong) {
     const style = mergedOptions.inline?.strong
     const styleStr = cssPropertiesToString(style)
     return `<strong${styleStr ? ` style="${styleStr}"` : ''}>${text}</strong>`
   }
 
-  customRenderer.link = function({ href, title, text }: Tokens.Link) {
+  renderer.link = function({ href, title, text }: Tokens.Link) {
     const style = mergedOptions.inline?.link
     const styleStr = cssPropertiesToString(style)
     return `<a href="${href}"${title ? ` title="${title}"` : ''}${styleStr ? ` style="${styleStr}"` : ''}>${text}</a>`
   }
 
-  customRenderer.image = function({ href, title, text }: Tokens.Image) {
+  renderer.image = function({ href, title, text }: Tokens.Image) {
     const style = mergedOptions.block?.image
     const styleStr = cssPropertiesToString(style)
     return `<img src="${href}"${title ? ` title="${title}"` : ''} alt="${text}"${styleStr ? ` style="${styleStr}"` : ''} />`
   }
 
 // 重写 list 方法
-customRenderer.list = function(token: Tokens.List): string {
+renderer.list = function(token: Tokens.List): string {
     const tag = token.ordered ? 'ol' : 'ul'
     try {
       const style = mergedOptions.block?.[token.ordered ? 'ol' : 'ul']
       const styleStr = cssPropertiesToString(style)
       const startAttr = token.ordered && token.start !== 1 ? ` start="${token.start}"` : ''
       
-      return `<${tag}${startAttr}${styleStr ? ` style="${styleStr}"` : ''}>${token.items.map(item => customRenderer.listitem(item)).join('')}</${tag}>`
+      return `<${tag}${startAttr}${styleStr ? ` style="${styleStr}"` : ''}>${token.items.map(item => renderer.listitem(item)).join('')}</${tag}>`
     } catch (error) {
       console.error(`Error rendering list: ${error}`)
-      return `<${tag}>${token.items.map(item => customRenderer.listitem(item)).join('')}</${tag}>`
+      return `<${tag}>${token.items.map(item => renderer.listitem(item)).join('')}</${tag}>`
     }
 }
 
 // 重写 listitem 方法
-customRenderer.listitem = function(item: Tokens.ListItem) {
+renderer.listitem = function(item: Tokens.ListItem) {
     try {
       const style = mergedOptions.inline?.listitem
       const styleStr = cssPropertiesToString(style)
@@ -192,7 +187,7 @@ customRenderer.listitem = function(item: Tokens.ListItem) {
       
       // 使用 Lexer 和 Parser 处理剩余的内联标记
       const tokens = marked.Lexer.lexInline(itemText)
-      const content = marked.Parser.parseInline(tokens, { renderer: customRenderer })
+      const content = marked.Parser.parseInline(tokens, { renderer })
       
       return `<li${styleStr ? ` style="${styleStr}"` : ''}>${content}</li>`
     } catch (error) {
@@ -201,15 +196,12 @@ customRenderer.listitem = function(item: Tokens.ListItem) {
     }
   }
   
-  
-  
-
   // Convert Markdown to HTML using the custom renderer
-  const html = marked.parse(markdown, { renderer: customRenderer }) as string
+  const html = marked.parse(markdown, { renderer }) as string
 
   // Apply base styles
   const baseStyles = baseStylesToString(mergedOptions.base)
-  return baseStyles ? `<div style="${baseStyles}">${html}</div>` : html
+  return baseStyles ? `<section style="${baseStyles}">${html}</section>` : html
 }
 
 export function convertToXiaohongshu(markdown: string): string {

@@ -106,18 +106,33 @@ export default function WechatEditor() {
         p: {
           ...(template?.options?.block?.p || {}),
           ...(styleOptions.block?.p || {}),
-          fontSize: styleOptions.block?.p?.fontSize || template?.options?.block?.p?.fontSize || '15px',
-          lineHeight: styleOptions.block?.p?.lineHeight || template?.options?.block?.p?.lineHeight || 2,
-          letterSpacing: styleOptions.block?.p?.letterSpacing || template?.options?.block?.p?.letterSpacing || '0.1em'
+          fontSize: styleOptions.base?.fontSize || template?.options?.base?.fontSize || '15px',
+          lineHeight: styleOptions.base?.lineHeight || template?.options?.base?.lineHeight || 2
+        },
+        ol: {
+          ...(template?.options?.block?.ol || {}),
+          ...(styleOptions.block?.ol || {}),
+          fontSize: styleOptions.base?.fontSize || template?.options?.base?.fontSize || '15px',
+        },
+        ul: {
+          ...(template?.options?.block?.ul || {}),
+          ...(styleOptions.block?.ul || {}),
+          fontSize: styleOptions.base?.fontSize || template?.options?.base?.fontSize || '15px',
         }
       },
       inline: {
         ...(template?.options?.inline || {}),
-        ...(styleOptions.inline || {})
+        ...(styleOptions.inline || {}),
+        listitem: {
+          ...(template?.options?.inline?.listitem || {}),
+          ...(styleOptions.inline?.listitem || {}),
+          fontSize: styleOptions.base?.fontSize || template?.options?.base?.fontSize || '15px',
+        }
       }
     }
     
     const html = convertToWechat(value, mergedOptions)
+   
     if (!template?.transform) return html
     
     try {
@@ -202,84 +217,28 @@ export default function WechatEditor() {
     }
   }, [toast])
 
+  // 渲染预览内容
+  const renderPreview = useCallback(() => {
+    const content = getPreviewContent()
+    return (
+      <div 
+        className="preview-content" 
+        dangerouslySetInnerHTML={{ __html: content }}
+      />
+    )
+  }, [getPreviewContent])
+
   const handleCopy = useCallback(async () => {
-    const previewContent = previewRef.current?.querySelector('.preview-content') as HTMLElement | null
-    if (!previewContent) {
-      toast({
-        variant: "destructive",
-        title: "复制失败",
-        description: "未找到预览内容",
-        duration: 2000
-      })
-      return
-    }
-
     try {
-      // 创建临时容器来处理样式
+      const htmlContent = getPreviewContent()
       const tempDiv = document.createElement('div')
-      tempDiv.innerHTML = previewContent.innerHTML
-      // 获取当前模板
-      const template = templates.find(t => t.id === selectedTemplate)
-      
-      // 处理 CSS 变量
-      const cssVariables = {
-        '--foreground': styleOptions.base?.themeColor || template?.options.base?.themeColor || '#1a1a1a',
-        '--background': '#ffffff',
-        '--muted': '#f1f5f9',
-        '--muted-foreground': '#64748b',
-        '--blockquote-background': 'rgba(0, 0, 0, 0.05)'
-      }
+      tempDiv.innerHTML = htmlContent
+      const plainText = tempDiv.textContent || tempDiv.innerText
 
-      // 替换所有元素中的 CSS 变量
-      const replaceVariables = (element: HTMLElement) => {
-        const style = window.getComputedStyle(element)
-        const properties = ['color', 'background-color', 'border-color', 'border-left-color', 'font-size']
-        
-        // 获取元素的计算样式
-        const computedStyle = window.getComputedStyle(element)
-        // 保留原始样式
-        const originalStyle = element.getAttribute('style') || ''
-        
-        // 如果是段落元素，确保应用字体大小
-        if (element.tagName.toLowerCase() === 'p') {
-           // alert(element.style.fontSize )
-          element.style.fontSize = '15px'
-        }
-        
-        properties.forEach(prop => {
-          const value = style.getPropertyValue(prop)
-          if (value.includes('var(')) {
-            let finalValue = value
-            Object.entries(cssVariables).forEach(([variable, replacement]) => {
-              finalValue = finalValue.replace(`var(${variable})`, replacement)
-            })
-            element.style[prop as any] = finalValue
-          } else if (prop === 'font-size' && !element.style.fontSize) {
-            // 如果没有字体大小，从计算样式中获取
-            element.style.fontSize = computedStyle.fontSize
-          }
-        })
-
-        // 递归处理子元素
-        Array.from(element.children).forEach(child => {
-          if (child instanceof HTMLElement) {
-            replaceVariables(child)
-          }
-        })
-      }
-
-      // 处理所有元素
-      Array.from(tempDiv.children).forEach(child => {
-        if (child instanceof HTMLElement) {
-          replaceVariables(child)
-        }
-      })
-
-      // 创建并写入剪贴板
       await navigator.clipboard.write([
         new ClipboardItem({
-          'text/html': new Blob([previewContent.innerHTML], { type: 'text/html' }),
-          'text/plain': new Blob([previewContent.innerText], { type: 'text/plain' })
+          'text/html': new Blob([htmlContent], { type: 'text/html' }),
+          'text/plain': new Blob([plainText], { type: 'text/plain' })
         })
       ])
 
@@ -291,7 +250,7 @@ export default function WechatEditor() {
     } catch (err) {
       console.error('Copy error:', err)
       try {
-        await navigator.clipboard.writeText(previewContent.innerText)
+        await navigator.clipboard.writeText(previewContent)
         toast({
           title: "复制成功",
           description: "已复制预览内容（仅文本）",
@@ -306,7 +265,7 @@ export default function WechatEditor() {
         })
       }
     }
-  }, [previewRef, selectedTemplate, styleOptions, toast])
+  }, [previewRef, toast, getPreviewContent])
 
   // 检测是否为移动设备
   const isMobile = useCallback(() => {

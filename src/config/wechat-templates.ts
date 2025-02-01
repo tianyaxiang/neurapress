@@ -89,6 +89,7 @@ export const templates: Template[] = [
         
             // 段落
             p: {
+              'fontSize': `var(--fontSize)`,
               'margin': `1.5em 8px`,
               'letterSpacing': `0.1em`,
               'color': `hsl(var(--foreground))`,
