@@ -20,7 +20,7 @@ export const templates: Template[] = [
             themeColor: '#166534',
             fontFamily: '-apple-system-font, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", Arial, sans-serif',
             textAlign: 'left',
-            lineHeight: '1.75',
+            lineHeight: '2',
             padding: '1rem 1.5rem',
             maxWidth: '100%',
             margin: '0 auto',
