@@ -684,4 +684,14 @@
 /* 暗黑模式下的加载动画 */
 .dark .animate-spin {
   color: hsl(var(--primary));
+}
+
+@layer utilities {
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
 } 

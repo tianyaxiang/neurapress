@@ -393,8 +393,10 @@ export default function WechatEditor() {
     setReadingTime(calculateReadingTime(plainText))
   }, [previewContent])
 
+  const isScrolling = useRef<boolean>(false)
+
   return (
-    <div className="h-full flex flex-col relative">
+    <div className="h-screen flex flex-col overflow-hidden">
       <div className="hidden sm:block">
         <EditorToolbar 
           value={value}
@@ -441,7 +443,7 @@ export default function WechatEditor() {
               <div 
                 ref={editorRef}
                 className={cn(
-                  "h-full overflow-y-auto",
+                  "h-full",
                   selectedTemplate && templates.find(t => t.id === selectedTemplate)?.styles
                 )}
               >
@@ -450,9 +452,26 @@ export default function WechatEditor() {
                   value={value}
                   onChange={handleInput}
                   onKeyDown={handleKeyDown}
-                  className="w-full h-full resize-none outline-none p-4 font-mono text-base leading-relaxed"
+                  className="w-full h-full resize-none outline-none p-4 font-mono text-base leading-relaxed overflow-y-scroll scrollbar-none"
                   placeholder="开始写作..."
                   spellCheck={false}
+                  onScroll={(e) => {
+                    if (isScrolling.current) return
+                    isScrolling.current = true
+                    try {
+                      const textarea = e.currentTarget
+                      const previewContainer = document.querySelector('.preview-container .overflow-y-auto')
+                      if (!previewContainer) return
+                      
+                      const scrollPercentage = textarea.scrollTop / (textarea.scrollHeight - textarea.clientHeight)
+                      const previewScrollTop = scrollPercentage * (previewContainer.scrollHeight - previewContainer.clientHeight)
+                      previewContainer.scrollTop = previewScrollTop
+                    } finally {
+                      requestAnimationFrame(() => {
+                        isScrolling.current = false
+                      })
+                    }
+                  }}
                 />
               </div>
             </TabsContent>
@@ -476,7 +495,7 @@ export default function WechatEditor() {
           <div 
             ref={editorRef}
             className={cn(
-              "editor-container bg-background transition-all duration-300 ease-in-out flex flex-col h-[calc(100vh-theme(spacing.16)-theme(spacing.10))] min-h-[600px]",
+              "editor-container bg-background transition-all duration-300 ease-in-out flex flex-col h-full",
               showPreview 
                 ? "w-1/2 border-r" 
                 : "w-full",
@@ -484,15 +503,32 @@ export default function WechatEditor() {
             )}
           >
             <MarkdownToolbar onInsert={handleToolbarInsert} />
-            <div className="flex-1">
+            <div className="flex-1 overflow-hidden">
               <textarea
                 ref={textareaRef}
                 value={value}
                 onChange={handleInput}
                 onKeyDown={handleKeyDown}
-                className="w-full h-full resize-none outline-none p-4 font-mono text-base leading-relaxed"
+                className="w-full h-full resize-none outline-none p-4 font-mono text-base leading-relaxed overflow-y-scroll scrollbar-none"
                 placeholder="开始写作..."
                 spellCheck={false}
+                onScroll={(e) => {
+                  if (isScrolling.current) return
+                  isScrolling.current = true
+                  try {
+                    const textarea = e.currentTarget
+                    const previewContainer = document.querySelector('.preview-container .overflow-y-auto')
+                    if (!previewContainer) return
+                    
+                    const scrollPercentage = textarea.scrollTop / (textarea.scrollHeight - textarea.clientHeight)
+                    const previewScrollTop = scrollPercentage * (previewContainer.scrollHeight - previewContainer.clientHeight)
+                    previewContainer.scrollTop = previewScrollTop
+                  } finally {
+                    requestAnimationFrame(() => {
+                      isScrolling.current = false
+                    })
+                  }
+                }}
               />
             </div>
           </div>

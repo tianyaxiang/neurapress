@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils'
 import { PREVIEW_SIZES, type PreviewSize } from '../constants'
 import { Loader2, ZoomIn, ZoomOut, Maximize2, Minimize2 } from 'lucide-react'
 import { templates } from '@/config/wechat-templates'
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 
 interface EditorPreviewProps {
   previewRef: React.RefObject<HTMLDivElement>
@@ -23,6 +23,7 @@ export function EditorPreview({
 }: EditorPreviewProps) {
   const [zoom, setZoom] = useState(100)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const isScrolling = useRef<boolean>(false)
 
   const handleZoomIn = () => {
     setZoom(prev => Math.min(prev + 10, 200))
@@ -47,12 +48,12 @@ export function EditorPreview({
       ref={previewRef}
       className={cn(
         "preview-container bg-background transition-all duration-300 ease-in-out flex flex-col",
-        "h-[50%] sm:h-full sm:w-1/2",
-        "markdown-body",
+        "h-full sm:w-1/2",
+        "markdown-body relative",
         selectedTemplate && templates.find(t => t.id === selectedTemplate)?.styles
       )}
     >
-      <div className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b flex items-center justify-between z-10 sticky top-0">
+      <div className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b flex items-center justify-between z-10 sticky top-0 left-0 right-0">
         <div className="text-sm text-muted-foreground px-2 py-1">预览效果</div>
         <div className="flex items-center gap-4 px-2 py-1">
           <div className="flex items-center gap-2">
@@ -96,8 +97,23 @@ export function EditorPreview({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
-        <div className="min-h-full py-8 px-4">
+      <div className="flex-1 overflow-y-auto" onScroll={(e) => {
+        const container = e.currentTarget
+        const textarea = document.querySelector('.editor-container textarea')
+        if (!textarea || isScrolling.current) return
+        isScrolling.current = true
+
+        try {
+          const scrollPercentage = container.scrollTop / (container.scrollHeight - container.clientHeight)
+          const textareaScrollTop = scrollPercentage * (textarea.scrollHeight - textarea.clientHeight)
+          textarea.scrollTop = textareaScrollTop
+        } finally {
+          requestAnimationFrame(() => {
+            isScrolling.current = false
+          })
+        }
+      }}>
+        <div className="h-full py-8 px-4">
           <div 
             className={cn(
               "bg-background mx-auto rounded-lg transition-all duration-300",
