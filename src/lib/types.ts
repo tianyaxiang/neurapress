@@ -2,31 +2,31 @@ import type { CSSProperties } from 'react'
 
 export interface RendererOptions {
   base?: {
-    primaryColor?: string
+    themeColor?: string
     textAlign?: string
     lineHeight?: string
   }
   block?: {
-    h1?: CSSProperties
-    h2?: CSSProperties
-    h3?: CSSProperties
-    h4?: CSSProperties
-    h5?: CSSProperties
-    h6?: CSSProperties
-    p?: CSSProperties
-    blockquote?: CSSProperties
-    code_pre?: CSSProperties
-    code?: CSSProperties
-    image?: CSSProperties
-    ol?: CSSProperties
-    ul?: CSSProperties
+    h1?: StyleOptions
+    h2?: StyleOptions
+    h3?: StyleOptions
+    h4?: StyleOptions
+    h5?: StyleOptions
+    h6?: StyleOptions
+    p?: StyleOptions
+    blockquote?: StyleOptions
+    code_pre?: StyleOptions
+    code?: StyleOptions
+    image?: StyleOptions
+    ol?: StyleOptions
+    ul?: StyleOptions
   }
   inline?: {
-    strong?: CSSProperties
-    em?: CSSProperties
-    codespan?: CSSProperties
-    link?: CSSProperties
-    listitem?: CSSProperties
+    strong?: StyleOptions
+    em?: StyleOptions
+    codespan?: StyleOptions
+    link?: StyleOptions
+    listitem?: StyleOptions
   }
 }
 
@@ -34,9 +34,42 @@ export interface StyleOptions {
   padding?: string
   maxWidth?: string
   margin?: string
-  wordBreak?: string
-  whiteSpace?: string
+  wordBreak?: 'normal' | 'break-all' | 'keep-all' | 'break-word'
+  whiteSpace?: 'normal' | 'nowrap' | 'pre' | 'pre-wrap' | 'pre-line' | 'break-spaces'
   color?: string
+  display?: string
+  fontSize?: string
+  fontWeight?: string
+  textAlign?: string
+  paddingLeft?: string
+  marginLeft?: string
+  borderLeft?: string
+  lineHeight?: string | number
+  letterSpacing?: string
+  fontStyle?: string
+  borderRadius?: string
+  background?: string
+  marginBottom?: string
+  alignItems?: 'flex-start' | 'flex-end' | 'center' | 'baseline' | 'stretch'
+  gap?: string
+  overflowX?: string
+  fontFamily?: string
+  width?: string
+  listStyle?: string
+  borderStyle?: string
+  borderWidth?: string
+  borderColor?: string
+  WebkitTransformOrigin?: string
+  transformOrigin?: string
+  transform?: string
+  height?: string
+  textIndent?: string | number
+  borderCollapse?: 'collapse' | 'separate' | 'initial' | 'inherit'
+  border?: string
+  textDecoration?: string
+  borderBottom?: string
+  WebkitBackgroundClip?: string
+  WebkitTextFillColor?: string
   '@media (max-width: 768px)'?: {
     margin?: string
     padding?: string

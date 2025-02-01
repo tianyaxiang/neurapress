@@ -16,166 +16,272 @@ export const templates: Template[] = [
     description: '清晰简约的默认样式',
     styles: '',
     options: {
-      base: {
-        themeColor: '#16a34a',
-        primaryColor: '#000000',
-        textAlign: 'left',
-        lineHeight: '1.75',
-        padding: '1rem 1.5rem',
-        maxWidth: '100%',
-        margin: '0 auto',
-        wordBreak: 'break-word',
-        whiteSpace: 'pre-wrap',
-        fontSize: '15px',
-        color: '#333'
-      },
-      block: {
-        h1: {
-          display: 'table',
-          padding: '0 1em',
-          borderBottom: '2px solid var(--md-primary-color)',
-          margin: '2em auto 1em',
-          color: 'hsl(var(--foreground))',
-          fontSize: '1.2em',
-          fontWeight: 'bold',
-          textAlign: 'center'
-        },
-        h2: {
-          display: 'table',
-          padding: '0 0.2em',
-          margin: '4em auto 2em',
-          color: '#fff',
-          borderBottom: '2px solid var(--md-primary-color)',
-          fontSize: '1.2em',
-          fontWeight: 'bold',
-          textAlign: 'center'
-        },
-        h3: {
-          paddingLeft: '8px',
-          borderLeft: '3px solid var(--md-primary-color)',
-          margin: '2em 8px 0.75em 0',
-          color: 'hsl(var(--foreground))',
-          fontSize: '1.1em',
-          fontWeight: 'bold',
-          lineHeight: 1.2
-        },
-        p: {
-          fontSize: '15px',
-          margin: '1.5em 8px',
-          lineHeight: 2,
-          letterSpacing: '0.1em',
-          color: 'hsl(var(--foreground))',
-          textAlign: 'justify'
-        },
-        blockquote: {
-          fontStyle: 'normal',
-          padding: '1em',
-          borderLeft: '4px solid var(--md-primary-color)',
-          borderRadius: '6px',
-          color: 'rgba(0,0,0,0.5)',
-          background: 'var(--blockquote-background)',
-          margin: '0 0 1em 0'
-        },
-        code_pre: {
-          fontSize: '14px',
-          overflowX: 'auto',
-          borderRadius: '8px',
-          padding: '1em',
-          lineHeight: 1.5,
-          margin: '10px 8px',
-          background: '#f6f8fa',
-          border: '1px solid #e5e7eb',
-          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-        },
-        code: {
-          fontSize: '90%',
-          background: 'rgba(27,31,35,.05)',
-          padding: '3px 5px',
-          borderRadius: '4px',
-          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace'
-        },
-        ul: {
-          listStyle: 'disc',
-          paddingLeft: '2em',
-          margin: '1em 0',
-          color: 'rgba(0, 0, 0, 0.3)',
-          fontSize: '15px'
-        },
-        ol: {
-          listStyle: 'decimal',
-          paddingLeft: '2em',
-          margin: '1em 0',
-          color: 'hsl(var(--foreground))',
-          lineHeight: 1.75
-        },
-        image: {
-          display: 'block',
-          width: '100%',
-          margin: '0.1em auto 0.5em',
-          borderRadius: '4px',
-        }
-      },
-      inline: {
-        strong: {
-          color: 'var(--md-primary-color)',
-          fontWeight: 'bold'
-        },
-        em: {
-          fontStyle: 'italic'
-        },
-        codespan: {
-          fontSize: '90%',
-          color: '#d14',
-          background: 'rgba(27,31,35,.05)',
-          padding: '3px 5px',
-          borderRadius: '4px'
-        },
-        link: {        
-          fontSize: '15px',
-          color: '#576b95'
-        },
-        listitem: {
-          margin: '0.5em 0',
-          lineHeight: 1.75,
-          color: 'hsl(var(--foreground))'
-        }
-      },
-      dark: {
         base: {
-          color: 'hsl(var(--foreground))'
-        },
-        block: {
-          h1: { color: 'hsl(var(--foreground))' },
-          h2: { color: 'hsl(var(--foreground))' },
-          h3: { color: 'hsl(var(--foreground))' },
-          p: { color: 'hsl(var(--foreground))' },
-          ul: { color: 'hsl(var(--foreground))' },
-          ol: { color: 'hsl(var(--foreground))' },
-          pre: {
-            background: 'hsl(var(--muted))',
-            border: '1px solid hsl(var(--border))'
+            themeColor: '#166534',
+            fontFamily: '-apple-system-font, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei UI", "Microsoft YaHei", Arial, sans-serif',
+            textAlign: 'left',
+            lineHeight: '1.75',
+            padding: '1rem 1.5rem',
+            maxWidth: '100%',
+            margin: '0 auto',
+            wordBreak: 'break-word',
+            whiteSpace: 'pre-wrap',
+            fontSize: '14px',
+            color: '#333'
           },
-          code: {
-            background: 'hsl(var(--muted))',
-            color: 'hsl(var(--accent-foreground))'
+          block: {    // 一级标题
+            h1: {
+              display: 'table',
+              padding: '0 1em',
+              borderBottom: '2px solid var(--themeColor)',
+              margin: '2em auto 1em',
+              color: 'hsl(var(--foreground))',
+              fontSize: '1.2em',
+              fontWeight: 'bold',
+              textAlign: 'center'
+            },
+        
+            // 二级标题
+            h2: {
+              display: 'table',
+              padding: '0 0.2em',
+              margin: '4em auto 2em',
+              color: '#fff',
+              background: 'var(--themeColor)',
+              fontSize: '1.2em',
+              fontWeight: 'bold',
+              textAlign: 'center'
+            },
+        
+            // 三级标题
+            h3: {
+              paddingLeft: '8px',
+              borderLeft: '3px solid var(--themeColor)',
+              margin: '2em 8px 0.75em 0',
+              color: 'hsl(var(--foreground))',
+              fontSize: '1.1em',
+              fontWeight: 'bold',
+              lineHeight: '1.2'
+            },
+        
+            // 四级标题
+            h4: {
+              'margin': `2em 8px 0.5em`,
+              'color': `var(--themeColor)`,
+              'fontSize': `1em`,
+              'fontWeight': `bold`,
+            },
+        
+            // 五级标题
+            h5: {
+              'margin': `1.5em 8px 0.5em`,
+              'color': `var(--themeColor)`,
+              'fontSize': `1em`,
+              'fontWeight': `bold`,
+            },
+        
+            // 六级标题
+            h6: {
+              'margin': `1.5em 8px 0.5em`,
+              'fontSize': `1em`,
+              'color': `var(--themeColor)`,
+            },
+        
+            // 段落
+            p: {
+              'margin': `1.5em 8px`,
+              'letterSpacing': `0.1em`,
+              'color': `hsl(var(--foreground))`,
+              'textAlign': `justify`,
+            },
+        
+            // 引用
+            blockquote: {
+              fontStyle: 'normal',
+              padding: '1em',
+              borderLeft: '4px solid var(--themeColor)',
+              borderRadius: '6px',
+              color: 'rgba(0,0,0,0.5)',
+              background: 'var(--blockquote-background)',
+              margin: '0 0 1em 0'
+            },
+        
+            // 引用内容
+            blockquote_p: {
+              'display': `block`,
+              'fontSize': `1em`,
+              'letterSpacing': `0.1em`,
+              'color': `hsl(var(--foreground))`,
+            },
+        
+            blockquote_note: {
+            },
+        
+            blockquote_tip: {
+            },
+        
+            blockquote_important: {
+            },
+        
+            blockquote_warning: {
+            },
+        
+            blockquote_caution: {
+            },
+        
+        
+            blockquote_title_note: {
+              color: `#478be6`,
+            },
+        
+            blockquote_title_tip: {
+              color: `#57ab5a`,
+            },
+        
+            blockquote_title_important: {
+              color: `#986ee2`,
+            },
+        
+            blockquote_title_warning: {
+              color: `#c69026`,
+            },
+        
+            blockquote_title_caution: {
+              color: `#e5534b`,
+            },
+        
+            blockquote_p_note: {
+            },
+        
+            blockquote_p_tip: {
+            },
+        
+            blockquote_p_important: {
+            },
+        
+            blockquote_p_warning: {
+            },
+        
+            blockquote_p_caution: {
+            },
+        
+            // 代码块
+            code_pre: {
+              'fontSize': `14px`,
+              'overflowX': `auto`,
+              'borderRadius': `8px`,
+              'padding': `1em`,
+              'lineHeight': `1.5`,
+              'margin': `10px 8px`,
+            },
+        
+            // 行内代码
+            code: {
+              margin: '0',
+              fontFamily: 'Menlo, Operator Mono, Consolas, Monaco, monospace'
+            },
+        
+            // 图片
+            image: {
+              'display': `block`,
+              'width': `100% !important`,
+              'margin': `0.1em auto 0.5em`,
+              'borderRadius': `4px`,
+            },
+        
+            // 有序列表
+            ol: {
+              paddingLeft: '1em',
+              color: 'hsl(var(--foreground))'
+            },
+        
+            // 无序列表
+            ul: {
+              listStyle: 'circle',
+              paddingLeft: '1em',
+              color: 'hsl(var(--foreground))'
+            },
+        
+            footnotes: {
+              'margin': `0.5em 8px`,
+              'fontSize': `80%`,
+              'color': `hsl(var(--foreground))`,
+            },
+        
+            figure: {
+              margin: `1.5em 8px`,
+              color: `hsl(var(--foreground))`,
+            },
+        
           },
-          code_pre: {
-            background: 'hsl(var(--muted))',
-            border: '1px solid hsl(var(--border))',
-            color: 'hsl(var(--foreground))'
-          },
-          blockquote: {
-            background: 'hsl(var(--muted))',
-            borderLeftColor: 'hsl(var(--primary))',
-            color: 'hsl(var(--muted-foreground))'
-          },
-          image: {
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+          inline: {
+            listitem: {
+              display: 'block',
+              margin: '0.2em 8px',
+              color: 'hsl(var(--foreground))'
+            },
+        
+            codespan: {
+              'fontSize': `90%`,
+              'color': `#d14`,
+              'background': `rgba(27,31,35,.05)`,
+              'padding': `3px 5px`,
+              'borderRadius': `4px`,
+              // 'word-break': `break-all`,
+            },
+        
+            em: {
+              'fontStyle': `italic`,
+              'fontSize': `inherit`,
+            },
+        
+            link: {
+              color: `#576b95`,
+            },
+        
+            wx_link: {
+              'color': `#576b95`,
+              'textDecoration': `none`,
+            },
+        
+            // 字体加粗样式
+            strong: {
+              'color': `var(--themeColor)`,
+              'fontWeight': `bold`,
+              'fontSize': `inherit`,
+            },
+        
+            table: {
+              textAlign: 'center',
+              margin: '1em 8px',
+              color: 'hsl(var(--foreground))'
+            },
+        
+            thead: {
+              'background': `rgba(0, 0, 0, 0.05)`,
+              'fontWeight': `bold`,
+              'color': `hsl(var(--foreground))`,
+            },
+        
+            td: {
+              border: '1px solid #dfdfdf',
+              padding: '0.25em 0.5em',
+              color: '#3f3f3f',
+            },
+        
+            footnote: {
+              'fontSize': `12px`,
+              'color': `hsl(var(--foreground))`,
+            },
+        
+            figcaption: {
+              'textAlign': `center`,
+              'color': `#888`,
+              'fontSize': `0.8em`,
+            }
           }
-        }
-      }
-    },
-    transform: (html) => html
+        },
+        transform: (html: string) => html
   },
   {
     id: 'elegant',
@@ -185,9 +291,15 @@ export const templates: Template[] = [
     options: {
       base: {
         themeColor: '#16a34a',
-        primaryColor: '#16a34a',
-        textAlign: 'justify',
-        lineHeight: '1.8'
+        textAlign: 'left',
+        lineHeight: '1.75',
+        padding: '1rem 1.5rem',
+        maxWidth: '100%',
+        margin: '0 auto',
+        wordBreak: 'break-word',
+        whiteSpace: 'pre-wrap',
+        fontSize: '15px',
+        color: '#333'
       },
       block: {
         h1: {
@@ -210,7 +322,7 @@ export const templates: Template[] = [
         },
         h3: {
           paddingLeft: '8px',
-          borderLeft: '3px solid var(--md-primary-color)',
+          borderLeft: '3px solid var(--themeColor)',
           margin: '2em 8px 0.75em 0',
           color: 'hsl(var(--foreground))',
           fontSize: '1.1em',
@@ -218,6 +330,7 @@ export const templates: Template[] = [
           lineHeight: 1.2
         },
         p: {
+          fontSize: '15px',
           margin: '1.8em 8px',
           letterSpacing: '0.12em',
           color: '#2c3e50',
@@ -240,7 +353,7 @@ export const templates: Template[] = [
         }
       }
     },
-    transform: (html) => html
+    transform: (html: string) => html
   },
   {
     id: 'creative',
@@ -249,7 +362,7 @@ export const templates: Template[] = [
     styles: 'prose-creative',
     options: {
       base: {
-        primaryColor: '#4299e1',
+        themeColor: '#4299e1',
         textAlign: 'left',
         lineHeight: '1.8',
         fontSize: '15px'
@@ -311,6 +424,6 @@ export const templates: Template[] = [
         }
       }
     },
-    transform: (html) => html
+    transform: (html: string) => html
   }
-] 
+]; 

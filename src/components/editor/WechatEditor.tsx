@@ -99,9 +99,16 @@ export default function WechatEditor() {
         h3: { 
           ...(template?.options?.block?.h3 || {}),
           ...(styleOptions.block?.h3 || {}),
-          fontSize: styleOptions.block?.h3?.fontSize || template?.options?.block?.h3?.fontSize || '18px',
+          fontSize: styleOptions.block?.h3?.fontSize || template?.options?.block?.h3?.fontSize || '1.1em',
           color: styleOptions.base?.themeColor || template?.options?.base?.themeColor || '#1a1a1a',
           borderLeft: `3px solid ${styleOptions.base?.themeColor || template?.options?.base?.themeColor || '#1a1a1a'}`
+        },
+        p: {
+          ...(template?.options?.block?.p || {}),
+          ...(styleOptions.block?.p || {}),
+          fontSize: styleOptions.block?.p?.fontSize || template?.options?.block?.p?.fontSize || '15px',
+          lineHeight: styleOptions.block?.p?.lineHeight || template?.options?.block?.p?.lineHeight || 2,
+          letterSpacing: styleOptions.block?.p?.letterSpacing || template?.options?.block?.p?.letterSpacing || '0.1em'
         }
       },
       inline: {
@@ -216,7 +223,6 @@ export default function WechatEditor() {
       
       // 处理 CSS 变量
       const cssVariables = {
-        '--md-primary-color': styleOptions.base?.primaryColor || template?.options.base?.primaryColor || '#333333',
         '--foreground': styleOptions.base?.themeColor || template?.options.base?.themeColor || '#1a1a1a',
         '--background': '#ffffff',
         '--muted': '#f1f5f9',

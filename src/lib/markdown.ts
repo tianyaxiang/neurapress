@@ -284,6 +284,7 @@ export interface RendererOptions {
     wordBreak?: string
     whiteSpace?: string
     color?: string
+    fontFamily?: string
   }
   block?: {
     [key: string]: StyleOptions
