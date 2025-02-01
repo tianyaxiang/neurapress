@@ -65,7 +65,7 @@ export function ArticleList({ onSelect, currentContent, onNew }: ArticleListProp
       id: Date.now().toString(),
       title,
       content: currentContent,
-      template: 'creative', // 默认模板
+      template: 'default', // 默认模板
       createdAt: Date.now(),
       updatedAt: Date.now()
     }
@@ -107,7 +107,7 @@ export function ArticleList({ onSelect, currentContent, onNew }: ArticleListProp
       id: Date.now().toString(),
       title: '新文章',
       content: '# 新文章\n\n开始写作...',
-      template: 'creative',
+      template: 'default',
       createdAt: Date.now(),
       updatedAt: Date.now()
     }

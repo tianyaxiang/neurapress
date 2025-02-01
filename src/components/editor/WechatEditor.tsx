@@ -23,7 +23,7 @@ export default function WechatEditor() {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const previewRef = useRef<HTMLDivElement>(null)
   const [value, setValue] = useState('')
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('creative')
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('default')
   const [showPreview, setShowPreview] = useState(true)
   const [styleOptions, setStyleOptions] = useState<RendererOptions>({})
   const [previewSize, setPreviewSize] = useState<PreviewSize>('medium')
