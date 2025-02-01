@@ -17,6 +17,7 @@ export const templates: Template[] = [
     styles: '',
     options: {
       base: {
+        themeColor: '#16a34a',
         primaryColor: '#000000',
         textAlign: 'left',
         lineHeight: '1.75',
@@ -44,7 +45,7 @@ export const templates: Template[] = [
           padding: '0 0.2em',
           margin: '4em auto 2em',
           color: '#fff',
-          background: 'var(--md-primary-color)',
+          borderBottom: '2px solid var(--md-primary-color)',
           fontSize: '1.2em',
           fontWeight: 'bold',
           textAlign: 'center'
@@ -183,6 +184,7 @@ export const templates: Template[] = [
     styles: 'prose-elegant',
     options: {
       base: {
+        themeColor: '#16a34a',
         primaryColor: '#16a34a',
         textAlign: 'justify',
         lineHeight: '1.8'
@@ -198,15 +200,13 @@ export const templates: Template[] = [
           textAlign: 'center'
         },
         h2: {
-          display: 'table',
-          padding: '0.2em 1em',
-          margin: '4em auto 2em',
-          color: '#fff',
-          background: '#16a34a',
-          fontSize: '1.2em',
-          fontWeight: 'bold',
-          textAlign: 'center',
-          borderRadius: '4px'
+            display: 'table',
+            padding: '0 1.5em',
+            borderBottom: '2px solid #16a34a',
+            margin: '2.5em auto 1.2em',
+            fontSize: '1.4em',
+            fontWeight: 'bold',
+            textAlign: 'center'
         },
         h3: {
           paddingLeft: '8px',

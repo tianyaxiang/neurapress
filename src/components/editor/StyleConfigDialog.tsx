@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
@@ -32,6 +32,11 @@ interface StyleConfigDialogProps {
 export function StyleConfigDialog({ value, onChangeAction }: StyleConfigDialogProps) {
   const [currentOptions, setCurrentOptions] = useState<RendererOptions>(value)
   const [customizedFields, setCustomizedFields] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    setCurrentOptions(value)
+    setCustomizedFields(new Set())
+  }, [value])
 
   const handleOptionChange = (
     category: keyof RendererOptions,

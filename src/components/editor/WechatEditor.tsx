@@ -81,18 +81,27 @@ export default function WechatEditor() {
       block: {
         ...(template?.options?.block || {}),
         ...(styleOptions.block || {}),
-        // 确保标题使用主题颜色和正确的字体大小
+        // 合并标题样式，保留模版中的其他样式属性
         h1: { 
-          fontSize: styleOptions.block?.h1?.fontSize || '24px',
-          color: styleOptions.base?.themeColor || '#1a1a1a'
+          ...(template?.options?.block?.h1 || {}),
+          ...(styleOptions.block?.h1 || {}),
+          fontSize: styleOptions.block?.h1?.fontSize || template?.options?.block?.h1?.fontSize || '24px',
+          color: styleOptions.base?.themeColor || template?.options?.base?.themeColor || '#1a1a1a',
+          borderBottom: `2px solid ${styleOptions.base?.themeColor || template?.options?.base?.themeColor || '#1a1a1a'}`
         },
         h2: { 
-          fontSize: styleOptions.block?.h2?.fontSize || '20px',
-          color: styleOptions.base?.themeColor || '#1a1a1a'
+          ...(template?.options?.block?.h2 || {}),
+          ...(styleOptions.block?.h2 || {}),
+          fontSize: styleOptions.block?.h2?.fontSize || template?.options?.block?.h2?.fontSize || '20px',
+          color: styleOptions.base?.themeColor || template?.options?.base?.themeColor || '#1a1a1a',
+          borderBottom: `2px solid ${styleOptions.base?.themeColor || template?.options?.base?.themeColor || '#1a1a1a'}`
         },
         h3: { 
-          fontSize: styleOptions.block?.h3?.fontSize || '18px',
-          color: styleOptions.base?.themeColor || '#1a1a1a'
+          ...(template?.options?.block?.h3 || {}),
+          ...(styleOptions.block?.h3 || {}),
+          fontSize: styleOptions.block?.h3?.fontSize || template?.options?.block?.h3?.fontSize || '18px',
+          color: styleOptions.base?.themeColor || template?.options?.base?.themeColor || '#1a1a1a',
+          borderLeft: `3px solid ${styleOptions.base?.themeColor || template?.options?.base?.themeColor || '#1a1a1a'}`
         }
       },
       inline: {
@@ -384,6 +393,13 @@ export default function WechatEditor() {
     })
   }, [value, handleEditorChange])
 
+  // 处理模版选择
+  const handleTemplateSelect = useCallback((templateId: string) => {
+    setSelectedTemplate(templateId)
+    // 重置样式设置为模版默认值
+    setStyleOptions({})
+  }, [])
+
   return (
     <div className="h-full flex flex-col">
       <div className="hidden sm:block">
@@ -397,7 +413,7 @@ export default function WechatEditor() {
           onCopyPreview={handleCopy}
           onNewArticle={handleNewArticle}
           onArticleSelect={handleArticleSelect}
-          onTemplateSelect={setSelectedTemplate}
+          onTemplateSelect={handleTemplateSelect}
           onTemplateChange={() => setValue(value)}
           onStyleOptionsChange={setStyleOptions}
           onPreviewToggle={() => setShowPreview(!showPreview)}
@@ -412,7 +428,7 @@ export default function WechatEditor() {
             <div className="flex-1 mr-2">
               <WechatStylePicker 
                 value={selectedTemplate} 
-                onSelect={setSelectedTemplate}
+                onSelect={handleTemplateSelect}
               />
             </div>
             <button
