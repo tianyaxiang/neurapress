@@ -4,10 +4,10 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from '@/components/theme-toggle'
+import { Logo } from '@/components/icons/Logo'
 
 const navigation = [
   { name: '微信公众号', href: '/wechat' },
-  { name: '小红书', href: '/xiaohongshu' },
 ]
 
 export function MainNav() {
@@ -19,8 +19,9 @@ export function MainNav() {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <Link href="/" className="text-xl font-bold text-primary">
-                NeuraPress
+              <Link href="/" className="flex items-center gap-2 text-xl font-bold text-primary">
+                <Logo className="w-8 h-8" />
+                <span>NeuraPress</span>
               </Link>
             </div>
             <div className="hidden md:block">
