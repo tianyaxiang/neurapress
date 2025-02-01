@@ -11,6 +11,17 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { FileText, Trash2, Menu, Plus, Save } from 'lucide-react'
 import { useToast } from '@/components/ui/use-toast'
@@ -34,6 +45,7 @@ interface ArticleListProps {
 export function ArticleList({ onSelect, currentContent, onNew }: ArticleListProps) {
   const { toast } = useToast()
   const [articles, setArticles] = useState<Article[]>([])
+  const [articleToDelete, setArticleToDelete] = useState<Article | null>(null)
 
   // 加载文章列表
   useEffect(() => {
@@ -82,14 +94,22 @@ export function ArticleList({ onSelect, currentContent, onNew }: ArticleListProp
   }
 
   // 删除文章
-  const deleteArticle = (id: string) => {
-    const updatedArticles = articles.filter(article => article.id !== id)
+  const deleteArticle = (article: Article) => {
+    setArticleToDelete(article)
+  }
+
+  // 确认删除文章
+  const confirmDelete = () => {
+    if (!articleToDelete) return
+
+    const updatedArticles = articles.filter(article => article.id !== articleToDelete.id)
     setArticles(updatedArticles)
     localStorage.setItem('wechat_articles', JSON.stringify(updatedArticles))
+    setArticleToDelete(null)
 
     toast({
       title: "删除成功",
-      description: "文章已删除",
+      description: `文章"${articleToDelete.title}"已删除`,
       duration: 2000
     })
   }
@@ -121,70 +141,89 @@ export function ArticleList({ onSelect, currentContent, onNew }: ArticleListProp
   }
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <Menu className="h-5 w-5" />
-          <span className="sr-only">文章列表</span>
-          {articles.length > 0 && (
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-[10px] text-primary-foreground rounded-full flex items-center justify-center">
-              {articles.length}
-            </span>
-          )}
-        </Button>
-      </SheetTrigger>
-      <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-        <SheetHeader>
-          <SheetTitle>文章列表</SheetTitle>
-          <SheetDescription className="flex gap-2">
-            <Button onClick={createNewArticle} className="flex-1">
-              <Plus className="h-4 w-4 mr-2" />
-              新建文章
-            </Button>
-            <Button onClick={saveCurrentArticle} className="flex-1">
-              <Save className="h-4 w-4 mr-2" />
-              保存当前
-            </Button>
-          </SheetDescription>
-        </SheetHeader>
-        <ScrollArea className="h-[calc(100vh-8rem)] mt-4">
-          <div className="space-y-2">
-            {articles.map(article => (
-              <div
-                key={article.id}
-                className="flex items-center justify-between p-2 rounded-md hover:bg-muted group"
-              >
-                <button
-                  onClick={() => onSelect(article)}
-                  className="flex items-center gap-2 flex-1 text-left"
-                >
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium truncate">{article.title}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {new Date(article.updatedAt).toLocaleString()}
-                    </div>
-                  </div>
-                </button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => deleteArticle(article.id)}
-                >
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                  <span className="sr-only">删除</span>
-                </Button>
-              </div>
-            ))}
-            {articles.length === 0 && (
-              <div className="text-center text-muted-foreground py-8">
-                暂无保存的文章
-              </div>
+    <>
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button variant="ghost" size="icon" className="relative">
+            <Menu className="h-5 w-5" />
+            <span className="sr-only">文章列表</span>
+            {articles.length > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-[10px] text-primary-foreground rounded-full flex items-center justify-center">
+                {articles.length}
+              </span>
             )}
-          </div>
-        </ScrollArea>
-      </SheetContent>
-    </Sheet>
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+          <SheetHeader>
+            <SheetTitle>文章列表</SheetTitle>
+            <SheetDescription className="flex gap-2">
+              <Button onClick={createNewArticle} className="flex-1">
+                <Plus className="h-4 w-4 mr-2" />
+                新建文章
+              </Button>
+              <Button onClick={saveCurrentArticle} className="flex-1">
+                <Save className="h-4 w-4 mr-2" />
+                保存当前
+              </Button>
+            </SheetDescription>
+          </SheetHeader>
+          <ScrollArea className="h-[calc(100vh-8rem)] mt-4">
+            <div className="space-y-2">
+              {articles.map(article => (
+                <div
+                  key={article.id}
+                  className="flex items-center justify-between p-2 rounded-md hover:bg-muted group"
+                >
+                  <button
+                    onClick={() => onSelect(article)}
+                    className="flex items-center gap-2 flex-1 text-left"
+                  >
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium truncate">{article.title}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {new Date(article.updatedAt).toLocaleString()}
+                      </div>
+                    </div>
+                  </button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="shrink-0 hover:bg-destructive/10 hover:text-destructive transition-colors"
+                    onClick={() => deleteArticle(article)}
+                  >
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                    <span className="sr-only">删除</span>
+                  </Button>
+                </div>
+              ))}
+              {articles.length === 0 && (
+                <div className="text-center text-muted-foreground py-8">
+                  暂无保存的文章
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+        </SheetContent>
+      </Sheet>
+
+      <AlertDialog open={!!articleToDelete} onOpenChange={() => setArticleToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>确认删除</AlertDialogTitle>
+            <AlertDialogDescription>
+              确定要删除文章"{articleToDelete?.title}"吗？此操作无法撤销。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              删除
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 } 
