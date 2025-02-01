@@ -15,7 +15,20 @@ import { MarkdownToolbar } from './components/MarkdownToolbar'
 import { type PreviewSize } from './constants'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { WechatStylePicker } from '@/components/template/WechatStylePicker'
-import { Copy } from 'lucide-react'
+import { Copy, Clock, Type } from 'lucide-react'
+
+// 计算阅读时间（假设每分钟阅读300字）
+const calculateReadingTime = (text: string): string => {
+  const words = text.trim().length
+  const minutes = Math.ceil(words / 300)
+  return `${minutes} 分钟`
+}
+
+// 计算字数
+const calculateWordCount = (text: string): string => {
+  const count = text.trim().length
+  return count.toLocaleString()
+}
 
 export default function WechatEditor() {
   const { toast } = useToast()
@@ -31,6 +44,10 @@ export default function WechatEditor() {
   const [isDraft, setIsDraft] = useState(false)
   const [previewContent, setPreviewContent] = useState('')
   const [cursorPosition, setCursorPosition] = useState<{ start: number; end: number }>({ start: 0, end: 0 })
+
+  // 添加字数和阅读时间状态
+  const [wordCount, setWordCount] = useState('0')
+  const [readingTime, setReadingTime] = useState('1 分钟')
 
   // 使用自定义 hooks
   const { handleScroll } = useEditorSync(editorRef)
@@ -150,6 +167,49 @@ export default function WechatEditor() {
     }
   }, [value, selectedTemplate, styleOptions])
 
+  // 处理复制
+  const handleCopy = useCallback(async () => {
+    try {
+      const htmlContent = getPreviewContent()
+      const tempDiv = document.createElement('div')
+      tempDiv.innerHTML = htmlContent
+      const plainText = tempDiv.textContent || tempDiv.innerText
+
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          'text/html': new Blob([htmlContent], { type: 'text/html' }),
+          'text/plain': new Blob([plainText], { type: 'text/plain' })
+        })
+      ])
+
+      toast({
+        title: "复制成功",
+        description: "已复制预览内容",
+        duration: 2000
+      })
+      return true
+    } catch (err) {
+      console.error('Copy error:', err)
+      try {
+        await navigator.clipboard.writeText(previewContent)
+        toast({
+          title: "复制成功",
+          description: "已复制预览内容（仅文本）",
+          duration: 2000
+        })
+        return true
+      } catch (fallbackErr) {
+        toast({
+          variant: "destructive",
+          title: "复制失败",
+          description: "无法访问剪贴板，请检查浏览器权限",
+          action: <ToastAction altText="重试">重试</ToastAction>,
+        })
+        return false
+      }
+    }
+  }, [previewContent, toast, getPreviewContent])
+
   // 手动保存
   const handleSave = useCallback(() => {
     try {
@@ -227,45 +287,6 @@ export default function WechatEditor() {
       />
     )
   }, [getPreviewContent])
-
-  const handleCopy = useCallback(async () => {
-    try {
-      const htmlContent = getPreviewContent()
-      const tempDiv = document.createElement('div')
-      tempDiv.innerHTML = htmlContent
-      const plainText = tempDiv.textContent || tempDiv.innerText
-
-      await navigator.clipboard.write([
-        new ClipboardItem({
-          'text/html': new Blob([htmlContent], { type: 'text/html' }),
-          'text/plain': new Blob([plainText], { type: 'text/plain' })
-        })
-      ])
-
-      toast({
-        title: "复制成功",
-        description: "已复制预览内容",
-        duration: 2000
-      })
-    } catch (err) {
-      console.error('Copy error:', err)
-      try {
-        await navigator.clipboard.writeText(previewContent)
-        toast({
-          title: "复制成功",
-          description: "已复制预览内容（仅文本）",
-          duration: 2000
-        })
-      } catch (fallbackErr) {
-        toast({
-          variant: "destructive",
-          title: "复制失败",
-          description: "无法访问剪贴板，请检查浏览器权限",
-          action: <ToastAction altText="重试">重试</ToastAction>,
-        })
-      }
-    }
-  }, [previewRef, toast, getPreviewContent])
 
   // 检测是否为移动设备
   const isMobile = useCallback(() => {
@@ -365,8 +386,15 @@ export default function WechatEditor() {
     setStyleOptions({})
   }, [])
 
+  // 更新字数和阅读时间
+  useEffect(() => {
+    const plainText = previewContent.replace(/<[^>]+>/g, '')
+    setWordCount(calculateWordCount(plainText))
+    setReadingTime(calculateReadingTime(plainText))
+  }, [previewContent])
+
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col relative">
       <div className="hidden sm:block">
         <EditorToolbar 
           value={value}
@@ -397,24 +425,7 @@ export default function WechatEditor() {
               />
             </div>
             <button
-              onClick={() => {
-                handleCopy()
-                  .then(() => {
-                    toast({
-                      title: "复制成功",
-                      description: "已复制预览内容到剪贴板",
-                      duration: 2000
-                    })
-                  })
-                  .catch(() => {
-                    toast({
-                      variant: "destructive",
-                      title: "复制失败",
-                      description: "无法访问剪贴板，请检查浏览器权限",
-                      duration: 2000
-                    })
-                  })
-              }}
+              onClick={handleCopy}
               className="flex items-center justify-center gap-1 px-2 py-1 rounded-md text-xs text-primary hover:bg-muted transition-colors"
             >
               <Copy className="h-3.5 w-3.5" />
@@ -465,10 +476,10 @@ export default function WechatEditor() {
           <div 
             ref={editorRef}
             className={cn(
-              "editor-container bg-background transition-all duration-300 ease-in-out flex flex-col",
+              "editor-container bg-background transition-all duration-300 ease-in-out flex flex-col h-[calc(100vh-theme(spacing.16)-theme(spacing.10))] min-h-[600px]",
               showPreview 
-                ? "h-full w-1/2 border-r" 
-                : "h-full w-full",
+                ? "w-1/2 border-r" 
+                : "w-full",
               selectedTemplate && templates.find(t => t.id === selectedTemplate)?.styles
             )}
           >
@@ -498,6 +509,21 @@ export default function WechatEditor() {
           )}
         </div>
       </div>
+
+      {/* 底部工具栏 */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background border-t h-10 flex items-center justify-end px-4 gap-4">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Type className="h-4 w-4" />
+          <span>{wordCount} 字</span>
+        </div>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground mr-4">
+          <Clock className="h-4 w-4" />
+          <span>约 {readingTime}</span>
+        </div>
+      </div>
+
+      {/* 为底部工具栏添加间距 */}
+      <div className="h-10" />
     </div>
   )
 }
