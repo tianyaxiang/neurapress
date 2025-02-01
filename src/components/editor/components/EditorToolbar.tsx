@@ -6,6 +6,9 @@ import { StyleConfigDialog } from '../StyleConfigDialog'
 import { ArticleList } from '../ArticleList'
 import { type Article } from '../constants'
 import { type RendererOptions } from '@/lib/markdown'
+import { ThemeToggle } from '@/components/theme/ThemeToggle'
+import { Logo } from '@/components/icons/Logo'
+import Link from 'next/link'
 
 interface EditorToolbarProps {
   value: string
@@ -42,10 +45,14 @@ export function EditorToolbar({
 }: EditorToolbarProps) {
   return (
     <div className="flex-none border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-20">
-      <div className="container mx-auto">
+      <div className="px-4">
         <div className="p-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <Link href="/" className="text-xl font-bold text-primary hidden sm:flex items-center gap-2">
+                <Logo className="w-6 h-6" />
+                NeuraPress
+              </Link>
               <ArticleList 
                 onSelect={onArticleSelect}
                 currentContent={value}
@@ -53,7 +60,7 @@ export function EditorToolbar({
               />
               <button
                 onClick={onNewArticle}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors w-full sm:w-auto justify-center bg-muted text-muted-foreground hover:bg-muted/90"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors justify-center bg-muted text-muted-foreground hover:bg-muted/90"
               >
                 <Plus className="h-4 w-4" />
                 新建文章
@@ -62,18 +69,15 @@ export function EditorToolbar({
                 value={selectedTemplate} 
                 onSelect={onTemplateSelect} 
               />
-              <div className="hidden sm:block h-6 w-px bg-border" />
               <TemplateManager onTemplateChange={onTemplateChange} />
-              <div className="hidden sm:block h-6 w-px bg-border" />
               <StyleConfigDialog
                 value={styleOptions}
                 onChangeAction={onStyleOptionsChange}
               />
-              <div className="hidden sm:block h-6 w-px bg-border" />
               <button
                 onClick={onPreviewToggle}
                 className={cn(
-                  "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors w-full sm:w-auto justify-center",
+                  "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors justify-center",
                   showPreview 
                     ? "bg-primary text-primary-foreground hover:bg-primary/90"
                     : "bg-muted text-muted-foreground hover:bg-muted/90"
@@ -83,14 +87,14 @@ export function EditorToolbar({
                 {showPreview ? '编辑' : '预览'}
               </button>
             </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto">
+            <div className="flex items-center gap-4">
               {isDraft && (
                 <span className="text-sm text-muted-foreground">未保存</span>
               )}
               <button
                 onClick={onSave}
                 className={cn(
-                  "inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors flex-1 sm:flex-none",
+                  "inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors",
                   isDraft 
                     ? "bg-primary text-primary-foreground hover:bg-primary/90"
                     : "bg-muted text-muted-foreground hover:bg-muted/90"
@@ -101,18 +105,19 @@ export function EditorToolbar({
               </button>
               <button
                 onClick={onCopy}
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md bg-muted text-muted-foreground hover:bg-muted/90 text-sm transition-colors flex-1 sm:flex-none"
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md bg-muted text-muted-foreground hover:bg-muted/90 text-sm transition-colors"
               >
                 <Copy className="h-4 w-4" />
                 <span>复制源码</span>
               </button>
               <button
                 onClick={onCopyPreview}
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-sm transition-colors flex-1 sm:flex-none"
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-sm transition-colors"
               >
                 <Copy className="h-4 w-4" />
                 <span>复制预览</span>
               </button>
+              <ThemeToggle />
             </div>
           </div>
         </div>

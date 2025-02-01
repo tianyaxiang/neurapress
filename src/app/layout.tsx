@@ -1,16 +1,24 @@
-import type { Metadata, Viewport } from "next";
-import "./globals.css";
-import { cn } from "@/lib/utils";
-import { Toaster } from "@/components/ui/toaster";
-import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import './globals.css'
+import { ThemeProvider } from '@/components/theme/ThemeProvider'
+import { cn } from '@/lib/utils'
+import { Inter } from 'next/font/google'
 
+const inter = Inter({ subsets: ['latin'] })
 
-export const metadata: Metadata = {
-  title: "NeuraPress",
-  description: "一个现代化的内容创作平台",
-};
+export const metadata = {
+  title: 'NeuraPress - AI Enhanced Article Editor',
+  description: 'An intelligent article editor for creating and formatting content',
+  icons: {
+    icon: [
+      {
+        url: '/favicon.svg',
+        type: 'image/svg+xml',
+      }
+    ],
+  },
+}
 
-export const viewport: Viewport = {
+export const viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -28,15 +36,11 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="zh-CN" className="h-full" suppressHydrationWarning>
-      <head>
-        <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="format-detection" content="telephone=no" />
-        <meta name="mobile-web-app-capable" content="yes" />
-      </head>
+    <html lang="zh-CN" suppressHydrationWarning>
+      <head />
       <body className={cn(
-        "h-full bg-background text-foreground antialiased"
+        'min-h-screen bg-background font-sans antialiased',
+        inter.className
       )}>
         <ThemeProvider
           attribute="class"
@@ -45,9 +49,8 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
-          <Toaster />
         </ThemeProvider>
       </body>
     </html>
-  );
-} 
+  )
+}
