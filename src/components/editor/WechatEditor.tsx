@@ -15,7 +15,7 @@ import { MarkdownToolbar } from './components/MarkdownToolbar'
 import { type PreviewSize } from './constants'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { WechatStylePicker } from '@/components/template/WechatStylePicker'
-import { Copy, Clock, Type } from 'lucide-react'
+import { Copy, Clock, Type, Trash2 } from 'lucide-react'
 
 // 计算阅读时间（假设每分钟阅读300字）
 const calculateReadingTime = (text: string): string => {
@@ -395,6 +395,19 @@ export default function WechatEditor() {
 
   const isScrolling = useRef<boolean>(false)
 
+  // 清除编辑器内容
+  const handleClear = useCallback(() => {
+    if (window.confirm('确定要清除所有内容吗？')) {
+      setValue('')
+      handleEditorChange('')
+      toast({
+        title: "已清除",
+        description: "编辑器内容已清除",
+        duration: 2000
+      })
+    }
+  }, [handleEditorChange, toast])
+
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <div className="hidden sm:block">
@@ -426,13 +439,23 @@ export default function WechatEditor() {
                 onSelect={handleTemplateSelect}
               />
             </div>
-            <button
-              onClick={handleCopy}
-              className="flex items-center justify-center gap-1 px-2 py-1 rounded-md text-xs text-primary hover:bg-muted transition-colors"
-            >
-              <Copy className="h-3.5 w-3.5" />
-              复制
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleClear}
+                className="flex items-center justify-center gap-1 px-2 py-1 rounded-md text-xs text-destructive hover:bg-muted transition-colors"
+                title="清除内容"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                清除
+              </button>
+              <button
+                onClick={handleCopy}
+                className="flex items-center justify-center gap-1 px-2 py-1 rounded-md text-xs text-primary hover:bg-muted transition-colors"
+              >
+                <Copy className="h-3.5 w-3.5" />
+                复制
+              </button>
+            </div>
           </div>
           <Tabs defaultValue="editor" className="flex-1 flex flex-col">
             <TabsList className="grid w-full grid-cols-2">
