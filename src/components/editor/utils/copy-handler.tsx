@@ -4,6 +4,86 @@ declare global {
   interface Window {
     mermaid: {
       init: (config: any, nodes: NodeListOf<Element>) => Promise<void>
+      initialize: (config: any) => void
+    }
+  }
+}
+
+// Mermaid 配置
+export const MERMAID_CONFIG = {
+  theme: 'neutral',
+  themeVariables: {
+    primaryColor: '#f5f8fe',
+    primaryBorderColor: '#c9e0ff',
+    primaryTextColor: '#000000',
+    lineColor: '#000000',
+    textColor: '#000000',
+    fontSize: '14px'
+  },
+  flowchart: {
+    htmlLabels: true,
+    curve: 'basis',
+    padding: 15,
+    nodeSpacing: 50,
+    rankSpacing: 50,
+    useMaxWidth: false
+  },
+  sequence: {
+    useMaxWidth: false,
+    boxMargin: 10,
+    mirrorActors: false,
+    bottomMarginAdj: 2
+  }
+}
+
+/**
+ * 初始化 Mermaid
+ */
+export async function initializeMermaid() {
+  // 等待 Mermaid 加载完成
+  if (typeof window !== 'undefined') {
+    try {
+      // 如果 mermaid 还没加载，等待它加载完成（最多等待 5 秒）
+      if (!window.mermaid) {
+        await new Promise<void>((resolve, reject) => {
+          const startTime = Date.now()
+          const checkMermaid = () => {
+            // 如果等待超过 5 秒，就放弃等待
+            if (Date.now() - startTime > 5000) {
+              reject(new Error('Mermaid initialization timeout'))
+              return
+            }
+
+            if (window.mermaid) {
+              resolve()
+            } else {
+              setTimeout(checkMermaid, 100)
+            }
+          }
+          checkMermaid()
+        })
+      }
+
+      // 配置 Mermaid
+      window.mermaid.initialize({
+        ...MERMAID_CONFIG,
+        startOnLoad: true,
+      })
+
+      // 初始化所有图表
+      const mermaidElements = document.querySelectorAll('.mermaid')
+      if (mermaidElements.length > 0) {
+        // 设置超时
+        const initPromise = window.mermaid.init(undefined, mermaidElements)
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Chart initialization timeout')), 5000)
+        })
+
+        await Promise.race([initPromise, timeoutPromise])
+      }
+    } catch (error) {
+      console.error('Mermaid initialization error:', error)
+      // 即使初始化失败也继续执行，不阻塞整个应用
     }
   }
 }
@@ -88,13 +168,15 @@ async function handlePreviewCopy(previewContent: string): Promise<boolean> {
   const tempDiv = document.createElement('div')
   tempDiv.innerHTML = previewContent
 
-  // 等待所有 Mermaid 图表渲染完成
+  // 首先找到所有 Mermaid 图表的源代码
   const mermaidElements = tempDiv.querySelectorAll('.mermaid')
   if (mermaidElements.length > 0) {
     try {
       // 确保 mermaid 已经初始化
       if (typeof window.mermaid !== 'undefined') {
-        // 重新初始化所有图表
+        // 使用相同的配置
+        window.mermaid.initialize(MERMAID_CONFIG)
+        // 重新渲染所有图表
         await window.mermaid.init(undefined, mermaidElements)
       }
     } catch (error) {
@@ -102,15 +184,29 @@ async function handlePreviewCopy(previewContent: string): Promise<boolean> {
     }
   }
 
-  // 处理所有的 Mermaid 图表
+  // 处理渲染后的 SVG
   const mermaidDiagrams = tempDiv.querySelectorAll('.mermaid svg')
   mermaidDiagrams.forEach(svg => {
     const container = svg.closest('.mermaid')
     if (container) {
-      // 保存原始的 SVG 内容
-      const originalSvg = svg.cloneNode(true)
-      container.innerHTML = ''
-      container.appendChild(originalSvg)
+      // 设置 SVG 的样式
+      const svgElement = svg as SVGElement
+      Object.assign(svgElement.style, {
+        backgroundColor: 'transparent',
+        maxWidth: '100%',
+        width: '100%',
+        height: 'auto'
+      })
+
+      // 更新图表容器的样式
+      container.setAttribute('style', `
+        background-color: transparent;
+        padding: 0;
+        margin: 16px 0;
+        display: flex;
+        justify-content: center;
+        width: 100%;
+      `)
     }
   })
 
@@ -118,10 +214,25 @@ async function handlePreviewCopy(previewContent: string): Promise<boolean> {
   const htmlContent = tempDiv.innerHTML
   const plainText = tempDiv.textContent || tempDiv.innerText
 
-  // 复制到剪贴板
+  // 复制到剪贴板，添加必要的样式
+  const styledHtml = `
+    <div style="
+      background-color: transparent;
+      font-family: system-ui, -apple-system, sans-serif;
+      color: #000000;
+      line-height: 1.5;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    ">
+      ${htmlContent}
+    </div>
+  `
+
   await navigator.clipboard.write([
     new ClipboardItem({
-      'text/html': new Blob([htmlContent], { type: 'text/html' }),
+      'text/html': new Blob([styledHtml], { type: 'text/html' }),
       'text/plain': new Blob([plainText], { type: 'text/plain' })
     })
   ])

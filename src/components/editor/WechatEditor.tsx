@@ -18,7 +18,7 @@ import { Copy, Clock, Type, Trash2 } from 'lucide-react'
 import { useLocalStorage } from '@/hooks/use-local-storage'
 import { codeThemes, type CodeThemeId } from '@/config/code-themes'
 import '@/styles/code-themes.css'
-import { copyHandler } from './utils/copy-handler'
+import { copyHandler, initializeMermaid, MERMAID_CONFIG } from './utils/copy-handler'
 
 // 计算阅读时间（假设每分钟阅读300字）
 const calculateReadingTime = (text: string): string => {
@@ -58,6 +58,14 @@ export default function WechatEditor() {
   // 使用自定义 hooks
   const { handleScroll } = useEditorSync(editorRef)
   const { handleEditorChange } = useAutoSave(value, setIsDraft)
+
+  // 初始化 Mermaid
+  useEffect(() => {
+    const init = async () => {
+      await initializeMermaid()
+    }
+    init()
+  }, [])
 
   // 处理编辑器输入
   const handleInput = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -241,6 +249,14 @@ export default function WechatEditor() {
       try {
         const content = getPreviewContent()
         setPreviewContent(content)
+        
+        // 等待下一个渲染周期，确保内容已更新到 DOM
+        await new Promise(resolve => requestAnimationFrame(resolve))
+        // 重新初始化 Mermaid，但不阻塞界面
+        initializeMermaid().catch(error => {
+          console.error('Failed to initialize Mermaid:', error)
+          // 不显示错误提示，让界面继续运行
+        })
       } catch (error) {
         console.error('Error updating preview:', error)
         toast({
