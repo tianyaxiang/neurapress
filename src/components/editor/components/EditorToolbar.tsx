@@ -161,6 +161,9 @@ export function EditorToolbar({
               {isDraft && (
                 <span className="text-sm text-muted-foreground">未保存</span>
               )}
+              {!isDraft && (
+                <span className="text-sm text-muted-foreground">已保存</span>
+              )}
               <button
                 onClick={onSave}
                 className={cn(

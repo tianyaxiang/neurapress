@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
-import { useToast } from '@/components/ui/use-toast'
 import { AUTO_SAVE_DELAY } from '../constants'
 
 export function useAutoSave(value: string, setIsDraft: (isDraft: boolean) => void) {
-  const { toast } = useToast()
   const autoSaveTimerRef = useRef<NodeJS.Timeout>()
 
   const handleEditorChange = useCallback((v: string) => {
@@ -17,12 +15,9 @@ export function useAutoSave(value: string, setIsDraft: (isDraft: boolean) => voi
     // 设置新的自动保存定时器
     autoSaveTimerRef.current = setTimeout(() => {
       localStorage.setItem('wechat_editor_draft', v)
-      toast({
-        description: "内容已自动保存",
-        duration: 2000
-      })
+      setIsDraft(false)
     }, AUTO_SAVE_DELAY)
-  }, [toast, setIsDraft])
+  }, [setIsDraft])
 
   // 清理自动保存定时器
   useEffect(() => {
