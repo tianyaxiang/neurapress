@@ -20,7 +20,7 @@ import 'prismjs/components/prism-rust'
 import 'prismjs/components/prism-sql'
 import 'prismjs/components/prism-docker'
 import 'prismjs/components/prism-nginx'
-import type { StyleOptions, RendererOptions } from '@/lib/types'
+import { StyleOptions, type RendererOptions } from '@/lib/types'
 
 // 将样式对象转换为 CSS 字符串
 function cssPropertiesToString(style: StyleOptions = {}): string {
@@ -353,3 +353,5 @@ export function convertToWechat(markdown: string, options: RendererOptions = def
   const baseStyles = baseStylesToString(mergedOptions.base)
   return baseStyles ? `<section style="${baseStyles}">${html}</section>` : html
 }
+
+export type { RendererOptions }
