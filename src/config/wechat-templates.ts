@@ -114,57 +114,7 @@ export const templates: Template[] = [
               'letterSpacing': `0.1em`,
               'color': `hsl(var(--foreground))`,
             },
-        
-            blockquote_note: {
-            },
-        
-            blockquote_tip: {
-            },
-        
-            blockquote_important: {
-            },
-        
-            blockquote_warning: {
-            },
-        
-            blockquote_caution: {
-            },
-        
-        
-            blockquote_title_note: {
-              color: `#478be6`,
-            },
-        
-            blockquote_title_tip: {
-              color: `#57ab5a`,
-            },
-        
-            blockquote_title_important: {
-              color: `#986ee2`,
-            },
-        
-            blockquote_title_warning: {
-              color: `#c69026`,
-            },
-        
-            blockquote_title_caution: {
-              color: `#e5534b`,
-            },
-        
-            blockquote_p_note: {
-            },
-        
-            blockquote_p_tip: {
-            },
-        
-            blockquote_p_important: {
-            },
-        
-            blockquote_p_warning: {
-            },
-        
-            blockquote_p_caution: {
-            },
+      
         
             // 代码块
             code_pre: {
