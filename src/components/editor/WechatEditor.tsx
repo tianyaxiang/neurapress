@@ -400,6 +400,55 @@ export default function WechatEditor() {
   }, [previewContent])
 
   const isScrolling = useRef<boolean>(false)
+  const scrollTimeout = useRef<NodeJS.Timeout>()
+  const lastScrollTop = useRef<number>(0)
+
+  // 处理滚动同步
+  const handleEditorScroll = useCallback((e: React.UIEvent<HTMLTextAreaElement>) => {
+    if (isScrolling.current) return
+    
+    const textarea = e.currentTarget
+    const previewContainer = document.querySelector('.preview-container .overflow-y-auto')
+    if (!previewContainer) return
+
+    // 检查滚动方向和幅度
+    const currentScrollTop = textarea.scrollTop
+    const scrollDiff = currentScrollTop - lastScrollTop.current
+    
+    // 如果滚动幅度太小，忽略此次滚动
+    if (Math.abs(scrollDiff) < 5) return
+    
+    isScrolling.current = true
+    lastScrollTop.current = currentScrollTop
+
+    try {
+      const scrollPercentage = currentScrollTop / (textarea.scrollHeight - textarea.clientHeight)
+      const targetScrollTop = scrollPercentage * (previewContainer.scrollHeight - previewContainer.clientHeight)
+      
+      // 使用 scrollTo 带平滑滚动效果
+      previewContainer.scrollTo({
+        top: targetScrollTop,
+        behavior: 'instant' // 使用即时滚动而不是平滑滚动
+      })
+    } finally {
+      // 使用较短的延迟时间
+      if (scrollTimeout.current) {
+        clearTimeout(scrollTimeout.current)
+      }
+      scrollTimeout.current = setTimeout(() => {
+        isScrolling.current = false
+      }, 50) // 减少延迟时间到 50ms
+    }
+  }, [])
+
+  // 清理定时器
+  useEffect(() => {
+    return () => {
+      if (scrollTimeout.current) {
+        clearTimeout(scrollTimeout.current)
+      }
+    }
+  }, [])
 
   // 清除编辑器内容
   const handleClear = useCallback(() => {
@@ -484,23 +533,7 @@ export default function WechatEditor() {
                   className="w-full h-full resize-none outline-none p-4 font-mono text-base leading-relaxed overflow-y-scroll scrollbar-none"
                   placeholder="开始写作..."
                   spellCheck={false}
-                  onScroll={(e) => {
-                    if (isScrolling.current) return
-                    isScrolling.current = true
-                    try {
-                      const textarea = e.currentTarget
-                      const previewContainer = document.querySelector('.preview-container .overflow-y-auto')
-                      if (!previewContainer) return
-                      
-                      const scrollPercentage = textarea.scrollTop / (textarea.scrollHeight - textarea.clientHeight)
-                      const previewScrollTop = scrollPercentage * (previewContainer.scrollHeight - previewContainer.clientHeight)
-                      previewContainer.scrollTop = previewScrollTop
-                    } finally {
-                      requestAnimationFrame(() => {
-                        isScrolling.current = false
-                      })
-                    }
-                  }}
+                  onScroll={handleEditorScroll}
                 />
               </div>
             </TabsContent>
@@ -541,23 +574,7 @@ export default function WechatEditor() {
                 className="w-full h-full resize-none outline-none p-4 font-mono text-base leading-relaxed overflow-y-scroll scrollbar-none"
                 placeholder="开始写作..."
                 spellCheck={false}
-                onScroll={(e) => {
-                  if (isScrolling.current) return
-                  isScrolling.current = true
-                  try {
-                    const textarea = e.currentTarget
-                    const previewContainer = document.querySelector('.preview-container .overflow-y-auto')
-                    if (!previewContainer) return
-                    
-                    const scrollPercentage = textarea.scrollTop / (textarea.scrollHeight - textarea.clientHeight)
-                    const previewScrollTop = scrollPercentage * (previewContainer.scrollHeight - previewContainer.clientHeight)
-                    previewContainer.scrollTop = previewScrollTop
-                  } finally {
-                    requestAnimationFrame(() => {
-                      isScrolling.current = false
-                    })
-                  }
-                }}
+                onScroll={handleEditorScroll}
               />
             </div>
           </div>
