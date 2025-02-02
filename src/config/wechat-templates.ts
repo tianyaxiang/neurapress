@@ -107,15 +107,6 @@ export const templates: Template[] = [
               margin: '0 0 1em 0'
             },
         
-            // 引用内容
-            blockquote_p: {
-              'display': `block`,
-              'fontSize': `1em`,
-              'letterSpacing': `0.1em`,
-              'color': `hsl(var(--foreground))`,
-            },
-      
-        
             // 代码块
             code_pre: {
               'fontSize': `14px`,
@@ -158,12 +149,26 @@ export const templates: Template[] = [
               'fontSize': `80%`,
               'color': `hsl(var(--foreground))`,
             },
-        
-            figure: {
-              margin: `1.5em 8px`,
-              color: `hsl(var(--foreground))`,
+
+            table: {
+              textAlign: 'center',
+              margin: '1em 8px',
+              color: 'hsl(var(--foreground))'
             },
-        
+
+            thead: {
+              'background': `rgba(0, 0, 0, 0.05)`,
+              'fontWeight': `bold`,
+              'color': `hsl(var(--foreground))`,
+            },
+
+            td: {
+              border: '1px solid #dfdfdf',
+              padding: '0.25em 0.5em',
+              color: '#3f3f3f',
+            },
+
+          
           },
           inline: {
             listitem: {
@@ -190,10 +195,6 @@ export const templates: Template[] = [
               color: `#576b95`,
             },
         
-            wx_link: {
-              'color': `#576b95`,
-              'textDecoration': `none`,
-            },
         
             // 字体加粗样式
             strong: {
@@ -202,33 +203,9 @@ export const templates: Template[] = [
               'fontSize': `inherit`,
             },
         
-            table: {
-              textAlign: 'center',
-              margin: '1em 8px',
-              color: 'hsl(var(--foreground))'
-            },
-        
-            thead: {
-              'background': `rgba(0, 0, 0, 0.05)`,
-              'fontWeight': `bold`,
-              'color': `hsl(var(--foreground))`,
-            },
-        
-            td: {
-              border: '1px solid #dfdfdf',
-              padding: '0.25em 0.5em',
-              color: '#3f3f3f',
-            },
-        
             footnote: {
               'fontSize': `12px`,
               'color': `hsl(var(--foreground))`,
-            },
-        
-            figcaption: {
-              'textAlign': `center`,
-              'color': `#888`,
-              'fontSize': `0.8em`,
             }
           }
         },

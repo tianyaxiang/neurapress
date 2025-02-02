@@ -101,12 +101,14 @@ export interface RendererOptions {
     p?: StyleOptions
     blockquote?: StyleOptions
     code_pre?: StyleOptions
+    code?: StyleOptions
     image?: StyleOptions
     ul?: StyleOptions
     ol?: StyleOptions
     table?: StyleOptions
     th?: StyleOptions
     td?: StyleOptions
+    thead?: StyleOptions
     footnotes?: StyleOptions
   }
   inline?: {
