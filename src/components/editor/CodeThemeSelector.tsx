@@ -14,7 +14,7 @@ export function CodeThemeSelector({ value, onChange }: CodeThemeSelectorProps) {
     <div className="flex items-center gap-4">
       <Label>代码主题</Label>
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="w-[180px]">
+        <SelectTrigger className="w-[140px]">
           <SelectValue placeholder="选择代码主题" />
         </SelectTrigger>
         <SelectContent>

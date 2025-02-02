@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { Logo } from '@/components/icons/Logo'
+import { Github } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 const navigation = [
   { name: '微信公众号', href: '/wechat' },
@@ -48,6 +50,20 @@ export function MainNav() {
               专业的内容转换工具
             </p>
             <ThemeToggle />
+            <Button
+              variant="ghost"
+              size="icon"
+              asChild
+            >
+              <Link
+                href="https://github.com/tianyaxiang/neurapress"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Github className="h-5 w-5" />
+                <span className="sr-only">GitHub</span>
+              </Link>
+            </Button>
           </div>
         </div>
       </div>

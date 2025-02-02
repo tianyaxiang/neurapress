@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Copy, Plus, Save, Smartphone, Settings } from 'lucide-react'
+import { Copy, Plus, Save, Smartphone, Settings, Github } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { WechatStylePicker } from '../../template/WechatStylePicker'
 import { TemplateManager } from '../../template/TemplateManager'
@@ -173,21 +173,31 @@ export function EditorToolbar({
                 <Save className="h-4 w-4" />
                 <span>保存</span>
               </button>
-              <button
-                onClick={handleCopy}
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-muted text-sm transition-colors"
-              >
-                <Copy className="h-4 w-4" />
-                <span>复制源码</span>
-              </button>
+             
               <button
                 onClick={handleCopyPreview}
                 className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-sm transition-colors"
               >
                 <Copy className="h-4 w-4" />
-                <span>复制预览</span>
+                <span>复制</span>
               </button>
-              <ThemeToggle />
+              <div className="flex items-center gap-1">
+                <ThemeToggle />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  asChild
+                >
+                  <Link
+                    href="https://github.com/tianyaxiang/neurapress"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Github className="h-5 w-5" />
+                    <span className="sr-only">GitHub</span>
+                  </Link>
+                </Button>
+              </div>
             </div>
           </div>
         </div>
