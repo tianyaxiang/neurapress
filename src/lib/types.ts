@@ -1,16 +1,92 @@
 import type { CSSProperties } from 'react'
 import type { CodeThemeId } from '@/config/code-themes'
 
+export interface StyleOptions {
+  // Layout
+  display?: string
+  position?: string
+  top?: string | number
+  left?: string | number
+  right?: string | number
+  bottom?: string | number
+  width?: string | number
+  height?: string | number
+  margin?: string | number
+  marginTop?: string | number
+  marginRight?: string | number
+  marginBottom?: string | number
+  marginLeft?: string | number
+  padding?: string | number
+  paddingTop?: string | number
+  paddingRight?: string | number
+  paddingBottom?: string | number
+  paddingLeft?: string | number
+  maxWidth?: string | number
+  
+  // Typography
+  color?: string
+  fontSize?: string | number
+  fontFamily?: string
+  fontWeight?: string | number
+  fontStyle?: string
+  lineHeight?: string | number
+  textAlign?: 'left' | 'center' | 'right'
+  textDecoration?: string
+  textIndent?: string | number
+  letterSpacing?: string | number
+  whiteSpace?: string
+  wordBreak?: string
+  
+  // Border & Background
+  border?: string
+  borderTop?: string
+  borderRight?: string
+  borderBottom?: string
+  borderLeft?: string
+  borderRadius?: string
+  borderCollapse?: string
+  background?: string
+  backgroundColor?: string
+  backgroundImage?: string
+  
+  // List
+  listStyle?: string
+  listStyleType?: string
+  listStylePosition?: string
+  
+  // Flexbox
+  alignItems?: string
+  justifyContent?: string
+  flexDirection?: string
+  flexWrap?: string
+  gap?: string
+  
+  // Other
+  opacity?: number
+  overflow?: string
+  overflowX?: string
+  overflowY?: string
+  verticalAlign?: string
+  userSelect?: string
+  cursor?: string
+  zIndex?: number
+  boxShadow?: string
+  transition?: string
+  transform?: string
+  WebkitBackgroundClip?: string
+  WebkitTextFillColor?: string
+}
+
 export interface RendererOptions {
   base?: {
     themeColor?: string
     fontSize?: string
     lineHeight?: string
-    textAlign?: string
+    textAlign?: 'left' | 'center' | 'right'
     fontFamily?: string
     padding?: string
-    maxWidth?: string
     margin?: string
+    maxWidth?: string
     wordBreak?: string
     whiteSpace?: string
     color?: string
@@ -24,74 +100,24 @@ export interface RendererOptions {
     h6?: StyleOptions
     p?: StyleOptions
     blockquote?: StyleOptions
-    blockquote_p?: StyleOptions
     code_pre?: StyleOptions
-    code?: StyleOptions
     image?: StyleOptions
-    ol?: StyleOptions
     ul?: StyleOptions
+    ol?: StyleOptions
+    table?: StyleOptions
+    th?: StyleOptions
+    td?: StyleOptions
     footnotes?: StyleOptions
-    figure?: StyleOptions
   }
   inline?: {
     strong?: StyleOptions
     em?: StyleOptions
     codespan?: StyleOptions
     link?: StyleOptions
-    wx_link?: StyleOptions
     listitem?: StyleOptions
-    table?: StyleOptions
-    thead?: StyleOptions
-    td?: StyleOptions
-    figcaption?: StyleOptions
+    checkbox?: StyleOptions
+    del?: StyleOptions
     footnote?: StyleOptions
   }
   codeTheme?: CodeThemeId
-}
-
-export interface StyleOptions {
-  padding?: string
-  maxWidth?: string
-  margin?: string
-  wordBreak?: 'normal' | 'break-all' | 'keep-all' | 'break-word'
-  whiteSpace?: 'normal' | 'nowrap' | 'pre' | 'pre-wrap' | 'pre-line' | 'break-spaces'
-  color?: string
-  display?: string
-  fontSize?: string
-  fontWeight?: string
-  textAlign?: string
-  paddingLeft?: string
-  marginLeft?: string
-  borderLeft?: string
-  lineHeight?: string | number
-  letterSpacing?: string
-  fontStyle?: string
-  borderRadius?: string
-  background?: string
-  marginBottom?: string
-  alignItems?: 'flex-start' | 'flex-end' | 'center' | 'baseline' | 'stretch'
-  gap?: string
-  overflowX?: string
-  fontFamily?: string
-  width?: string
-  listStyle?: string
-  borderStyle?: string
-  borderWidth?: string
-  borderColor?: string
-  WebkitTransformOrigin?: string
-  transformOrigin?: string
-  transform?: string
-  height?: string
-  textIndent?: string | number
-  borderCollapse?: 'collapse' | 'separate' | 'initial' | 'inherit'
-  border?: string
-  textDecoration?: string
-  borderBottom?: string
-  WebkitBackgroundClip?: string
-  WebkitTextFillColor?: string
-  '@media (max-width: 768px)'?: {
-    margin?: string
-    padding?: string
-    fontSize?: string
-  }
 } 

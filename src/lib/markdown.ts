@@ -87,7 +87,7 @@ const marked = new Marked({
   pedantic: false
 })
 
-// 应用配置
+// 重写 marked 配置
 marked.use({
   breaks: true,
   gfm: true,
@@ -118,12 +118,40 @@ const defaultOptions: RendererOptions = {
       padding: '1em',
       lineHeight: '1.5',
       margin: '10px 8px'
+    },
+    table: {
+      width: '100%',
+      marginBottom: '1em',
+      borderCollapse: 'collapse',
+      fontSize: '14px'
+    },
+    th: {
+      padding: '0.5em 1em',
+      borderBottom: '2px solid var(--theme-color)',
+      textAlign: 'left',
+      fontWeight: 'bold'
+    },
+    td: {
+      padding: '0.5em 1em',
+      borderBottom: '1px solid #eee'
+    },
+    footnotes: {
+      marginTop: '2em',
+      paddingTop: '1em',
+      borderTop: '1px solid #eee',
+      fontSize: '0.9em',
+      color: '#666'
     }
   },
   inline: {
     link: { color: '#576b95' },
     codespan: { color: '#333333' },
-    em: { color: '#666666' }
+    em: { color: '#666666' },
+    del: { color: '#999999', textDecoration: 'line-through' },
+    checkbox: {
+      marginRight: '0.5em',
+      verticalAlign: 'middle'
+    }
   }
 }
 
@@ -168,11 +196,13 @@ export function convertToWechat(markdown: string, options: RendererOptions = def
       color: mergedOptions.base?.themeColor
     }
     const styleStr = cssPropertiesToString(style)
-    return `<h${depth}${styleStr ? ` style="${styleStr}"` : ''}>${text}</h${depth}>`
+    const tokens = marked.Lexer.lexInline(text)
+    const content = marked.Parser.parseInline(tokens, { renderer })
+    return `<h${depth}${styleStr ? ` style="${styleStr}"` : ''}>${content}</h${depth}>`
   }
 
   // 重写 paragraph 方法
-  renderer.paragraph = function({ text }: Tokens.Paragraph) {
+  renderer.paragraph = function({ text, tokens }: Tokens.Paragraph) {
     const paragraphStyle = (mergedOptions.block?.p || {}) as StyleOptions
     const style: StyleOptions = {
       ...paragraphStyle,
@@ -180,7 +210,23 @@ export function convertToWechat(markdown: string, options: RendererOptions = def
       lineHeight: mergedOptions.base?.lineHeight
     }
     const styleStr = cssPropertiesToString(style)
-    return `<p${styleStr ? ` style="${styleStr}"` : ''}>${text}</p>`
+
+    // 处理段落中的内联标记
+    let content = text
+    if (tokens) {
+      content = tokens.map(token => {
+        if (token.type === 'text') {
+          const inlineTokens = marked.Lexer.lexInline(token.text)
+          return marked.Parser.parseInline(inlineTokens, { renderer })
+        }
+        return marked.Parser.parseInline([token], { renderer })
+      }).join('')
+    } else {
+      const inlineTokens = marked.Lexer.lexInline(text)
+      content = marked.Parser.parseInline(inlineTokens, { renderer })
+    }
+
+    return `<p${styleStr ? ` style="${styleStr}"` : ''}>${content}</p>`
   }
 
   // 重写 blockquote 方法
@@ -191,23 +237,26 @@ export function convertToWechat(markdown: string, options: RendererOptions = def
       borderLeft: `4px solid ${mergedOptions.base?.themeColor || '#1a1a1a'}`
     }
     const styleStr = cssPropertiesToString(style)
-    return `<blockquote${styleStr ? ` style="${styleStr}"` : ''}>${text}</blockquote>`
+    const tokens = marked.Lexer.lexInline(text)
+    const content = marked.Parser.parseInline(tokens, { renderer })
+    
+    return `<blockquote${styleStr ? ` style="${styleStr}"` : ''}>${content}</blockquote>`
   }
 
   // 重写 code 方法
   renderer.code = function({ text, lang }: Tokens.Code) {  
-
     const codeStyle = (mergedOptions.block?.code_pre || {}) as StyleOptions
     const style: StyleOptions = {
       ...codeStyle,
       ...getCodeThemeStyles(mergedOptions.codeTheme)
     }
     const styleStr = cssPropertiesToString(style)
+    
     // 代码高亮处理
     let highlighted = text
     if (lang && Prism.languages[lang]) {
       // Helper function to recursively process tokens
-      const processToken = (token: string | Prism.Token): string => {
+      const processToken = (token: string | Prism.Token, lineNumber?: number): string => {
         if (typeof token === 'string') {
           return token
         }
@@ -223,7 +272,14 @@ export function convertToWechat(markdown: string, options: RendererOptions = def
       try {
         const grammar = Prism.languages[lang]
         const tokens = Prism.tokenize(text, grammar)
-        highlighted = tokens.map(processToken).join('')
+        const lines = text.split('\n')
+        const lineNumbersWidth = lines.length.toString().length * 8 + 20
+        
+        highlighted = lines.map((line, index) => {
+          const lineTokens = Prism.tokenize(line, grammar)
+          const processedLine = lineTokens.map(t => processToken(t, index + 1)).join('')
+          return `<div class="code-line"><span class="line-number" style="width:${lineNumbersWidth}px;color:#999;padding-right:1em;text-align:right;display:inline-block;user-select:none;">${index + 1}</span>${processedLine}</div>`
+        }).join('\n')
       } catch (error) {
         console.error(`Error highlighting code: ${error}`)
       }
@@ -234,7 +290,6 @@ export function convertToWechat(markdown: string, options: RendererOptions = def
 
   // 重写 codespan 方法
   renderer.codespan = function({ text }: Tokens.Codespan) {  
-
     const codespanStyle = (mergedOptions.inline?.codespan || {}) as StyleOptions
     const style: StyleOptions = {
       ...codespanStyle
@@ -251,7 +306,10 @@ export function convertToWechat(markdown: string, options: RendererOptions = def
       fontStyle: 'italic'
     }
     const styleStr = cssPropertiesToString(style)
-    return `<em${styleStr ? ` style="${styleStr}"` : ''}>${text}</em>`
+    const tokens = marked.Lexer.lexInline(text)
+    const content = marked.Parser.parseInline(tokens, { renderer })
+    
+    return `<em${styleStr ? ` style="${styleStr}"` : ''}>${content}</em>`
   }
 
   // 重写 strong 方法
@@ -263,7 +321,10 @@ export function convertToWechat(markdown: string, options: RendererOptions = def
       fontWeight: 'bold'
     }
     const styleStr = cssPropertiesToString(style)
-    return `<strong${styleStr ? ` style="${styleStr}"` : ''}>${text}</strong>`
+    const tokens = marked.Lexer.lexInline(text)
+    const content = marked.Parser.parseInline(tokens, { renderer })
+    
+    return `<strong${styleStr ? ` style="${styleStr}"` : ''}>${content}</strong>`
   }
 
   // 重写 link 方法
@@ -273,7 +334,9 @@ export function convertToWechat(markdown: string, options: RendererOptions = def
       ...linkStyle
     }
     const styleStr = cssPropertiesToString(style)
-    return `<a href="${href}"${title ? ` title="${title}"` : ''}${styleStr ? ` style="${styleStr}"` : ''}>${text}</a>`
+    const tokens = marked.Lexer.lexInline(text)
+    const content = marked.Parser.parseInline(tokens, { renderer })
+    return `<a href="${href}"${title ? ` title="${title}"` : ''}${styleStr ? ` style="${styleStr}"` : ''}>${content}</a>`
   }
 
   // 重写 image 方法
@@ -345,6 +408,48 @@ export function convertToWechat(markdown: string, options: RendererOptions = def
     
     return `<li${styleStr ? ` style="${styleStr}"` : ''}>${content}</li>`
   }
+
+
+
+  // 添加删除线支持
+  renderer.del = function({ text }: Tokens.Del) {
+    const delStyle = (mergedOptions.inline?.del || {}) as StyleOptions
+    const styleStr = cssPropertiesToString(delStyle)
+    return `<del${styleStr ? ` style="${styleStr}"` : ''}>${text}</del>`
+  }
+
+  // 添加脚注支持
+  const footnotes = new Map<string, string>()
+
+  marked.use({
+    extensions: [{
+      name: 'footnote',
+      level: 'inline',
+      start(src: string) { 
+        const match = src.match(/^\[\^([^\]]+)\]/)
+        return match ? match.index : undefined 
+      },
+      tokenizer(src: string) {
+        const match = /^\[\^([^\]]+)\]/.exec(src)
+        if (match) {
+          const token = {
+            type: 'footnote',
+            raw: match[0],
+            text: match[1],
+            tokens: []
+          }
+          return token as unknown as Tokens.Generic
+        }
+        return undefined
+      },
+      renderer(token: unknown) {
+        const footnoteToken = token as { text: string }
+        const footnoteStyle = (mergedOptions.inline?.footnote || {}) as StyleOptions
+        const styleStr = cssPropertiesToString(footnoteStyle)
+        return `<sup${styleStr ? ` style="${styleStr}"` : ''}><a href="#fn-${footnoteToken.text}">[${footnoteToken.text}]</a></sup>`
+      }
+    }]
+  })
 
   // Convert Markdown to HTML using the custom renderer
   const html = marked.parse(markdown, { renderer }) as string
