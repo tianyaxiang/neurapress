@@ -194,8 +194,7 @@ export const templates: Template[] = [
             link: {
               color: `#576b95`,
             },
-        
-        
+      
             // 字体加粗样式
             strong: {
               'color': `var(--themeColor)`,
@@ -285,8 +284,8 @@ export const templates: Template[] = [
   },
   {
     id: 'creative',
-    name: '创意活力',
-    description: '适合营销、活动类文章',
+    name: '科技主题',
+    description: '适合科技技术类文章',
     styles: 'prose-creative',
     options: {
       base: {
@@ -325,14 +324,12 @@ export const templates: Template[] = [
           color: '#4a5568',
           margin: '20px 0',
           lineHeight: 1.75,
-          borderLeft: '3px solid #4299e1',
-          paddingLeft: '1em'
         },
         blockquote: {
           fontSize: '15px',
           color: '#718096',
           borderLeft: '4px solid #4299e1',
-          paddingLeft: '1em',
+          padding:"1em",
           margin: '24px 0',
           background: 'rgba(66, 153, 225, 0.1)'
         }
