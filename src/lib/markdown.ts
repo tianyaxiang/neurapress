@@ -117,7 +117,10 @@ export function convertToWechat(markdown: string, options: RendererOptions = def
   renderer.blockquote = function({ text }: Tokens.Blockquote) {
     const style = mergedOptions.block?.blockquote
     const styleStr = cssPropertiesToString(style)
-    return `<blockquote${styleStr ? ` style="${styleStr}"` : ''}>${text}</blockquote>`
+    const tokens = marked.Lexer.lexInline(text)
+    const content = marked.Parser.parseInline(tokens, { renderer })
+    
+    return `<blockquote${styleStr ? ` style="${styleStr}"` : ''}>${content}</blockquote>`
   }
 
   renderer.code = function({ text, lang }: Tokens.Code) {
