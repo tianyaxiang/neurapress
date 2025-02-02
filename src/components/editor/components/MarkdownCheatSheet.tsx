@@ -59,10 +59,17 @@ const cheatSheet = [
     ]
   },
   {
+    title: '数学公式',
+    items: [
+      { label: '行内公式', syntax: '$E = mc^2$' },
+      { label: '行间公式', syntax: '$$\\frac{n!}{k!(n-k)!} = \\binom{n}{k}$$' },
+      { label: '带反引号的行间公式', syntax: '$$`\\sum_{i=1}^n a_i = \\int_0^{\\pi} \\sin(x) dx`$$' },
+    ]
+  },
+  {
     title: '其他',
     items: [
       { label: '水平分割线', syntax: '---' },
-      { label: '数学公式', syntax: '$E = mc^2$' },
       { label: '注脚', syntax: '这里是文字[^1]\n\n[^1]: 这里是注脚' },
     ]
   },

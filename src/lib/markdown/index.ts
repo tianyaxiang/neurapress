@@ -49,6 +49,11 @@ export const defaultOptions: RendererOptions = {
       borderTop: '1px solid #eee',
       fontSize: '0.9em',
       color: '#666'
+    },
+    latex: {
+      margin: '1em 0',
+      fontSize: '1.1em',
+      textAlign: 'center'
     }
   },
   inline: {
@@ -59,6 +64,9 @@ export const defaultOptions: RendererOptions = {
     checkbox: {
       marginRight: '0.5em',
       verticalAlign: 'middle'
+    },
+    latex: {
+      fontSize: '1.1em'
     }
   }
 }

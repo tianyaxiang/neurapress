@@ -110,6 +110,7 @@ export interface RendererOptions {
     td?: StyleOptions
     thead?: StyleOptions
     footnotes?: StyleOptions
+    latex?: StyleOptions
   }
   inline?: {
     strong?: StyleOptions
@@ -120,6 +121,7 @@ export interface RendererOptions {
     checkbox?: StyleOptions
     del?: StyleOptions
     footnote?: StyleOptions
+    latex?: StyleOptions
   }
   codeTheme?: CodeThemeId
 } 

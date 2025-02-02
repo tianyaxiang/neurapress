@@ -1,8 +1,16 @@
 import { marked } from 'marked'
-import type { Tokens } from 'marked'
+import type { Tokens, TokenizerAndRendererExtension } from 'marked'
 import type { RendererOptions } from './types'
 import { cssPropertiesToString } from './styles'
 import { highlightCode } from './code-highlight'
+import katex from 'katex'
+
+// 自定义 LaTeX 块的 Token 类型
+interface LatexBlockToken extends Tokens.Generic {
+  type: 'latexBlock'
+  raw: string
+  text: string
+}
 
 export class MarkdownRenderer {
   private renderer: typeof marked.Renderer.prototype
@@ -12,9 +20,74 @@ export class MarkdownRenderer {
     this.options = options
     this.renderer = new marked.Renderer()
     this.initializeRenderer()
+    this.initializeLatexExtension()
+  }
+
+  private initializeLatexExtension() {
+    // 添加 LaTeX 块的 tokenizer
+    const latexBlockTokenizer: TokenizerAndRendererExtension = {
+      name: 'latexBlock',
+      level: 'block',
+      start(src: string) {
+        return src.match(/^\$\$\n/)?.index
+      },
+      tokenizer(src: string) {
+        const rule = /^\$\$\n([\s\S]*?)\n\$\$/
+        const match = rule.exec(src)
+        if (match) {
+          return {
+            type: 'latexBlock',
+            raw: match[0],
+            tokens: [],
+            text: match[1].trim()
+          }
+        }
+      },
+      renderer: (token) => {
+        try {
+          const latexStyle = (this.options.block?.latex || {})
+          const style = {
+            ...latexStyle,
+            display: 'block',
+            margin: '1em 0',
+            textAlign: 'center'
+          }
+          const styleStr = cssPropertiesToString(style)
+          const rendered = katex.renderToString(token.text, {
+            displayMode: true,
+            throwOnError: false
+          })
+          return `<div${styleStr ? ` style="${styleStr}"` : ''}>${rendered}</div>`
+        } catch (error) {
+          console.error('LaTeX rendering error:', error)
+          return token.raw
+        }
+      }
+    }
+
+    // 注册扩展
+    marked.use({ extensions: [latexBlockTokenizer] })
   }
 
   private initializeRenderer() {
+    // 重写 text 方法来处理行内 LaTeX 公式
+    this.renderer.text = (token: Tokens.Text | Tokens.Escape) => {
+      // 处理行内公式 $...$ 和行间公式 $$`...`$$ 
+      return token.text.replace(/\$\$`([^`]+)`\$\$|\$([^$\n]+?)\$/g, (match, backtick, inline) => {
+        try {
+          const formula = backtick || inline
+          const isDisplayMode = !!backtick
+          return katex.renderToString(formula.trim(), {
+            displayMode: isDisplayMode,
+            throwOnError: false
+          })
+        } catch (error) {
+          console.error('LaTeX rendering error:', error)
+          return match
+        }
+      })
+    }
+
     // 重写 heading 方法
     this.renderer.heading = ({ text, depth }: Tokens.Heading) => {
       const headingKey = `h${depth}` as keyof RendererOptions['block']
@@ -208,4 +281,4 @@ export class MarkdownRenderer {
   public getRenderer(): typeof marked.Renderer.prototype {
     return this.renderer
   }
-} 
+}
