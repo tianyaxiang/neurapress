@@ -404,7 +404,7 @@ export const templates: Template[] = [
         blockquote: {
           margin: '1.2em 0',
           padding: '1em 1.2em',
-          borderLeft: '4px solid #FF6E42',
+          borderLeft: '4px solid gba(0, 0, 0, 0.4)',
           background: '#F8F9FA',
           borderRadius: '0 4px 4px 0',
           color: '#666666'

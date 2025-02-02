@@ -47,24 +47,76 @@ export function WechatStylePicker({ value, onSelect }: WechatStylePickerProps) {
             >
               <div className="aspect-[4/3] overflow-hidden rounded-md border bg-white">
                 <div className={cn(
-                  "p-4 transform scale-[0.6] origin-top-left",
+                  "transform scale-[0.45] origin-top-left",
                   template.styles
-                )}>
+                )} style={{
+                  backgroundColor: template.id === 'smartisan' ? 'rgb(251, 247, 238)' : 'transparent',
+                  width: '220%',
+                  minHeight: '220%',
+                  padding: template.id === 'smartisan' ? '20px' : '16px',
+                  fontFamily: template.id === 'smartisan' ? 'PingFangSC-regular, -apple-system, BlinkMacSystemFont, sans-serif' : 'inherit',
+                  transform: 'scale(0.45)',
+                  transformOrigin: 'top left',
+                  position: 'relative'
+                }}>
                   <h1 style={{
                     ...template.options?.block?.h1,
-                    fontSize: template.options?.block?.h1?.fontSize || '1.2em'
+                    fontSize: '24px',
+                    color: template.id === 'smartisan' ? '#333333' : undefined,
+                    marginBottom: template.id === 'smartisan' ? '1.5em' : undefined,
+                    textAlign: 'left',
+                    padding: '0',
+                    border: 'none'
                   } as React.CSSProperties}>
-                    标题示例
+                    {template.id === 'smartisan' ? '锤子便签风格' : '标题示例'}
                   </h1>
                   <p style={{
                     ...template.options?.block?.p,
-                    fontSize: template.options?.block?.p?.fontSize || '1em'
+                    fontSize: '16px',
+                    color: template.id === 'smartisan' ? '#333333' : undefined,
+                    lineHeight: template.id === 'smartisan' ? '1.8' : undefined,
+                    margin: '1em 0'
                   } as React.CSSProperties}>
-                    这是一段示例文本，展示不同样式模板的效果。
+                    {template.id === 'smartisan' 
+                      ? '这是锤子便签的经典样式，保持了简约、优雅的设计风格。文字的排版和间距都经过精心调整，让阅读体验更加舒适。'
+                      : '这是一段示例文本，展示不同样式模板的效果。'
+                    }
                   </p>
-                  <blockquote style={template.options?.block?.blockquote as React.CSSProperties}>
-                    引用文本示例
+                  <blockquote style={{
+                    ...template.options?.block?.blockquote as React.CSSProperties,
+                    borderLeft: template.id === 'smartisan' ? '4px solid rgba(0, 0, 0, 0.4)' : undefined,
+                    background: template.id === 'smartisan' ? 'rgba(0, 0, 0, 0.05)' : undefined,
+                    padding: template.id === 'smartisan' ? '1em 1.2em' : undefined,
+                    margin: template.id === 'smartisan' ? '1.2em 0' : undefined,
+                    color: template.id === 'smartisan' ? '#666666' : undefined,
+                    fontSize: '14px'
+                  }}>
+                    {template.id === 'smartisan' 
+                      ? '保持简单，保持优雅'
+                      : '引用文本示例'
+                    }
                   </blockquote>
+                  {template.id === 'smartisan' && (
+                    <ul style={{
+                      ...template.options?.block?.ul as React.CSSProperties,
+                      margin: '1em 0',
+                      paddingLeft: '1.5em',
+                      listStyle: 'disc',
+                      color: '#333333',
+                      fontSize: '14px'
+                    }}>
+                      <li style={{
+                        ...template.options?.inline?.listitem as React.CSSProperties,
+                        margin: '0.5em 0',
+                        lineHeight: '1.8'
+                      }}>精心设计的字体</li>
+                      <li style={{
+                        ...template.options?.inline?.listitem as React.CSSProperties,
+                        margin: '0.5em 0',
+                        lineHeight: '1.8'
+                      }}>舒适的行间距</li>
+                    </ul>
+                  )}
                 </div>
               </div>
               <div className="space-y-1">
