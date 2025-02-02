@@ -111,6 +111,7 @@ export interface RendererOptions {
     thead?: StyleOptions
     footnotes?: StyleOptions
     latex?: StyleOptions
+    mermaid?: StyleOptions
   }
   inline?: {
     strong?: StyleOptions

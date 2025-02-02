@@ -18,6 +18,7 @@ import { Copy, Clock, Type, Trash2 } from 'lucide-react'
 import { useLocalStorage } from '@/hooks/use-local-storage'
 import { codeThemes, type CodeThemeId } from '@/config/code-themes'
 import '@/styles/code-themes.css'
+import { copyHandler } from './utils/copy-handler'
 
 // 计算阅读时间（假设每分钟阅读300字）
 const calculateReadingTime = (text: string): string => {
@@ -185,46 +186,15 @@ export default function WechatEditor() {
 
   // 处理复制
   const handleCopy = useCallback(async () => {
-    try {
-      const htmlContent = getPreviewContent()
-      const tempDiv = document.createElement('div')
-      tempDiv.innerHTML = htmlContent
-      const plainText = tempDiv.textContent || tempDiv.innerText
-
-      await navigator.clipboard.write([
-        new ClipboardItem({
-          'text/html': new Blob([htmlContent], { type: 'text/html' }),
-          'text/plain': new Blob([plainText], { type: 'text/plain' })
-        })
-      ])
-
-      toast({
-        title: "复制成功",
-        description: "已复制预览内容",
-        duration: 2000
-      })
-      return true
-    } catch (err) {
-      console.error('Copy error:', err)
-      try {
-        await navigator.clipboard.writeText(previewContent)
-        toast({
-          title: "复制成功",
-          description: "已复制预览内容（仅文本）",
-          duration: 2000
-        })
-        return true
-      } catch (fallbackErr) {
-        toast({
-          variant: "destructive",
-          title: "复制失败",
-          description: "无法访问剪贴板，请检查浏览器权限",
-          action: <ToastAction altText="重试">重试</ToastAction>,
-        })
-        return false
-      }
+    // 获取预览容器中的实际内容
+    const previewContainer = document.querySelector('.preview-content')
+    if (!previewContainer) {
+      return copyHandler(window.getSelection(), previewContent, { toast })
     }
-  }, [previewContent, toast, getPreviewContent])
+    
+    // 使用实际渲染后的内容
+    return copyHandler(window.getSelection(), previewContainer.innerHTML, { toast })
+  }, [previewContent, toast])
 
   // 手动保存
   const handleSave = useCallback(() => {

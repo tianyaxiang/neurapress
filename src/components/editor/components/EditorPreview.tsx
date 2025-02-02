@@ -2,8 +2,9 @@ import { cn } from '@/lib/utils'
 import { PREVIEW_SIZES, type PreviewSize } from '../constants'
 import { Loader2, ZoomIn, ZoomOut, Maximize2, Minimize2 } from 'lucide-react'
 import { templates } from '@/config/wechat-templates'
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { type CodeThemeId } from '@/config/code-themes'
+import { initMermaid } from '@/lib/markdown/mermaid-init'
 import '@/styles/code-themes.css'
 
 interface EditorPreviewProps {
@@ -28,6 +29,107 @@ export function EditorPreview({
   const [zoom, setZoom] = useState(100)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const isScrolling = useRef<boolean>(false)
+  const contentRef = useRef<string>('')
+  const renderTimeoutRef = useRef<number>()
+  const stableKeyRef = useRef(`preview-${Date.now()}`)
+
+  // Add useEffect to handle content changes and Mermaid initialization
+  useEffect(() => {
+    if (!isConverting && previewContent) {
+      // Clear any pending render timeout
+      if (renderTimeoutRef.current) {
+        window.clearTimeout(renderTimeoutRef.current)
+      }
+
+      // Set a new timeout to render after content has settled
+      renderTimeoutRef.current = window.setTimeout(() => {
+        requestAnimationFrame(() => {
+          initMermaid().catch(error => {
+            console.error('Failed to initialize mermaid:', error)
+          })
+        })
+      }, 100) // Wait for 100ms after last content change
+    }
+
+    // Cleanup timeout on unmount
+    return () => {
+      if (renderTimeoutRef.current) {
+        window.clearTimeout(renderTimeoutRef.current)
+      }
+    }
+  }, [isConverting, previewContent])
+
+  // Add useEffect to handle theme changes
+  useEffect(() => {
+    if (document.querySelector('div.mermaid')) {
+      if (renderTimeoutRef.current) {
+        window.clearTimeout(renderTimeoutRef.current)
+      }
+
+      renderTimeoutRef.current = window.setTimeout(() => {
+        requestAnimationFrame(() => {
+          initMermaid().catch(error => {
+            console.error('Failed to initialize mermaid after theme change:', error)
+          })
+        })
+      }, 100)
+    }
+  }, [codeTheme])
+
+  // Add useEffect to handle copy events
+  useEffect(() => {
+    const handleCopy = async (e: ClipboardEvent) => {
+      const selection = window.getSelection()
+      if (!selection) return
+
+      const selectedNode = selection.anchorNode?.parentElement
+      if (!selectedNode) return
+
+      // 检查是否在 mermaid 图表内
+      const mermaidElement = selectedNode.closest('.mermaid')
+      if (mermaidElement) {
+        e.preventDefault()
+        
+        // 获取渲染后的 SVG 元素
+        const svgElement = mermaidElement.querySelector('svg')
+        if (svgElement) {
+          try {
+            // 创建一个临时的 div 来包含 SVG
+            const container = document.createElement('div')
+            container.appendChild(svgElement.cloneNode(true))
+            
+            // 准备 HTML 和纯文本格式
+            const htmlContent = container.innerHTML
+            const plainText = mermaidElement.querySelector('.mermaid-source')?.textContent || ''
+
+            // 尝试复制为 HTML（保留图表效果）
+            await navigator.clipboard.write([
+              new ClipboardItem({
+                'text/html': new Blob([htmlContent], { type: 'text/html' }),
+                'text/plain': new Blob([plainText], { type: 'text/plain' })
+              })
+            ])
+          } catch (error) {
+            // 如果复制 HTML 失败，退回到复制源代码
+            console.error('Failed to copy as HTML:', error)
+            const sourceText = mermaidElement.querySelector('.mermaid-source')?.textContent || ''
+            if (e.clipboardData) {
+              e.clipboardData.setData('text/plain', sourceText)
+            }
+          }
+        } else {
+          // 如果找不到 SVG，退回到复制源代码
+          const sourceText = mermaidElement.querySelector('.mermaid-source')?.textContent || ''
+          if (e.clipboardData) {
+            e.clipboardData.setData('text/plain', sourceText)
+          }
+        }
+      }
+    }
+
+    document.addEventListener('copy', handleCopy)
+    return () => document.removeEventListener('copy', handleCopy)
+  }, [])
 
   const handleZoomIn = () => {
     setZoom(prev => Math.min(prev + 10, 200))
@@ -47,6 +149,17 @@ export function EditorPreview({
     }
   }
 
+  // 使用 memo 包装预览内容
+  const PreviewContent = useMemo(() => (
+    <div className={cn(
+      "preview-content py-4",
+      "prose prose-slate dark:prose-invert max-w-none",
+      selectedTemplate && templates.find(t => t.id === selectedTemplate)?.styles
+    )}>
+      <div className="px-6" dangerouslySetInnerHTML={{ __html: previewContent }} />
+    </div>
+  ), [previewContent, selectedTemplate])
+
   return (
     <div 
       ref={previewRef}
@@ -57,7 +170,7 @@ export function EditorPreview({
         selectedTemplate && templates.find(t => t.id === selectedTemplate)?.styles,
         `code-theme-${codeTheme}`
       )}
-      key={codeTheme}
+      key={stableKeyRef.current}
     >
       <div className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b flex items-center justify-between z-10 sticky top-0 left-0 right-0">
         <div className="text-sm text-muted-foreground px-2 py-1">预览效果</div>
@@ -138,15 +251,7 @@ export function EditorPreview({
                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">正在生成预览...</span>
               </div>
-            ) : (
-              <div className={cn(
-                "preview-content py-4",
-                "prose prose-slate dark:prose-invert max-w-none",
-                selectedTemplate && templates.find(t => t.id === selectedTemplate)?.styles
-              )}>
-                <div className="px-6" dangerouslySetInnerHTML={{ __html: previewContent }} />
-              </div>
-            )}
+            ) : PreviewContent}
           </div>
         </div>
       </div>

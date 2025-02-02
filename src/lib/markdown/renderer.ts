@@ -12,6 +12,13 @@ interface LatexBlockToken extends Tokens.Generic {
   text: string
 }
 
+// 自定义 Mermaid 块的 Token 类型
+interface MermaidBlockToken extends Tokens.Generic {
+  type: 'mermaidBlock'
+  raw: string
+  text: string
+}
+
 export class MarkdownRenderer {
   private renderer: typeof marked.Renderer.prototype
   private options: RendererOptions
@@ -21,6 +28,7 @@ export class MarkdownRenderer {
     this.renderer = new marked.Renderer()
     this.initializeRenderer()
     this.initializeLatexExtension()
+    this.initializeMermaidExtension()
   }
 
   private initializeLatexExtension() {
@@ -67,6 +75,64 @@ export class MarkdownRenderer {
 
     // 注册扩展
     marked.use({ extensions: [latexBlockTokenizer] })
+  }
+
+  private initializeMermaidExtension() {
+    // 添加 Mermaid 块的 tokenizer
+    const mermaidBlockTokenizer: TokenizerAndRendererExtension = {
+      name: 'mermaidBlock',
+      level: 'block',
+      start(src: string) {
+        // 支持两种格式：```mermaid 和 ``` 后面跟 mermaid 内容
+        return src.match(/^```(?:mermaid\s*$|[\s\n]*pie\s+|[\s\n]*graph\s+|[\s\n]*sequenceDiagram\s+|[\s\n]*gantt\s+|[\s\n]*classDiagram\s+|[\s\n]*flowchart\s+)/)?.index
+      },
+      tokenizer(src: string) {
+        // 匹配两种格式
+        const rule = /^```(?:mermaid\s*\n)?([\s\S]*?)\n*```(?:\s*\n|$)/
+        const match = rule.exec(src)
+        if (match) {
+          const content = match[1].trim()
+          // 检查内容是否是 mermaid 图表
+          if (content.match(/^(?:pie\s+|graph\s+|sequenceDiagram\s+|gantt\s+|classDiagram\s+|flowchart\s+)/)) {
+            // 如果是饼图，添加 showData 选项
+            const processedContent = content.startsWith('pie') 
+              ? `pie showData\n${content.replace(/^pie\s*/, '').trim()}`
+              : content
+            return {
+              type: 'mermaidBlock',
+              raw: match[0],
+              tokens: [],
+              text: processedContent
+            }
+          }
+        }
+      },
+      renderer: (token) => {
+        try {
+          const mermaidStyle = (this.options.block?.mermaid || {})
+          const style = {
+            ...mermaidStyle,
+            display: 'block',
+            margin: '1em 0',
+            textAlign: 'center',
+            background: 'transparent' // 确保背景透明以适应主题
+          }
+          const styleStr = cssPropertiesToString(style)
+          
+          // Generate unique ID for the diagram
+          const id = `mermaid-${Math.random().toString(36).substring(2)}`
+          
+          // Since we can't use async/await in the renderer, we'll return a div that will be rendered by client-side JavaScript
+          return `<div${styleStr ? ` style="${styleStr}"` : ''} class="mermaid">${token.text}</div>`
+        } catch (error) {
+          console.error('Mermaid rendering error:', error)
+          return `<pre><code class="language-mermaid">${token.text}</code></pre>`
+        }
+      }
+    }
+
+    // 注册扩展
+    marked.use({ extensions: [mermaidBlockTokenizer] })
   }
 
   private initializeRenderer() {
