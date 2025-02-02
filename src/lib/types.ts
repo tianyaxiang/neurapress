@@ -7,6 +7,13 @@ export interface RendererOptions {
     fontSize?: string
     lineHeight?: string
     textAlign?: string
+    fontFamily?: string
+    padding?: string
+    maxWidth?: string
+    margin?: string
+    wordBreak?: string
+    whiteSpace?: string
+    color?: string
   }
   block?: {
     h1?: StyleOptions
@@ -17,18 +24,27 @@ export interface RendererOptions {
     h6?: StyleOptions
     p?: StyleOptions
     blockquote?: StyleOptions
+    blockquote_p?: StyleOptions
     code_pre?: StyleOptions
     code?: StyleOptions
     image?: StyleOptions
     ol?: StyleOptions
     ul?: StyleOptions
+    footnotes?: StyleOptions
+    figure?: StyleOptions
   }
   inline?: {
     strong?: StyleOptions
     em?: StyleOptions
     codespan?: StyleOptions
     link?: StyleOptions
+    wx_link?: StyleOptions
     listitem?: StyleOptions
+    table?: StyleOptions
+    thead?: StyleOptions
+    td?: StyleOptions
+    figcaption?: StyleOptions
+    footnote?: StyleOptions
   }
   codeTheme?: CodeThemeId
 }
