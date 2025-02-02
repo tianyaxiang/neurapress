@@ -1,10 +1,12 @@
 import type { CSSProperties } from 'react'
+import type { CodeThemeId } from '@/config/code-themes'
 
 export interface RendererOptions {
   base?: {
     themeColor?: string
-    textAlign?: string
+    fontSize?: string
     lineHeight?: string
+    textAlign?: string
   }
   block?: {
     h1?: StyleOptions
@@ -28,6 +30,7 @@ export interface RendererOptions {
     link?: StyleOptions
     listitem?: StyleOptions
   }
+  codeTheme?: CodeThemeId
 }
 
 export interface StyleOptions {

@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import { useToast } from '@/components/ui/use-toast'
 import { ToastAction } from '@/components/ui/toast'
 import { convertToWechat } from '@/lib/markdown'
-import { type RendererOptions } from '@/lib/markdown'
+import { type RendererOptions } from '@/lib/types'
 import { useEditorSync } from './hooks/useEditorSync'
 import { useAutoSave } from './hooks/useAutoSave'
 import { EditorToolbar } from './components/EditorToolbar'
@@ -16,6 +16,8 @@ import { type PreviewSize } from './constants'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { WechatStylePicker } from '@/components/template/WechatStylePicker'
 import { Copy, Clock, Type, Trash2 } from 'lucide-react'
+import { useLocalStorage } from '@/hooks/use-local-storage'
+import { codeThemes, type CodeThemeId } from '@/config/code-themes'
 
 // 计算阅读时间（假设每分钟阅读300字）
 const calculateReadingTime = (text: string): string => {
@@ -48,6 +50,9 @@ export default function WechatEditor() {
   // 添加字数和阅读时间状态
   const [wordCount, setWordCount] = useState('0')
   const [readingTime, setReadingTime] = useState('1 分钟')
+
+  // 添加 codeTheme 状态
+  const [codeTheme] = useLocalStorage<CodeThemeId>('code-theme', codeThemes[0].id)
 
   // 使用自定义 hooks
   const { handleScroll } = useEditorSync(editorRef)
@@ -151,7 +156,8 @@ export default function WechatEditor() {
           ...(styleOptions.inline?.listitem || {}),
           fontSize: styleOptions.base?.fontSize || template?.options?.base?.fontSize || '15px',
         }
-      }
+      },
+      codeTheme
     }
     
     const html = convertToWechat(value, mergedOptions)
@@ -171,7 +177,7 @@ export default function WechatEditor() {
       console.error('Template transformation error:', error)
       return html
     }
-  }, [value, selectedTemplate, styleOptions])
+  }, [value, selectedTemplate, styleOptions, codeTheme])
 
   // 处理复制
   const handleCopy = useCallback(async () => {
@@ -249,21 +255,33 @@ export default function WechatEditor() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [handleSave])
 
-  // 延迟更新预览内容
+  // 更新预览内容
   useEffect(() => {
-    if (!showPreview) return
-    
-    setIsConverting(true)
     const updatePreview = async () => {
+      if (!value) {
+        setPreviewContent('')
+        return
+      }
+      
+      setIsConverting(true)
       try {
         const content = getPreviewContent()
         setPreviewContent(content)
+      } catch (error) {
+        console.error('Error updating preview:', error)
+        toast({
+          variant: "destructive",
+          title: "预览更新失败",
+          description: "生成预览内容时发生错误",
+        })
       } finally {
         setIsConverting(false)
       }
     }
-    updatePreview()
-  }, [value, selectedTemplate, styleOptions, showPreview, getPreviewContent])
+
+    const timeoutId = setTimeout(updatePreview, 100)
+    return () => clearTimeout(timeoutId)
+  }, [value, selectedTemplate, styleOptions, codeTheme, getPreviewContent, toast])
 
   // 加载已保存的内容
   useEffect(() => {
@@ -285,14 +303,13 @@ export default function WechatEditor() {
 
   // 渲染预览内容
   const renderPreview = useCallback(() => {
-    const content = getPreviewContent()
     return (
       <div 
         className="preview-content" 
-        dangerouslySetInnerHTML={{ __html: content }}
+        dangerouslySetInnerHTML={{ __html: previewContent }}
       />
     )
-  }, [getPreviewContent])
+  }, [previewContent])
 
   // 检测是否为移动设备
   const isMobile = useCallback(() => {

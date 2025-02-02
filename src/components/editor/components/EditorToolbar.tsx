@@ -1,4 +1,7 @@
-import { Copy, Plus, Save, Smartphone } from 'lucide-react'
+'use client'
+
+import { useState } from 'react'
+import { Copy, Plus, Save, Smartphone, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { WechatStylePicker } from '../../template/WechatStylePicker'
 import { TemplateManager } from '../../template/TemplateManager'
@@ -12,6 +15,9 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/use-toast'
 import { ToastAction } from '@/components/ui/toast'
+import { CodeThemeSelector } from '../CodeThemeSelector'
+import { useLocalStorage } from '@/hooks/use-local-storage'
+import { codeThemes, type CodeThemeId } from '@/config/code-themes'
 
 interface EditorToolbarProps {
   value: string
@@ -47,6 +53,7 @@ export function EditorToolbar({
   styleOptions
 }: EditorToolbarProps) {
   const { toast } = useToast()
+  const [codeTheme, setCodeTheme] = useLocalStorage<CodeThemeId>('code-theme', codeThemes[0].id)
 
   const handleCopy = async () => {
     try {
@@ -117,16 +124,16 @@ export function EditorToolbar({
                 currentContent={value}
                 onNew={onNewArticle}
               />
-            
               <WechatStylePicker 
                 value={selectedTemplate} 
                 onSelect={onTemplateSelect} 
-              />
-              <TemplateManager onTemplateChange={onTemplateChange} />
+              /> 
+              <CodeThemeSelector value={codeTheme} onChange={setCodeTheme} />
               <StyleConfigDialog
                 value={styleOptions}
                 onChangeAction={onStyleOptionsChange}
               />
+               <TemplateManager onTemplateChange={onTemplateChange} />
               <button
                 onClick={onPreviewToggle}
                 className={cn(

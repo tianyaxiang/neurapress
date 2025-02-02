@@ -1,0 +1,254 @@
+/* GitHub Theme */
+.code-theme-github pre {
+  background-color: #f6f8fa;
+  color: #24292e;
+}
+
+.code-theme-github .token.comment {
+  color: #6a737d;
+}
+
+.code-theme-github .token.keyword {
+  color: #d73a49;
+}
+
+.code-theme-github .token.string {
+  color: #032f62;
+}
+
+.code-theme-github .token.number {
+  color: #005cc5;
+}
+
+.code-theme-github .token.function {
+  color: #6f42c1;
+}
+
+.code-theme-github .token.class-name {
+  color: #22863a;
+}
+
+.code-theme-github .token.operator {
+  color: #d73a49;
+}
+
+/* Dracula Theme */
+.code-theme-dracula pre {
+  background-color: #282a36;
+  color: #f8f8f2;
+}
+
+.code-theme-dracula .token.comment {
+  color: #6272a4;
+}
+
+.code-theme-dracula .token.keyword {
+  color: #ff79c6;
+}
+
+.code-theme-dracula .token.string {
+  color: #f1fa8c;
+}
+
+.code-theme-dracula .token.number {
+  color: #bd93f9;
+}
+
+.code-theme-dracula .token.function {
+  color: #50fa7b;
+}
+
+.code-theme-dracula .token.class-name {
+  color: #8be9fd;
+}
+
+.code-theme-dracula .token.operator {
+  color: #ff79c6;
+}
+
+/* Monokai Theme */
+.code-theme-monokai pre {
+  background-color: #272822;
+  color: #f8f8f2;
+}
+
+.code-theme-monokai .token.comment {
+  color: #75715e;
+}
+
+.code-theme-monokai .token.keyword {
+  color: #f92672;
+}
+
+.code-theme-monokai .token.string {
+  color: #e6db74;
+}
+
+.code-theme-monokai .token.number {
+  color: #ae81ff;
+}
+
+.code-theme-monokai .token.function {
+  color: #a6e22e;
+}
+
+.code-theme-monokai .token.class-name {
+  color: #66d9ef;
+}
+
+.code-theme-monokai .token.operator {
+  color: #f92672;
+}
+
+/* Solarized Light Theme */
+.code-theme-solarized-light pre {
+  background-color: #fdf6e3;
+  color: #657b83;
+}
+
+.code-theme-solarized-light .token.comment {
+  color: #93a1a1;
+}
+
+.code-theme-solarized-light .token.keyword {
+  color: #859900;
+}
+
+.code-theme-solarized-light .token.string {
+  color: #2aa198;
+}
+
+.code-theme-solarized-light .token.number {
+  color: #d33682;
+}
+
+.code-theme-solarized-light .token.function {
+  color: #268bd2;
+}
+
+.code-theme-solarized-light .token.class-name {
+  color: #b58900;
+}
+
+.code-theme-solarized-light .token.operator {
+  color: #859900;
+}
+
+/* Nord Theme */
+.code-theme-nord pre {
+  background-color: #2e3440;
+  color: #d8dee9;
+}
+
+.code-theme-nord .token.comment {
+  color: #4c566a;
+}
+
+.code-theme-nord .token.keyword {
+  color: #81a1c1;
+}
+
+.code-theme-nord .token.string {
+  color: #a3be8c;
+}
+
+.code-theme-nord .token.number {
+  color: #b48ead;
+}
+
+.code-theme-nord .token.function {
+  color: #88c0d0;
+}
+
+.code-theme-nord .token.class-name {
+  color: #8fbcbb;
+}
+
+.code-theme-nord .token.operator {
+  color: #81a1c1;
+}
+
+/* Common styles for all themes */
+pre {
+  padding: 1em;
+  margin: 0.5em 0;
+  overflow: auto;
+  border-radius: 0.3em;
+  font-family: "Fira Code", Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+code {
+  font-family: inherit;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  font-style: italic;
+}
+
+.token.function,
+.token.class-name {
+  font-weight: bold;
+}
+
+.token.important,
+.token.bold {
+  font-weight: bold;
+}
+
+.token.italic {
+  font-style: italic;
+}
+
+.token.entity {
+  cursor: help;
+}
+
+/* Line Numbers */
+.line-numbers .line-numbers-rows {
+  border-right: 1px solid #999;
+  padding-right: 0.5em;
+}
+
+/* Code Block Header */
+.code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5em 1em;
+  font-family: inherit;
+  font-size: 0.9em;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.code-header .language {
+  font-weight: bold;
+}
+
+.code-header .copy-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.2em 0.5em;
+  border-radius: 0.2em;
+  transition: background-color 0.2s;
+}
+
+.code-header .copy-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Dark mode adjustments */
+@media (prefers-color-scheme: dark) {
+  .code-header {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+
+  .code-header .copy-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+} 

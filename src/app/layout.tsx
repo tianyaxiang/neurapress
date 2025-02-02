@@ -1,14 +1,16 @@
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
 import './globals.css'
+import '@/styles/code-themes.css'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import { cn } from '@/lib/utils'
-import { Inter } from 'next/font/google'
 import { Toaster } from '@/components/ui/toaster'
 
 const inter = Inter({ subsets: ['latin'] })
 
-export const metadata = {
-  title: 'NeuraPress - AI Enhanced Article Editor',
-  description: 'An intelligent article editor for creating and formatting content',
+export const metadata: Metadata = {
+  title: 'NeuraPress',
+  description: 'Markdown 转微信公众号内容神器',
   icons: {
     icon: [
       {

@@ -2,7 +2,10 @@ import { cn } from '@/lib/utils'
 import { PREVIEW_SIZES, type PreviewSize } from '../constants'
 import { Loader2, ZoomIn, ZoomOut, Maximize2, Minimize2 } from 'lucide-react'
 import { templates } from '@/config/wechat-templates'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { useLocalStorage } from '@/hooks/use-local-storage'
+import { codeThemes, type CodeThemeId } from '@/config/code-themes'
+import '@/styles/code-themes.css'
 
 interface EditorPreviewProps {
   previewRef: React.RefObject<HTMLDivElement>
@@ -24,6 +27,7 @@ export function EditorPreview({
   const [zoom, setZoom] = useState(100)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const isScrolling = useRef<boolean>(false)
+  const [codeTheme] = useLocalStorage<CodeThemeId>('code-theme', codeThemes[0].id)
 
   const handleZoomIn = () => {
     setZoom(prev => Math.min(prev + 10, 200))
@@ -50,7 +54,8 @@ export function EditorPreview({
         "preview-container bg-background transition-all duration-300 ease-in-out flex flex-col",
         "h-full sm:w-1/2",
         "markdown-body relative",
-        selectedTemplate && templates.find(t => t.id === selectedTemplate)?.styles
+        selectedTemplate && templates.find(t => t.id === selectedTemplate)?.styles,
+        `code-theme-${codeTheme}`
       )}
     >
       <div className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b flex items-center justify-between z-10 sticky top-0 left-0 right-0">
