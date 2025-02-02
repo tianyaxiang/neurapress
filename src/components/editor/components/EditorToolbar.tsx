@@ -8,7 +8,7 @@ import { TemplateManager } from '../../template/TemplateManager'
 import { StyleConfigDialog } from '../StyleConfigDialog'
 import { ArticleList } from '../ArticleList'
 import { type Article } from '../constants'
-import { type RendererOptions } from '@/lib/markdown'
+import { type RendererOptions } from '@/lib/types'
 import { ThemeToggle } from '@/components/theme/ThemeToggle'
 import { Logo } from '@/components/icons/Logo'
 import Link from 'next/link'
@@ -24,16 +24,18 @@ interface EditorToolbarProps {
   isDraft: boolean
   showPreview: boolean
   selectedTemplate: string
+  styleOptions: RendererOptions
+  codeTheme: CodeThemeId
   onSave: () => void
   onCopy: () => Promise<boolean>
   onCopyPreview: () => Promise<boolean>
   onNewArticle: () => void
-  onArticleSelect: (article: Article) => void
-  onTemplateSelect: (template: string) => void
+  onArticleSelect: (article: { content: string, template: string }) => void
+  onTemplateSelect: (templateId: string) => void
   onTemplateChange: () => void
   onStyleOptionsChange: (options: RendererOptions) => void
   onPreviewToggle: () => void
-  styleOptions: RendererOptions
+  onCodeThemeChange: (theme: CodeThemeId) => void
 }
 
 export function EditorToolbar({
@@ -50,10 +52,11 @@ export function EditorToolbar({
   onTemplateChange,
   onStyleOptionsChange,
   onPreviewToggle,
-  styleOptions
+  styleOptions,
+  codeTheme,
+  onCodeThemeChange
 }: EditorToolbarProps) {
   const { toast } = useToast()
-  const [codeTheme, setCodeTheme] = useLocalStorage<CodeThemeId>('code-theme', codeThemes[0].id)
 
   const handleCopy = async () => {
     try {
@@ -128,7 +131,10 @@ export function EditorToolbar({
                 value={selectedTemplate} 
                 onSelect={onTemplateSelect} 
               /> 
-              <CodeThemeSelector value={codeTheme} onChange={setCodeTheme} />
+              <CodeThemeSelector 
+                value={codeTheme} 
+                onChange={onCodeThemeChange} 
+              />
               <StyleConfigDialog
                 value={styleOptions}
                 onChangeAction={onStyleOptionsChange}

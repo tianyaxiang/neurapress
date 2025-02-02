@@ -53,7 +53,7 @@ export default function WechatEditor() {
   const [readingTime, setReadingTime] = useState('1 分钟')
 
   // 添加 codeTheme 状态
-  const [codeTheme] = useLocalStorage<CodeThemeId>('code-theme', codeThemes[0].id)
+  const [codeTheme, setCodeTheme] = useLocalStorage<CodeThemeId>('code-theme', codeThemes[0].id)
 
   // 使用自定义 hooks
   const { handleScroll } = useEditorSync(editorRef)
@@ -484,6 +484,26 @@ export default function WechatEditor() {
     }
   }, [handleEditorChange, toast])
 
+  // 处理代码主题变化
+  const handleCodeThemeChange = useCallback((theme: CodeThemeId) => {
+    setCodeTheme(theme)
+    // 立即重新生成预览内容
+    setIsConverting(true)
+    try {
+      const content = getPreviewContent()
+      setPreviewContent(content)
+    } catch (error) {
+      console.error('Error updating preview:', error)
+      toast({
+        variant: "destructive",
+        title: "预览更新失败",
+        description: "生成预览内容时发生错误",
+      })
+    } finally {
+      setIsConverting(false)
+    }
+  }, [getPreviewContent, toast])
+
   return (
     <div className="h-screen flex flex-col overflow-hidden">
       <div className="hidden sm:block">
@@ -502,6 +522,10 @@ export default function WechatEditor() {
           onStyleOptionsChange={setStyleOptions}
           onPreviewToggle={() => setShowPreview(!showPreview)}
           styleOptions={styleOptions}
+          wordCount={wordCount}
+          readingTime={readingTime}
+          codeTheme={codeTheme}
+          onCodeThemeChange={handleCodeThemeChange}
         />
       </div>
       
