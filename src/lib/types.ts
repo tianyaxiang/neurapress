@@ -30,7 +30,7 @@ export interface StyleOptions {
   fontWeight?: string | number
   fontStyle?: string
   lineHeight?: string | number
-  textAlign?: 'left' | 'center' | 'right'
+  textAlign?: 'left' | 'center' | 'right' | 'justify'
   textDecoration?: string
   textIndent?: string | number
   letterSpacing?: string | number
