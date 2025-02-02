@@ -119,10 +119,8 @@ export class MarkdownRenderer {
           }
           const styleStr = cssPropertiesToString(style)
           
-          // Generate unique ID for the diagram
-          const id = `mermaid-${Math.random().toString(36).substring(2)}`
-          
-          // Since we can't use async/await in the renderer, we'll return a div that will be rendered by client-side JavaScript
+          // Remove the random ID generation since it's not needed
+          // Return a simple div with the mermaid class and content
           return `<div${styleStr ? ` style="${styleStr}"` : ''} class="mermaid">${token.text}</div>`
         } catch (error) {
           console.error('Mermaid rendering error:', error)
