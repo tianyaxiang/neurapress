@@ -74,7 +74,7 @@ export function TemplateManager({ onTemplateChange }: TemplateManagerProps) {
       styles: newTemplate.styles || '',
       options: {
         base: {
-          primaryColor: '#000000',
+          themeColor: '#000000',
           textAlign: 'left',
           lineHeight: '1.75'
         },
@@ -136,7 +136,7 @@ export function TemplateManager({ onTemplateChange }: TemplateManagerProps) {
             return `
               <section>
                 <style>
-                  :root { --md-primary-color: ${data.options.base.primaryColor}; }
+                  :root { --md-primary-color: ${data.options.base.themeColor}; }
                 </style>
                 ${html}
               </section>
