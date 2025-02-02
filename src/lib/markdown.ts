@@ -334,9 +334,7 @@ export function convertToWechat(markdown: string, options: RendererOptions = def
       ...linkStyle
     }
     const styleStr = cssPropertiesToString(style)
-    const tokens = marked.Lexer.lexInline(text)
-    const content = marked.Parser.parseInline(tokens, { renderer })
-    return `<a href="${href}"${title ? ` title="${title}"` : ''}${styleStr ? ` style="${styleStr}"` : ''}>${content}</a>`
+    return `<a href="${href}"${title ? ` title="${title}"` : ''}${styleStr ? ` style="${styleStr}"` : ''}>${text}</a>`
   }
 
   // 重写 image 方法
@@ -408,8 +406,6 @@ export function convertToWechat(markdown: string, options: RendererOptions = def
     
     return `<li${styleStr ? ` style="${styleStr}"` : ''}>${content}</li>`
   }
-
-
 
   // 添加删除线支持
   renderer.del = function({ text }: Tokens.Del) {
