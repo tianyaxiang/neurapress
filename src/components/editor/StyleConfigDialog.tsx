@@ -56,7 +56,7 @@ export function StyleConfigDialog({ value, onChangeAction }: StyleConfigDialogPr
     const newOptions = {
       ...currentOptions,
       [category]: {
-        ...currentOptions[category],
+        ...(currentOptions[category] as object || {}),
         [subcategory]: value === null ? undefined : value
       }
     }
