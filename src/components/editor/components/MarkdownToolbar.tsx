@@ -141,7 +141,7 @@ export function MarkdownToolbar({ onInsert }: MarkdownToolbarProps) {
       <div className="flex items-center gap-0.5 px-2 py-1 border-b">
         {tools.map((tool, index) => {
           if ('type' in tool && tool.type === 'separator') {
-            return <Separator key={index} orientation="vertical" className="mx-1 h-6" />
+            return <Separator key={index} orientation="vertical" className="mx-0.5 h-4" />
           }
 
           const buttonTool = tool as ToolButton
