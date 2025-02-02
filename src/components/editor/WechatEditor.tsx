@@ -5,7 +5,7 @@ import { templates } from '@/config/wechat-templates'
 import { cn } from '@/lib/utils'
 import { useToast } from '@/components/ui/use-toast'
 import { ToastAction } from '@/components/ui/toast'
-import { convertToWechat } from '@/lib/markdown'
+import { convertToWechat, getCodeThemeStyles } from '@/lib/markdown'
 import { type RendererOptions } from '@/lib/types'
 import { useEditorSync } from './hooks/useEditorSync'
 import { useAutoSave } from './hooks/useAutoSave'
@@ -18,6 +18,7 @@ import { WechatStylePicker } from '@/components/template/WechatStylePicker'
 import { Copy, Clock, Type, Trash2 } from 'lucide-react'
 import { useLocalStorage } from '@/hooks/use-local-storage'
 import { codeThemes, type CodeThemeId } from '@/config/code-themes'
+import '@/styles/code-themes.css'
 
 // 计算阅读时间（假设每分钟阅读300字）
 const calculateReadingTime = (text: string): string => {
@@ -103,7 +104,11 @@ export default function WechatEditor() {
       block: {
         ...(template?.options?.block || {}),
         ...(styleOptions.block || {}),
-        // 合并标题样式，保留模版中的其他样式属性
+        code_pre: {
+          ...(template?.options?.block?.code_pre || {}),
+          ...(styleOptions.block?.code_pre || {}),
+          ...getCodeThemeStyles(codeTheme)
+        },
         h1: {
           ...(template?.options?.block?.h1 || {}),
           ...(styleOptions.block?.h1 || {}),
@@ -279,8 +284,7 @@ export default function WechatEditor() {
       }
     }
 
-    const timeoutId = setTimeout(updatePreview, 100)
-    return () => clearTimeout(timeoutId)
+    updatePreview()
   }, [value, selectedTemplate, styleOptions, codeTheme, getPreviewContent, toast])
 
   // 加载已保存的内容
@@ -562,6 +566,7 @@ export default function WechatEditor() {
                   previewSize={previewSize}
                   isConverting={isConverting}
                   previewContent={previewContent}
+                  codeTheme={codeTheme}
                   onPreviewSizeChange={setPreviewSize}
                 />
               </div>
@@ -603,6 +608,7 @@ export default function WechatEditor() {
               previewSize={previewSize}
               isConverting={isConverting}
               previewContent={previewContent}
+              codeTheme={codeTheme}
               onPreviewSizeChange={setPreviewSize}
             />
           )}

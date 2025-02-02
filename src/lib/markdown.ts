@@ -128,7 +128,7 @@ const defaultOptions: RendererOptions = {
 }
 
 // 获取代码主题的样式
-function getCodeThemeStyles(theme: CodeThemeId): StyleOptions {
+export function getCodeThemeStyles(theme: CodeThemeId): StyleOptions {
   const themeConfig = codeThemes.find(t => t.id === theme)
   if (!themeConfig) return {}
 
