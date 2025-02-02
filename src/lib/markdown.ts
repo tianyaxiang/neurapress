@@ -145,7 +145,6 @@ function getTokenStyles(theme: CodeThemeId, tokenType: string): string {
 
   const tokenColor = themeConfig.theme[tokenType as keyof typeof themeConfig.theme]
   if (!tokenColor) return ''
-
   return `color: ${tokenColor};`
 }
 
@@ -196,29 +195,35 @@ export function convertToWechat(markdown: string, options: RendererOptions = def
   }
 
   // 重写 code 方法
-  renderer.code = function({ text, lang }: Tokens.Code) {
+  renderer.code = function({ text, lang }: Tokens.Code) {  
+
     const codeStyle = (mergedOptions.block?.code_pre || {}) as StyleOptions
     const style: StyleOptions = {
       ...codeStyle,
       ...getCodeThemeStyles(mergedOptions.codeTheme)
     }
     const styleStr = cssPropertiesToString(style)
-    
     // 代码高亮处理
     let highlighted = text
     if (lang && Prism.languages[lang]) {
+      // Helper function to recursively process tokens
+      const processToken = (token: string | Prism.Token): string => {
+        if (typeof token === 'string') {
+          return token
+        }
+
+        const tokenStyle = getTokenStyles(mergedOptions.codeTheme, token.type)
+        const content = Array.isArray(token.content)
+          ? token.content.map(t => processToken(t)).join('')
+          : processToken(token.content)
+
+        return `<span style="${tokenStyle}">${content}</span>`
+      }
+
       try {
         const grammar = Prism.languages[lang]
         const tokens = Prism.tokenize(text, grammar)
-        
-        highlighted = tokens.map(token => {
-          if (typeof token === 'string') {
-            return token
-          }
-          
-          const tokenStyle = getTokenStyles(mergedOptions.codeTheme, token.type)
-          return `<span style="${tokenStyle}">${token.content}</span>`
-        }).join('')
+        highlighted = tokens.map(processToken).join('')
       } catch (error) {
         console.error(`Error highlighting code: ${error}`)
       }
@@ -228,7 +233,8 @@ export function convertToWechat(markdown: string, options: RendererOptions = def
   }
 
   // 重写 codespan 方法
-  renderer.codespan = function({ text }: Tokens.Codespan) {
+  renderer.codespan = function({ text }: Tokens.Codespan) {  
+
     const codespanStyle = (mergedOptions.inline?.codespan || {}) as StyleOptions
     const style: StyleOptions = {
       ...codespanStyle
