@@ -58,7 +58,7 @@ export class MarkdownRenderer {
             ...latexStyle,
             display: 'block',
             margin: '1em 0',
-            textAlign: 'center'
+            textAlign: 'center' as const
           }
           const styleStr = cssPropertiesToString(style)
           const rendered = katex.renderToString(token.text, {
@@ -114,8 +114,8 @@ export class MarkdownRenderer {
             ...mermaidStyle,
             display: 'block',
             margin: '1em 0',
-            textAlign: 'center',
-            background: 'transparent' // 确保背景透明以适应主题
+            textAlign: 'center' as const,
+            background: 'transparent'
           }
           const styleStr = cssPropertiesToString(style)
           
