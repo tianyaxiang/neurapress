@@ -99,26 +99,32 @@ export default function WechatEditor() {
         ...(template?.options?.block || {}),
         ...(styleOptions.block || {}),
         // 合并标题样式，保留模版中的其他样式属性
-        h1: { 
+        h1: {
           ...(template?.options?.block?.h1 || {}),
           ...(styleOptions.block?.h1 || {}),
           fontSize: styleOptions.block?.h1?.fontSize || template?.options?.block?.h1?.fontSize || '24px',
           color: styleOptions.base?.themeColor || template?.options?.base?.themeColor || '#1a1a1a',
-          borderBottom: `2px solid ${styleOptions.base?.themeColor || template?.options?.base?.themeColor || '#1a1a1a'}`
+          ...(template?.options?.block?.h1?.borderBottom && {
+            borderBottom: `2px solid ${styleOptions.base?.themeColor || template?.options?.base?.themeColor || '#1a1a1a'}`
+          })
         },
-        h2: { 
+        h2: {
           ...(template?.options?.block?.h2 || {}),
           ...(styleOptions.block?.h2 || {}),
           fontSize: styleOptions.block?.h2?.fontSize || template?.options?.block?.h2?.fontSize || '20px',
           color: styleOptions.base?.themeColor || template?.options?.base?.themeColor || '#1a1a1a',
-          borderBottom: `2px solid ${styleOptions.base?.themeColor || template?.options?.base?.themeColor || '#1a1a1a'}`
+          ...(template?.options?.block?.h2?.borderBottom && {
+            borderBottom: `2px solid ${styleOptions.base?.themeColor || template?.options?.base?.themeColor || '#1a1a1a'}`
+          })
         },
-        h3: { 
+        h3: {
           ...(template?.options?.block?.h3 || {}),
           ...(styleOptions.block?.h3 || {}),
           fontSize: styleOptions.block?.h3?.fontSize || template?.options?.block?.h3?.fontSize || '1.1em',
           color: styleOptions.base?.themeColor || template?.options?.base?.themeColor || '#1a1a1a',
-          borderLeft: `3px solid ${styleOptions.base?.themeColor || template?.options?.base?.themeColor || '#1a1a1a'}`
+          ...(template?.options?.block?.h3?.borderLeft && {
+            borderLeft: `3px solid ${styleOptions.base?.themeColor || template?.options?.base?.themeColor || '#1a1a1a'}`
+          })
         },
         p: {
           ...(template?.options?.block?.p || {}),

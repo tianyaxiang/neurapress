@@ -426,5 +426,124 @@ export const templates: Template[] = [
       }
     },
     transform: (html: string) => html
+  },
+  {
+    id: 'smartisan',
+    name: '锤子便签',
+    description: '简洁优雅的锤子便签风格',
+    styles: 'prose-smartisan',
+    options: {
+      base: {
+        themeColor: 'rgb(99, 87, 83)',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif',
+        textAlign: 'left',
+        lineHeight: '1.75',
+        padding: '1.2rem',
+        margin: '0 auto',
+        wordBreak: 'break-word',
+        whiteSpace: 'pre-wrap',
+        fontSize: '16px',
+        color: 'rgb(99, 87, 83)'
+      },
+      block: {
+        h1: {
+          fontSize: '24px',
+          fontWeight: 'bold',
+          color: '#333333',
+          margin: '1.5em 0 1em',
+          padding: '0.5em 0',
+          textAlign: 'center'
+        },
+        h2: {
+          fontSize: '20px',
+          fontWeight: 'bold',
+          color: '#333333',
+          margin: '1.5em 0 1em',
+          padding: '0.3em 0',
+          textAlign: 'left'
+        },
+        h3: {
+          fontSize: '18px',
+          fontWeight: 'bold',
+          color: '#333333',
+          margin: '1.2em 0 0.8em',
+          paddingLeft: '0.8em',
+        },
+        p: {
+          margin: '1.2em 0',
+          lineHeight: '1.8',
+          color: '#333333',
+          fontSize: '16px',
+          textAlign: 'justify',
+          letterSpacing: '0.05em'
+        },
+        blockquote: {
+          margin: '1.2em 0',
+          padding: '1em 1.2em',
+          borderLeft: '4px solid #FF6E42',
+          background: '#F8F9FA',
+          borderRadius: '0 4px 4px 0',
+          color: '#666666'
+        },
+        ul: {
+          margin: '1em 0',
+          paddingLeft: '1.5em',
+          listStyle: 'disc',
+          color: '#333333'
+        },
+        ol: {
+          margin: '1em 0',
+          paddingLeft: '1.5em',
+          listStyle: 'decimal',
+          color: '#333333'
+        },
+        code_pre: {
+          margin: '1.2em 0',
+          padding: '1em',
+          background: '#F8F9FA',
+          borderRadius: '4px',
+          fontSize: '14px',
+          fontFamily: 'Menlo, Monaco, Consolas, "Courier New", monospace',
+          overflowX: 'auto'
+        },
+        image: {
+          margin: '1.2em auto',
+          display: 'block',
+          borderRadius: '4px'
+        }
+      },
+      inline: {
+        strong: {
+          color: '#FF6E42',
+          fontWeight: 'bold'
+        },
+        em: {
+          fontStyle: 'italic',
+          color: '#666666'
+        },
+        link: {
+          color: '#FF6E42',
+          textDecoration: 'none',
+          borderBottom: '1px solid #FF6E42'
+        },
+        codespan: {
+          background: '#F8F9FA',
+          padding: '0.2em 0.4em',
+          borderRadius: '3px',
+          fontSize: '0.9em',
+          color: '#FF6E42',
+          fontFamily: 'Menlo, Monaco, Consolas, "Courier New", monospace'
+        },
+        listitem: {
+          margin: '0.5em 0',
+          lineHeight: '1.8'
+        }
+      }
+    },
+    transform: (html: string) => {
+      return `<section id="nice" style="margin: 0; padding: 10px 20px; background-color: rgb(251, 247, 238); width: auto; font-family: PingFangSC-regular, sans-serif; font-size: 16px; color: rgb(0, 0, 0); line-height: 1.5em; word-spacing: 0; letter-spacing: 0; word-break: break-word; overflow-wrap: break-word; text-align: left;">
+        ${html}
+      </section>`;
+    }
   }
 ]; 
