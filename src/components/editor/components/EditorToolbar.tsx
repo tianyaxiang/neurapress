@@ -26,6 +26,8 @@ interface EditorToolbarProps {
   selectedTemplate: string
   styleOptions: RendererOptions
   codeTheme: CodeThemeId
+  wordCount: string
+  readingTime: string
   onSave: () => void
   onCopy: () => Promise<boolean>
   onCopyPreview: () => Promise<boolean>
@@ -54,7 +56,9 @@ export function EditorToolbar({
   onPreviewToggle,
   styleOptions,
   codeTheme,
-  onCodeThemeChange
+  onCodeThemeChange,
+  wordCount,
+  readingTime
 }: EditorToolbarProps) {
   const { toast } = useToast()
 
