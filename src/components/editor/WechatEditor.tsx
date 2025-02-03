@@ -1,217 +1,45 @@
 'use client'
 
-import { useState, useCallback, useEffect, useRef } from 'react'
-import { templates } from '@/config/wechat-templates'
-import { cn } from '@/lib/utils'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 import { ToastAction } from '@/components/ui/toast'
-import { convertToWechat, getCodeThemeStyles, type RendererOptions } from '@/lib/markdown'
+import { type RendererOptions } from '@/lib/markdown'
 import { useEditorSync } from './hooks/useEditorSync'
 import { useAutoSave } from './hooks/useAutoSave'
 import { EditorToolbar } from './components/EditorToolbar'
 import { EditorPreview } from './components/EditorPreview'
 import { MarkdownToolbar } from './components/MarkdownToolbar'
 import { type PreviewSize } from './constants'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { WechatStylePicker } from '@/components/template/WechatStylePicker'
-import { Copy, Clock, Type, Trash2 } from 'lucide-react'
 import { useLocalStorage } from '@/hooks/use-local-storage'
 import { codeThemes, type CodeThemeId } from '@/config/code-themes'
 import '@/styles/code-themes.css'
-import { copyHandler, initializeMermaid, MERMAID_CONFIG } from './utils/copy-handler'
-
-// 计算阅读时间（假设每分钟阅读300字）
-const calculateReadingTime = (text: string): string => {
-  const words = text.trim().length
-  const minutes = Math.ceil(words / 300)
-  return `${minutes} 分钟`
-}
-
-// 计算字数
-const calculateWordCount = (text: string): string => {
-  const count = text.trim().length
-  return count.toLocaleString()
-}
+import { templates } from '@/config/wechat-templates'
+import { cn } from '@/lib/utils'
+import { usePreviewContent } from './hooks/usePreviewContent'
+import { useEditorKeyboard } from './hooks/useEditorKeyboard'
+import { useScrollSync } from './hooks/useScrollSync'
+import { useWordStats } from './hooks/useWordStats'
+import { useCopy } from './hooks/useCopy'
 
 export default function WechatEditor() {
   const { toast } = useToast()
   const editorRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const previewRef = useRef<HTMLDivElement>(null)
+  
+  // 状态管理
   const [value, setValue] = useState('')
   const [selectedTemplate, setSelectedTemplate] = useState<string>('default')
   const [showPreview, setShowPreview] = useState(true)
   const [styleOptions, setStyleOptions] = useState<RendererOptions>({})
   const [previewSize, setPreviewSize] = useState<PreviewSize>('medium')
-  const [isConverting, setIsConverting] = useState(false)
   const [isDraft, setIsDraft] = useState(false)
-  const [previewContent, setPreviewContent] = useState('')
-  const [cursorPosition, setCursorPosition] = useState<{ start: number; end: number }>({ start: 0, end: 0 })
-
-  // 添加字数和阅读时间状态
-  const [wordCount, setWordCount] = useState('0')
-  const [readingTime, setReadingTime] = useState('1 分钟')
-
-  // 添加 codeTheme 状态
   const [codeTheme, setCodeTheme] = useLocalStorage<CodeThemeId>('code-theme', codeThemes[0].id)
 
   // 使用自定义 hooks
   const { handleScroll } = useEditorSync(editorRef)
   const { handleEditorChange } = useAutoSave(value, setIsDraft)
-
-  // 初始化 Mermaid
-  useEffect(() => {
-    const init = async () => {
-      await initializeMermaid()
-    }
-    init()
-  }, [])
-
-  // 处理编辑器输入
-  const handleInput = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newValue = e.target.value
-    const currentPosition = {
-      start: e.target.selectionStart,
-      end: e.target.selectionEnd,
-      scrollTop: e.target.scrollTop  // 保存当前滚动位置
-    }
-    
-    setValue(newValue)
-    handleEditorChange(newValue)
-    
-    // 使用 requestAnimationFrame 确保在下一帧恢复位置
-    requestAnimationFrame(() => {
-      if (textareaRef.current) {
-        textareaRef.current.scrollTop = currentPosition.scrollTop  // 恢复滚动位置
-        textareaRef.current.setSelectionRange(currentPosition.start, currentPosition.end)
-      }
-    })
-  }, [handleEditorChange])
-
-  // 处理Tab键
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Tab') {
-      e.preventDefault()
-      const textarea = e.currentTarget
-      const start = textarea.selectionStart
-      const end = textarea.selectionEnd
-
-      // 插入两个空格作为缩进
-      const newValue = value.substring(0, start) + '  ' + value.substring(end)
-      setValue(newValue)
-      handleEditorChange(newValue)
-
-      // 恢复光标位置
-      requestAnimationFrame(() => {
-        textarea.selectionStart = textarea.selectionEnd = start + 2
-      })
-    }
-  }, [value, handleEditorChange])
-
-  // 获取预览内容
-  const getPreviewContent = useCallback(() => {
-    if (!value) return ''
-    
-    const template = templates.find(t => t.id === selectedTemplate)
-    const mergedOptions: RendererOptions = {
-      base: {
-        ...(template?.options?.base || {}),
-        ...styleOptions.base,
-      },
-      block: {
-        ...(template?.options?.block || {}),
-        ...(styleOptions.block || {}),
-        code_pre: {
-          ...(template?.options?.block?.code_pre || {}),
-          ...(styleOptions.block?.code_pre || {}),
-          ...getCodeThemeStyles(codeTheme)
-        },
-        h1: {
-          ...(template?.options?.block?.h1 || {}),
-          ...(styleOptions.block?.h1 || {}),
-          fontSize: styleOptions.block?.h1?.fontSize || template?.options?.block?.h1?.fontSize || '24px',
-          color: styleOptions.base?.themeColor || template?.options?.base?.themeColor || '#1a1a1a',
-          ...(template?.options?.block?.h1?.borderBottom && {
-            borderBottom: `2px solid ${styleOptions.base?.themeColor || template?.options?.base?.themeColor || '#1a1a1a'}`
-          })
-        },
-        h2: {
-          ...(template?.options?.block?.h2 || {}),
-          ...(styleOptions.block?.h2 || {}),
-          fontSize: styleOptions.block?.h2?.fontSize || template?.options?.block?.h2?.fontSize || '20px',
-          color: styleOptions.base?.themeColor || template?.options?.base?.themeColor || '#1a1a1a',
-          ...(template?.options?.block?.h2?.borderBottom && {
-            borderBottom: `2px solid ${styleOptions.base?.themeColor || template?.options?.base?.themeColor || '#1a1a1a'}`
-          })
-        },
-        h3: {
-          ...(template?.options?.block?.h3 || {}),
-          ...(styleOptions.block?.h3 || {}),
-          fontSize: styleOptions.block?.h3?.fontSize || template?.options?.block?.h3?.fontSize || '1.1em',
-          color: styleOptions.base?.themeColor || template?.options?.base?.themeColor || '#1a1a1a',
-          ...(template?.options?.block?.h3?.borderLeft && {
-            borderLeft: `3px solid ${styleOptions.base?.themeColor || template?.options?.base?.themeColor || '#1a1a1a'}`
-          })
-        },
-        p: {
-          ...(template?.options?.block?.p || {}),
-          ...(styleOptions.block?.p || {}),
-          fontSize: styleOptions.base?.fontSize || template?.options?.base?.fontSize || '15px',
-          lineHeight: styleOptions.base?.lineHeight || template?.options?.base?.lineHeight || 2
-        },
-        ol: {
-          ...(template?.options?.block?.ol || {}),
-          ...(styleOptions.block?.ol || {}),
-          fontSize: styleOptions.base?.fontSize || template?.options?.base?.fontSize || '15px',
-        },
-        ul: {
-          ...(template?.options?.block?.ul || {}),
-          ...(styleOptions.block?.ul || {}),
-          fontSize: styleOptions.base?.fontSize || template?.options?.base?.fontSize || '15px',
-        }
-      },
-      inline: {
-        ...(template?.options?.inline || {}),
-        ...(styleOptions.inline || {}),
-        listitem: {
-          ...(template?.options?.inline?.listitem || {}),
-          ...(styleOptions.inline?.listitem || {}),
-          fontSize: styleOptions.base?.fontSize || template?.options?.base?.fontSize || '15px',
-        }
-      },
-      codeTheme
-    }
-    
-    const html = convertToWechat(value, mergedOptions)
-   
-    if (!template?.transform) return html
-    
-    try {
-      const transformed = template.transform(html)
-      if (transformed && typeof transformed === 'object') {
-        const result = transformed as { html?: string; content?: string }
-        if (result.html) return result.html
-        if (result.content) return result.content
-        return JSON.stringify(transformed)
-      }
-      return transformed || html
-    } catch (error) {
-      console.error('Template transformation error:', error)
-      return html
-    }
-  }, [value, selectedTemplate, styleOptions, codeTheme])
-
-  // 处理复制
-  const handleCopy = useCallback(async () => {
-    // 获取预览容器中的实际内容
-    const previewContainer = document.querySelector('.preview-content')
-    if (!previewContainer) {
-      return copyHandler(window.getSelection(), previewContent, { toast })
-    }
-    
-    // 使用实际渲染后的内容
-    return copyHandler(window.getSelection(), previewContainer.innerHTML, { toast })
-  }, [previewContent, toast])
+  const { handleEditorScroll } = useScrollSync()
 
   // 手动保存
   const handleSave = useCallback(() => {
@@ -233,78 +61,53 @@ export default function WechatEditor() {
     }
   }, [value, toast])
 
-  // 监听快捷键保存事件
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
-        e.preventDefault()
-        handleSave()
-      }
+  const { isConverting, previewContent } = usePreviewContent({
+    value,
+    selectedTemplate,
+    styleOptions,
+    codeTheme
+  })
+
+  const { handleKeyDown } = useEditorKeyboard({
+    value,
+    onChange: (newValue) => {
+      setValue(newValue)
+      handleEditorChange(newValue)
+    },
+    onSave: handleSave
+  })
+
+  // 处理编辑器输入
+  const handleInput = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value
+    const currentPosition = {
+      start: e.target.selectionStart,
+      end: e.target.selectionEnd,
+      scrollTop: e.target.scrollTop
     }
     
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [handleSave])
-
-  // 更新预览内容
-  useEffect(() => {
-    const updatePreview = async () => {
-      if (!value) {
-        setPreviewContent('')
-        return
-      }
-      
-      setIsConverting(true)
-      try {
-        const content = getPreviewContent()
-        setPreviewContent(content)
-        
-        // 等待下一个渲染周期，确保内容已更新到 DOM
-        await new Promise(resolve => requestAnimationFrame(resolve))
-        // 重新初始化 Mermaid，但不阻塞界面
-        initializeMermaid().catch(error => {
-          console.error('Failed to initialize Mermaid:', error)
-          // 不显示错误提示，让界面继续运行
-        })
-      } catch (error) {
-        console.error('Error updating preview:', error)
-        toast({
-          variant: "destructive",
-          title: "预览更新失败",
-          description: "生成预览内容时发生错误",
-        })
-      } finally {
-        setIsConverting(false)
-      }
-    }
-
-    updatePreview()
-  }, [value, selectedTemplate, styleOptions, codeTheme, getPreviewContent, toast])
-
-  // 加载已保存的内容
-  useEffect(() => {
-    const draftContent = localStorage.getItem('wechat_editor_draft')
-    const savedContent = localStorage.getItem('wechat_editor_content')
+    setValue(newValue)
+    handleEditorChange(newValue)
     
-    if (draftContent) {
-      setValue(draftContent)
-      setIsDraft(true)
-      toast({
-        description: "已恢复未保存的草稿",
-        action: <ToastAction altText="放弃" onClick={handleDiscardDraft}>放弃草稿</ToastAction>,
-        duration: 5000,
-      })
-    } else if (savedContent) {
-      setValue(savedContent)
-    }
-  }, [toast])
+    requestAnimationFrame(() => {
+      if (textareaRef.current) {
+        textareaRef.current.scrollTop = currentPosition.scrollTop
+        textareaRef.current.setSelectionRange(currentPosition.start, currentPosition.end)
+      }
+    })
+  }, [handleEditorChange])
+
+  const { handleCopy } = useCopy()
+
+  // 处理复制
+  const onCopy = useCallback(async () => {
+    return handleCopy(window.getSelection(), previewContent)
+  }, [handleCopy, previewContent])
 
   // 处理放弃草稿
   const handleDiscardDraft = useCallback(() => {
     const savedContent = localStorage.getItem('wechat_editor_content')
-    // 移除草稿
     localStorage.removeItem('wechat_editor_draft')
-    // 恢复到最后保存的内容，如果没有则清空
     setValue(savedContent || '')
     setIsDraft(false)
     toast({
@@ -313,35 +116,6 @@ export default function WechatEditor() {
       duration: 2000
     })
   }, [toast])
-
-  // 渲染预览内容
-  const renderPreview = useCallback(() => {
-    return (
-      <div 
-        className="preview-content" 
-        dangerouslySetInnerHTML={{ __html: previewContent }}
-      />
-    )
-  }, [previewContent])
-
-  // 检测是否为移动设备
-  const isMobile = useCallback(() => {
-    if (typeof window === 'undefined') return false
-    return window.innerWidth < 640
-  }, [])
-
-  // 自动切换预览模式
-  useEffect(() => {
-    const handleResize = () => {
-      if (isMobile()) {
-        setPreviewSize('full')
-      }
-    }
-
-    handleResize()
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [isMobile])
 
   // 处理文章选择
   const handleArticleSelect = useCallback((article: { content: string, template: string }) => {
@@ -391,13 +165,11 @@ export default function WechatEditor() {
     let newCursorPos = 0
 
     if (options?.wrap && selectedText) {
-      // 如果有选中文本且需要包裹
       newText = value.substring(0, start) + 
                 text + selectedText + (options.suffix || text) + 
                 value.substring(end)
       newCursorPos = start + text.length + selectedText.length + (options.suffix?.length || text.length)
     } else {
-      // 插入新文本
       const insertText = selectedText || options?.placeholder || ''
       newText = value.substring(0, start) + 
                 text + insertText + (options?.suffix || '') + 
@@ -408,7 +180,6 @@ export default function WechatEditor() {
     setValue(newText)
     handleEditorChange(newText)
 
-    // 恢复焦点并设置光标位置
     requestAnimationFrame(() => {
       textarea.focus()
       textarea.setSelectionRange(newCursorPos, newCursorPos)
@@ -418,69 +189,7 @@ export default function WechatEditor() {
   // 处理模版选择
   const handleTemplateSelect = useCallback((templateId: string) => {
     setSelectedTemplate(templateId)
-    // 重置样式设置为模版默认值
     setStyleOptions({})
-  }, [])
-
-  // 更新字数和阅读时间
-  useEffect(() => {
-    const plainText = previewContent.replace(/<[^>]+>/g, '')
-    setWordCount(calculateWordCount(plainText))
-    setReadingTime(calculateReadingTime(plainText))
-  }, [previewContent])
-
-  const isScrolling = useRef<boolean>(false)
-  const scrollTimeout = useRef<NodeJS.Timeout>()
-  const lastScrollTop = useRef<number>(0)
-
-  // 处理滚动同步
-  const handleEditorScroll = useCallback((e: React.UIEvent<HTMLTextAreaElement>) => {
-    // 如果是由于输入导致的滚动，不进行同步
-    if (e.currentTarget.selectionStart !== e.currentTarget.selectionEnd) {
-      return;
-    }
-    
-    if (isScrolling.current) return
-    
-    const textarea = e.currentTarget
-    const previewContainer = document.querySelector('.preview-container .overflow-y-auto')
-    if (!previewContainer) return
-
-    // 检查滚动方向和幅度
-    const currentScrollTop = textarea.scrollTop
-    const scrollDiff = currentScrollTop - lastScrollTop.current
-    
-    // 如果滚动幅度太小，忽略此次滚动
-    if (Math.abs(scrollDiff) < 5) return
-    
-    isScrolling.current = true
-    lastScrollTop.current = currentScrollTop
-
-    try {
-      const scrollPercentage = currentScrollTop / (textarea.scrollHeight - textarea.clientHeight)
-      const targetScrollTop = scrollPercentage * (previewContainer.scrollHeight - previewContainer.clientHeight)
-      
-      previewContainer.scrollTo({
-        top: targetScrollTop,
-        behavior: 'instant'
-      })
-    } finally {
-      if (scrollTimeout.current) {
-        clearTimeout(scrollTimeout.current)
-      }
-      scrollTimeout.current = setTimeout(() => {
-        isScrolling.current = false
-      }, 50)
-    }
-  }, [])
-
-  // 清理定时器
-  useEffect(() => {
-    return () => {
-      if (scrollTimeout.current) {
-        clearTimeout(scrollTimeout.current)
-      }
-    }
   }, [])
 
   // 清除编辑器内容
@@ -496,25 +205,44 @@ export default function WechatEditor() {
     }
   }, [handleEditorChange, toast])
 
-  // 处理代码主题变化
-  const handleCodeThemeChange = useCallback((theme: CodeThemeId) => {
-    setCodeTheme(theme)
-    // 立即重新生成预览内容
-    setIsConverting(true)
-    try {
-      const content = getPreviewContent()
-      setPreviewContent(content)
-    } catch (error) {
-      console.error('Error updating preview:', error)
-      toast({
-        variant: "destructive",
-        title: "预览更新失败",
-        description: "生成预览内容时发生错误",
-      })
-    } finally {
-      setIsConverting(false)
+  // 检测是否为移动设备
+  const isMobile = useCallback(() => {
+    if (typeof window === 'undefined') return false
+    return window.innerWidth < 640
+  }, [])
+
+  // 自动切换预览模式
+  useEffect(() => {
+    const handleResize = () => {
+      if (isMobile()) {
+        setPreviewSize('full')
+      }
     }
-  }, [getPreviewContent, toast])
+
+    handleResize()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [isMobile])
+
+  // 加载已保存的内容
+  useEffect(() => {
+    const draftContent = localStorage.getItem('wechat_editor_draft')
+    const savedContent = localStorage.getItem('wechat_editor_content')
+    
+    if (draftContent) {
+      setValue(draftContent)
+      setIsDraft(true)
+      toast({
+        description: "已恢复未保存的草稿",
+        action: <ToastAction altText="放弃" onClick={handleDiscardDraft}>放弃草稿</ToastAction>,
+        duration: 5000,
+      })
+    } else if (savedContent) {
+      setValue(savedContent)
+    }
+  }, [toast, handleDiscardDraft])
+
+  const { wordCount, readingTime } = useWordStats(value)
 
   return (
     <div className="h-screen flex flex-col overflow-hidden">
@@ -525,8 +253,8 @@ export default function WechatEditor() {
           showPreview={showPreview}
           selectedTemplate={selectedTemplate}
           onSave={handleSave}
-          onCopy={handleCopy}
-          onCopyPreview={handleCopy}
+          onCopy={onCopy}
+          onCopyPreview={onCopy}
           onNewArticle={handleNewArticle}
           onArticleSelect={handleArticleSelect}
           onTemplateSelect={handleTemplateSelect}
@@ -537,7 +265,7 @@ export default function WechatEditor() {
           wordCount={wordCount}
           readingTime={readingTime}
           codeTheme={codeTheme}
-          onCodeThemeChange={handleCodeThemeChange}
+          onCodeThemeChange={setCodeTheme}
         />
       </div>
       
@@ -546,10 +274,17 @@ export default function WechatEditor() {
         <div className="sm:hidden flex-1 flex flex-col">
           <div className="flex items-center justify-between p-2 border-b bg-background">
             <div className="flex-1 mr-2">
-              <WechatStylePicker 
-                value={selectedTemplate} 
-                onSelect={handleTemplateSelect}
-              />
+              <select
+                value={selectedTemplate}
+                onChange={(e) => handleTemplateSelect(e.target.value)}
+                className="w-full p-2 rounded-md border"
+              >
+                {templates.map((template) => (
+                  <option key={template.id} value={template.id}>
+                    {template.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -557,24 +292,18 @@ export default function WechatEditor() {
                 className="flex items-center justify-center gap-1 px-2 py-1 rounded-md text-xs text-destructive hover:bg-muted transition-colors"
                 title="清除内容"
               >
-                <Trash2 className="h-3.5 w-3.5" />
                 清除
               </button>
               <button
-                onClick={handleCopy}
+                onClick={onCopy}
                 className="flex items-center justify-center gap-1 px-2 py-1 rounded-md text-xs text-primary hover:bg-muted transition-colors"
               >
-                <Copy className="h-3.5 w-3.5" />
                 复制
               </button>
             </div>
           </div>
-          <Tabs defaultValue="editor" className="flex-1 flex flex-col">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="editor">编辑</TabsTrigger>
-              <TabsTrigger value="preview">预览</TabsTrigger>
-            </TabsList>
-            <TabsContent value="editor" className="flex-1 data-[state=inactive]:hidden">
+          <div className="flex-1 flex flex-col">
+            <div className="flex-1">
               <div 
                 ref={editorRef}
                 className={cn(
@@ -587,27 +316,25 @@ export default function WechatEditor() {
                   value={value}
                   onChange={handleInput}
                   onKeyDown={handleKeyDown}
+                  onScroll={handleEditorScroll}
                   className="w-full h-full resize-none outline-none p-4 font-mono text-base leading-relaxed overflow-y-scroll scrollbar-none"
                   placeholder="开始写作..."
                   spellCheck={false}
-                  onScroll={handleEditorScroll}
                 />
               </div>
-            </TabsContent>
-            <TabsContent value="preview" className="flex-1 data-[state=inactive]:hidden">
-              <div className="h-full overflow-y-auto">
-                <EditorPreview 
-                  previewRef={previewRef}
-                  selectedTemplate={selectedTemplate}
-                  previewSize={previewSize}
-                  isConverting={isConverting}
-                  previewContent={previewContent}
-                  codeTheme={codeTheme}
-                  onPreviewSizeChange={setPreviewSize}
-                />
-              </div>
-            </TabsContent>
-          </Tabs>
+            </div>
+            <div className="flex-1">
+              <EditorPreview 
+                previewRef={previewRef}
+                selectedTemplate={selectedTemplate}
+                previewSize={previewSize}
+                isConverting={isConverting}
+                previewContent={previewContent}
+                codeTheme={codeTheme}
+                onPreviewSizeChange={setPreviewSize}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Desktop Split View */}
@@ -629,10 +356,10 @@ export default function WechatEditor() {
                 value={value}
                 onChange={handleInput}
                 onKeyDown={handleKeyDown}
+                onScroll={handleEditorScroll}
                 className="w-full h-full resize-none outline-none p-4 font-mono text-base leading-relaxed overflow-y-scroll scrollbar-none"
                 placeholder="开始写作..."
                 spellCheck={false}
-                onScroll={handleEditorScroll}
               />
             </div>
           </div>
@@ -651,14 +378,12 @@ export default function WechatEditor() {
         </div>
       </div>
 
-      {/* 底部工具栏 */}
+      {/* 底部状态栏 */}
       <div className="fixed bottom-0 left-0 right-0 bg-background border-t h-10 flex items-center justify-end px-4 gap-4">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Type className="h-4 w-4" />
           <span>{wordCount} 字</span>
         </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground mr-4">
-          <Clock className="h-4 w-4" />
           <span>约 {readingTime}</span>
         </div>
       </div>
