@@ -9,6 +9,7 @@ import { type CodeThemeId } from '@/config/code-themes'
 import { useTheme } from 'next-themes'
 import '@/styles/code-themes.css'
 import mermaid from 'mermaid'
+import { useScrollSync } from '../hooks/useScrollSync'
 
 interface EditorPreviewProps {
   previewRef: React.RefObject<HTMLDivElement>
@@ -17,6 +18,7 @@ interface EditorPreviewProps {
   isConverting: boolean
   previewContent: string
   codeTheme: CodeThemeId
+  showToolbar?: boolean
   onPreviewSizeChange: (size: PreviewSize) => void
 }
 
@@ -27,11 +29,14 @@ export function EditorPreview({
   isConverting,
   previewContent,
   codeTheme,
+  showToolbar = true,
   onPreviewSizeChange
 }: EditorPreviewProps) {
   const [zoom, setZoom] = useState(100)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const isScrolling = useRef<boolean>(false)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const { handlePreviewScroll } = useScrollSync()
   const { theme } = useTheme()
 
   // 初始化 Mermaid
@@ -161,22 +166,6 @@ export function EditorPreview({
     }
   }, [])
 
-  const handleZoomIn = () => {
-    setZoom(prev => Math.min(prev + 10, 200))
-  }
-
-  const handleZoomOut = () => {
-    setZoom(prev => Math.max(prev - 10, 50))
-  }
-
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      previewRef.current?.requestFullscreen()
-    } else {
-      document.exitFullscreen()
-    }
-  }
-
   return (
     <div 
       ref={previewRef}
@@ -188,73 +177,63 @@ export function EditorPreview({
         `code-theme-${codeTheme}`
       )}
     >
-      <div className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b flex items-center justify-between z-10 sticky top-0 left-0 right-0">
-        <div className="flex items-center gap-0.5 px-2">
-          <span className="text-sm text-muted-foreground">预览效果</span>
-        </div>
-        <div className="flex items-center gap-4 px-4 py-2">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleZoomOut}
-              className="p-1 rounded hover:bg-muted/80 text-muted-foreground"
-              disabled={zoom <= 50}
-            >
-              <ZoomOut className="h-4 w-4" />
-            </button>
-            <span className="text-sm text-muted-foreground">{zoom}%</span>
-            <button
-              onClick={handleZoomIn}
-              className="p-1 rounded hover:bg-muted/80 text-muted-foreground"
-              disabled={zoom >= 200}
-            >
-              <ZoomIn className="h-4 w-4" />
-            </button>
+      {showToolbar && (
+        <div className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b flex items-center justify-between z-10 sticky top-0 left-0 right-0">
+          <div className="flex items-center gap-0.5 px-2">
+            <span className="text-sm text-muted-foreground">预览效果</span>
           </div>
-          <div className="flex items-center gap-2">
-            <select
-              value={previewSize}
-              onChange={(e) => onPreviewSizeChange(e.target.value as PreviewSize)}
-              className="text-sm border rounded px-2 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-background text-foreground"
-            >
-              {Object.entries(PREVIEW_SIZES).map(([key, { label }]) => (
-                <option key={key} value={key}>{label}</option>
-              ))}
-            </select>
-            <button
-              onClick={toggleFullscreen}
-              className="p-1 rounded hover:bg-muted/80 text-muted-foreground"
-            >
-              {isFullscreen ? (
-                <Minimize2 className="h-4 w-4" />
-              ) : (
-                <Maximize2 className="h-4 w-4" />
-              )}
-            </button>
+          <div className="flex items-center gap-4 px-4 py-2">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setZoom(zoom => Math.max(zoom - 10, 50))}
+                className="p-1 rounded hover:bg-muted/80 text-muted-foreground"
+                disabled={zoom <= 50}
+              >
+                <ZoomOut className="h-4 w-4" />
+              </button>
+              <span className="text-sm text-muted-foreground">{zoom}%</span>
+              <button
+                onClick={() => setZoom(zoom => Math.min(zoom + 10, 200))}
+                className="p-1 rounded hover:bg-muted/80 text-muted-foreground"
+                disabled={zoom >= 200}
+              >
+                <ZoomIn className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="flex items-center gap-2">
+              <select
+                value={previewSize}
+                onChange={(e) => onPreviewSizeChange(e.target.value as PreviewSize)}
+                className="text-sm border rounded px-2 focus:outline-none focus:ring-2 focus:ring-primary/20 bg-background text-foreground"
+              >
+                {Object.entries(PREVIEW_SIZES).map(([value, { label }]) => (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={() => setIsFullscreen(!isFullscreen)}
+                className="p-1 rounded hover:bg-muted/80 text-muted-foreground"
+              >
+                {isFullscreen ? (
+                  <Minimize2 className="h-4 w-4" />
+                ) : (
+                  <Maximize2 className="h-4 w-4" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div 
         className="flex-1 overflow-y-auto"
-        onScroll={(e) => {
-          const container = e.currentTarget
-          const textarea = document.querySelector('.editor-container textarea')
-          if (!textarea || isScrolling.current) return
-          isScrolling.current = true
-
-          try {
-            const scrollPercentage = container.scrollTop / (container.scrollHeight - container.clientHeight)
-            const textareaScrollTop = scrollPercentage * (textarea.scrollHeight - textarea.clientHeight)
-            textarea.scrollTop = textareaScrollTop
-          } finally {
-            requestAnimationFrame(() => {
-              isScrolling.current = false
-            })
-          }
-        }}
+        onScroll={handlePreviewScroll}
       >
         <div className="h-full py-8 px-4">
-          <div 
+          <div
+            ref={contentRef}
             className={cn(
               "bg-background mx-auto rounded-lg transition-all duration-300",
               previewSize === 'full' ? '' : 'border shadow-sm'

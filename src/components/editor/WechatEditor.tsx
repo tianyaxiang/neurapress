@@ -4,7 +4,6 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { useToast } from '@/components/ui/use-toast'
 import { ToastAction } from '@/components/ui/toast'
 import { type RendererOptions } from '@/lib/markdown'
-import { useEditorSync } from './hooks/useEditorSync'
 import { useAutoSave } from './hooks/useAutoSave'
 import { EditorToolbar } from './components/EditorToolbar'
 import { EditorPreview } from './components/EditorPreview'
@@ -20,6 +19,11 @@ import { useEditorKeyboard } from './hooks/useEditorKeyboard'
 import { useScrollSync } from './hooks/useScrollSync'
 import { useWordStats } from './hooks/useWordStats'
 import { useCopy } from './hooks/useCopy'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Button } from '@/components/ui/button'
+import { Copy } from 'lucide-react'
+import { MobileEditor } from './components/MobileEditor'
+import { DesktopEditor } from './components/DesktopEditor'
 
 export default function WechatEditor() {
   const { toast } = useToast()
@@ -37,9 +41,21 @@ export default function WechatEditor() {
   const [codeTheme, setCodeTheme] = useLocalStorage<CodeThemeId>('code-theme', codeThemes[0].id)
 
   // 使用自定义 hooks
-  const { handleScroll } = useEditorSync(editorRef)
   const { handleEditorChange } = useAutoSave(value, setIsDraft)
   const { handleEditorScroll } = useScrollSync()
+
+  // 清除编辑器内容
+  const handleClear = useCallback(() => {
+    if (window.confirm('确定要清除所有内容吗？')) {
+      setValue('')
+      handleEditorChange('')
+      toast({
+        title: "已清除",
+        description: "编辑器内容已清除",
+        duration: 2000
+      })
+    }
+  }, [handleEditorChange, toast])
 
   // 手动保存
   const handleSave = useCallback(() => {
@@ -97,12 +113,29 @@ export default function WechatEditor() {
     })
   }, [handleEditorChange])
 
-  const { handleCopy } = useCopy()
+  const { copyToClipboard } = useCopy()
 
-  // 处理复制
-  const onCopy = useCallback(async () => {
-    return handleCopy(window.getSelection(), previewContent)
-  }, [handleCopy, previewContent])
+  const handleCopy = useCallback(async (): Promise<boolean> => {
+    const contentElement = previewRef.current?.querySelector('.preview-content') as HTMLElement | null
+    if (!contentElement) return false
+
+    const success = await copyToClipboard(contentElement)
+    if (success) {
+      toast({
+        title: "复制成功",
+        description: "内容已复制，可直接粘贴到公众号编辑器",
+        duration: 2000
+      })
+    } else {
+      toast({
+        variant: "destructive",
+        title: "复制失败",
+        description: "无法访问剪贴板，请检查浏览器权限",
+        duration: 2000
+      })
+    }
+    return success
+  }, [copyToClipboard, toast, previewRef])
 
   // 处理放弃草稿
   const handleDiscardDraft = useCallback(() => {
@@ -192,19 +225,6 @@ export default function WechatEditor() {
     setStyleOptions({})
   }, [])
 
-  // 清除编辑器内容
-  const handleClear = useCallback(() => {
-    if (window.confirm('确定要清除所有内容吗？')) {
-      setValue('')
-      handleEditorChange('')
-      toast({
-        title: "已清除",
-        description: "编辑器内容已清除",
-        duration: 2000
-      })
-    }
-  }, [handleEditorChange, toast])
-
   // 检测是否为移动设备
   const isMobile = useCallback(() => {
     if (typeof window === 'undefined') return false
@@ -245,141 +265,72 @@ export default function WechatEditor() {
   const { wordCount, readingTime } = useWordStats(value)
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
-      <div className="hidden sm:block">
-        <EditorToolbar 
-          value={value}
-          isDraft={isDraft}
-          showPreview={showPreview}
-          selectedTemplate={selectedTemplate}
-          onSave={handleSave}
-          onCopy={onCopy}
-          onCopyPreview={onCopy}
-          onNewArticle={handleNewArticle}
-          onArticleSelect={handleArticleSelect}
-          onTemplateSelect={handleTemplateSelect}
-          onTemplateChange={() => setValue(value)}
-          onStyleOptionsChange={setStyleOptions}
-          onPreviewToggle={() => setShowPreview(!showPreview)}
-          styleOptions={styleOptions}
-          wordCount={wordCount}
-          readingTime={readingTime}
-          codeTheme={codeTheme}
-          onCodeThemeChange={setCodeTheme}
-        />
-      </div>
-      
-      <div className="flex-1 flex flex-col sm:flex-row overflow-hidden">
-        {/* Mobile View */}
-        <div className="sm:hidden flex-1 flex flex-col">
-          <div className="flex items-center justify-between p-2 border-b bg-background">
-            <div className="flex-1 mr-2">
-              <select
-                value={selectedTemplate}
-                onChange={(e) => handleTemplateSelect(e.target.value)}
-                className="w-full p-2 rounded-md border"
-              >
-                {templates.map((template) => (
-                  <option key={template.id} value={template.id}>
-                    {template.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleClear}
-                className="flex items-center justify-center gap-1 px-2 py-1 rounded-md text-xs text-destructive hover:bg-muted transition-colors"
-                title="清除内容"
-              >
-                清除
-              </button>
-              <button
-                onClick={onCopy}
-                className="flex items-center justify-center gap-1 px-2 py-1 rounded-md text-xs text-primary hover:bg-muted transition-colors"
-              >
-                复制
-              </button>
-            </div>
-          </div>
-          <div className="flex-1 flex flex-col">
-            <div className="flex-1">
-              <div 
-                ref={editorRef}
-                className={cn(
-                  "h-full",
-                  selectedTemplate && templates.find(t => t.id === selectedTemplate)?.styles
-                )}
-              >
-                <textarea
-                  ref={textareaRef}
-                  value={value}
-                  onChange={handleInput}
-                  onKeyDown={handleKeyDown}
-                  onScroll={handleEditorScroll}
-                  className="w-full h-full resize-none outline-none p-4 font-mono text-base leading-relaxed overflow-y-scroll scrollbar-none"
-                  placeholder="开始写作..."
-                  spellCheck={false}
-                />
-              </div>
-            </div>
-            <div className="flex-1">
-              <EditorPreview 
-                previewRef={previewRef}
-                selectedTemplate={selectedTemplate}
-                previewSize={previewSize}
-                isConverting={isConverting}
-                previewContent={previewContent}
-                codeTheme={codeTheme}
-                onPreviewSizeChange={setPreviewSize}
-              />
-            </div>
-          </div>
-        </div>
+    <div className="relative flex flex-col h-screen">
+      {/* 工具栏 */}
+      <EditorToolbar
+        value={value}
+        isDraft={isDraft}
+        showPreview={showPreview}
+        selectedTemplate={selectedTemplate}
+        styleOptions={styleOptions}
+        codeTheme={codeTheme}
+        wordCount={wordCount}
+        readingTime={readingTime}
+        onSave={handleSave}
+        onCopy={handleCopy}
+        onCopyPreview={handleCopy}
+        onNewArticle={handleNewArticle}
+        onArticleSelect={handleArticleSelect}
+        onTemplateSelect={(templateId: string) => setSelectedTemplate(templateId)}
+        onTemplateChange={() => {}}
+        onStyleOptionsChange={setStyleOptions}
+        onPreviewToggle={() => setShowPreview(!showPreview)}
+        onCodeThemeChange={setCodeTheme}
+        onClear={handleClear}
+      />
 
-        {/* Desktop Split View */}
-        <div className="hidden sm:flex flex-1 flex-row">
-          <div 
-            ref={editorRef}
-            className={cn(
-              "editor-container bg-background transition-all duration-300 ease-in-out flex flex-col h-full",
-              showPreview 
-                ? "w-1/2 border-r" 
-                : "w-full",
-              selectedTemplate && templates.find(t => t.id === selectedTemplate)?.styles
-            )}
-          >
-            <MarkdownToolbar onInsert={handleToolbarInsert} />
-            <div className="flex-1 overflow-hidden">
-              <textarea
-                ref={textareaRef}
-                value={value}
-                onChange={handleInput}
-                onKeyDown={handleKeyDown}
-                onScroll={handleEditorScroll}
-                className="w-full h-full resize-none outline-none p-4 font-mono text-base leading-relaxed overflow-y-scroll scrollbar-none"
-                placeholder="开始写作..."
-                spellCheck={false}
-              />
-            </div>
-          </div>
-          
-          {showPreview && (
-            <EditorPreview 
-              previewRef={previewRef}
-              selectedTemplate={selectedTemplate}
-              previewSize={previewSize}
-              isConverting={isConverting}
-              previewContent={previewContent}
-              codeTheme={codeTheme}
-              onPreviewSizeChange={setPreviewSize}
-            />
-          )}
-        </div>
+      {/* 编辑器主体 */}
+      <div className="flex-1 min-h-0 flex flex-col">
+        {/* 移动设备编辑器 */}
+        <MobileEditor
+          textareaRef={textareaRef}
+          previewRef={previewRef}
+          value={value}
+          selectedTemplate={selectedTemplate}
+          previewSize={previewSize}
+          codeTheme={codeTheme}
+          previewContent={previewContent}
+          isConverting={isConverting}
+          onValueChange={setValue}
+          onEditorChange={handleEditorChange}
+          onEditorScroll={handleEditorScroll}
+          onPreviewSizeChange={setPreviewSize}
+          onCopy={handleCopy}
+        />
+
+        {/* 桌面设备编辑器 */}
+        <DesktopEditor
+          editorRef={editorRef}
+          textareaRef={textareaRef}
+          previewRef={previewRef}
+          value={value}
+          selectedTemplate={selectedTemplate}
+          showPreview={showPreview}
+          previewSize={previewSize}
+          isConverting={isConverting}
+          previewContent={previewContent}
+          codeTheme={codeTheme}
+          onValueChange={setValue}
+          onEditorChange={handleEditorChange}
+          onEditorScroll={handleEditorScroll}
+          onPreviewSizeChange={setPreviewSize}
+          onToolbarInsert={handleToolbarInsert}
+          onKeyDown={handleKeyDown}
+        />
       </div>
 
       {/* 底部状态栏 */}
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t h-10 flex items-center justify-end px-4 gap-4">
+      <div className="h-10 bg-background border-t flex items-center justify-end px-4 gap-4">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <span>{wordCount} 字</span>
         </div>
@@ -387,9 +338,6 @@ export default function WechatEditor() {
           <span>约 {readingTime}</span>
         </div>
       </div>
-
-      {/* 为底部工具栏添加间距 */}
-      <div className="h-10" />
     </div>
   )
 }

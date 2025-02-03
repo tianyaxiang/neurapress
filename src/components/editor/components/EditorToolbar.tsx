@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Copy, Plus, Save, Smartphone, Settings, Github } from 'lucide-react'
+import { Copy, Plus, Save, Smartphone, Settings, Github, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { WechatStylePicker } from '../../template/WechatStylePicker'
 import { TemplateManager } from '../../template/TemplateManager'
@@ -38,6 +38,7 @@ interface EditorToolbarProps {
   onStyleOptionsChange: (options: RendererOptions) => void
   onPreviewToggle: () => void
   onCodeThemeChange: (theme: CodeThemeId) => void
+  onClear: () => void
 }
 
 export function EditorToolbar({
@@ -58,7 +59,8 @@ export function EditorToolbar({
   codeTheme,
   onCodeThemeChange,
   wordCount,
-  readingTime
+  readingTime,
+  onClear
 }: EditorToolbarProps) {
   const { toast } = useToast()
 
@@ -126,28 +128,36 @@ export function EditorToolbar({
                 <Logo className="w-6 h-6" />
                 NeuraPress
               </Link>
-              <ArticleList 
-                onSelect={onArticleSelect}
-                currentContent={value}
-                onNew={onNewArticle}
-              />
+              <div className="hidden sm:block">
+                <ArticleList 
+                  onSelect={onArticleSelect}
+                  currentContent={value}
+                  onNew={onNewArticle}
+                />
+              </div>
               <WechatStylePicker 
                 value={selectedTemplate} 
                 onSelect={onTemplateSelect} 
               /> 
-              <CodeThemeSelector 
-                value={codeTheme} 
-                onChange={onCodeThemeChange} 
-              />
-              <StyleConfigDialog
-                value={styleOptions}
-                onChangeAction={onStyleOptionsChange}
-              />
-               <TemplateManager onTemplateChange={onTemplateChange} />
+              <div className="hidden sm:block">
+                <CodeThemeSelector 
+                  value={codeTheme} 
+                  onChange={onCodeThemeChange}
+                />
+              </div>
+              <div className="hidden sm:block">
+                <StyleConfigDialog
+                  value={styleOptions}
+                  onChangeAction={onStyleOptionsChange}
+                />
+              </div>
+              <div className="hidden sm:block">
+                <TemplateManager onTemplateChange={onTemplateChange} />
+              </div>
               <button
                 onClick={onPreviewToggle}
                 className={cn(
-                  "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors justify-center",
+                  "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors justify-center hidden sm:inline-flex",
                   showPreview 
                     ? "bg-primary text-primary-foreground hover:bg-primary/90"
                     : "bg-muted text-muted-foreground hover:bg-muted/90"
@@ -158,16 +168,13 @@ export function EditorToolbar({
               </button>
             </div>
             <div className="flex items-center gap-4">
-              {isDraft && (
-                <span className="text-sm text-muted-foreground">未保存</span>
-              )}
-              {!isDraft && (
-                <span className="text-sm text-muted-foreground">已保存</span>
-              )}
+              <span className="text-sm text-muted-foreground hidden sm:inline">
+                {isDraft ? '未保存' : '已保存'}
+              </span>
               <button
                 onClick={onSave}
                 className={cn(
-                  "inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors",
+                  "inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-sm transition-colors hidden sm:inline-flex",
                   isDraft 
                     ? "bg-primary text-primary-foreground hover:bg-primary/90"
                     : "bg-muted text-muted-foreground hover:bg-muted/90"
@@ -176,7 +183,14 @@ export function EditorToolbar({
                 <Save className="h-4 w-4" />
                 <span>保存</span>
               </button>
-             
+              
+              <button
+                onClick={onClear}
+                className="sm:hidden inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md bg-destructive text-destructive-foreground hover:bg-destructive/90 text-sm transition-colors"
+              >
+                <Trash2 className="h-4 w-4" />
+                <span>清除</span>
+              </button>
               <button
                 onClick={handleCopyPreview}
                 className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 text-sm transition-colors"
@@ -184,7 +198,7 @@ export function EditorToolbar({
                 <Copy className="h-4 w-4" />
                 <span>复制</span>
               </button>
-              <div className="flex items-center gap-1">
+              <div className="hidden sm:flex items-center gap-1">
                 <ThemeToggle />
                 <Button
                   variant="ghost"
