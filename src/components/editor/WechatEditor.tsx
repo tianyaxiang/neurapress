@@ -291,12 +291,27 @@ export default function WechatEditor() {
       setIsDraft(true)
       toast({
         description: "已恢复未保存的草稿",
-        action: <ToastAction altText="放弃">放弃草稿</ToastAction>,
+        action: <ToastAction altText="放弃" onClick={handleDiscardDraft}>放弃草稿</ToastAction>,
         duration: 5000,
       })
     } else if (savedContent) {
       setValue(savedContent)
     }
+  }, [toast])
+
+  // 处理放弃草稿
+  const handleDiscardDraft = useCallback(() => {
+    const savedContent = localStorage.getItem('wechat_editor_content')
+    // 移除草稿
+    localStorage.removeItem('wechat_editor_draft')
+    // 恢复到最后保存的内容，如果没有则清空
+    setValue(savedContent || '')
+    setIsDraft(false)
+    toast({
+      title: "已放弃草稿",
+      description: "已恢复到上次保存的内容",
+      duration: 2000
+    })
   }, [toast])
 
   // 渲染预览内容
