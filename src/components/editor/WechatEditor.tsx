@@ -70,12 +70,21 @@ export default function WechatEditor() {
   // 处理编辑器输入
   const handleInput = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value
+    const currentPosition = {
+      start: e.target.selectionStart,
+      end: e.target.selectionEnd,
+      scrollTop: e.target.scrollTop  // 保存当前滚动位置
+    }
+    
     setValue(newValue)
     handleEditorChange(newValue)
-    // 保存光标位置
-    setCursorPosition({
-      start: e.target.selectionStart,
-      end: e.target.selectionEnd
+    
+    // 使用 requestAnimationFrame 确保在下一帧恢复位置
+    requestAnimationFrame(() => {
+      if (textareaRef.current) {
+        textareaRef.current.scrollTop = currentPosition.scrollTop  // 恢复滚动位置
+        textareaRef.current.setSelectionRange(currentPosition.start, currentPosition.end)
+      }
     })
   }, [handleEditorChange])
 
@@ -411,6 +420,11 @@ export default function WechatEditor() {
 
   // 处理滚动同步
   const handleEditorScroll = useCallback((e: React.UIEvent<HTMLTextAreaElement>) => {
+    // 如果是由于输入导致的滚动，不进行同步
+    if (e.currentTarget.selectionStart !== e.currentTarget.selectionEnd) {
+      return;
+    }
+    
     if (isScrolling.current) return
     
     const textarea = e.currentTarget
@@ -431,19 +445,17 @@ export default function WechatEditor() {
       const scrollPercentage = currentScrollTop / (textarea.scrollHeight - textarea.clientHeight)
       const targetScrollTop = scrollPercentage * (previewContainer.scrollHeight - previewContainer.clientHeight)
       
-      // 使用 scrollTo 带平滑滚动效果
       previewContainer.scrollTo({
         top: targetScrollTop,
-        behavior: 'instant' // 使用即时滚动而不是平滑滚动
+        behavior: 'instant'
       })
     } finally {
-      // 使用较短的延迟时间
       if (scrollTimeout.current) {
         clearTimeout(scrollTimeout.current)
       }
       scrollTimeout.current = setTimeout(() => {
         isScrolling.current = false
-      }, 50) // 减少延迟时间到 50ms
+      }, 50)
     }
   }, [])
 
