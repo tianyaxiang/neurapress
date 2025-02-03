@@ -1,4 +1,5 @@
 import React from "react"
+import { initMermaid } from '@/lib/markdown/mermaid-init'
 
 declare global {
   interface Window {
@@ -40,47 +41,9 @@ export const MERMAID_CONFIG = {
  * 初始化 Mermaid
  */
 export async function initializeMermaid() {
-  // 等待 Mermaid 加载完成
   if (typeof window !== 'undefined') {
     try {
-      // 如果 mermaid 还没加载，等待它加载完成（最多等待 5 秒）
-      if (!window.mermaid) {
-        await new Promise<void>((resolve, reject) => {
-          const startTime = Date.now()
-          const checkMermaid = () => {
-            // 如果等待超过 5 秒，就放弃等待
-            if (Date.now() - startTime > 5000) {
-              reject(new Error('Mermaid initialization timeout'))
-              return
-            }
-
-            if (window.mermaid) {
-              resolve()
-            } else {
-              setTimeout(checkMermaid, 100)
-            }
-          }
-          checkMermaid()
-        })
-      }
-
-      // 配置 Mermaid
-      window.mermaid.initialize({
-        ...MERMAID_CONFIG,
-        startOnLoad: true,
-      })
-
-      // 初始化所有图表
-      const mermaidElements = document.querySelectorAll('.mermaid')
-      if (mermaidElements.length > 0) {
-        // 设置超时
-        const initPromise = window.mermaid.init(undefined, mermaidElements)
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Chart initialization timeout')), 5000)
-        })
-
-        await Promise.race([initPromise, timeoutPromise])
-      }
+      await initMermaid()
     } catch (error) {
       console.error('Mermaid initialization error:', error)
       // 即使初始化失败也继续执行，不阻塞整个应用
@@ -172,13 +135,7 @@ async function handlePreviewCopy(previewContent: string): Promise<boolean> {
   const mermaidElements = tempDiv.querySelectorAll('.mermaid')
   if (mermaidElements.length > 0) {
     try {
-      // 确保 mermaid 已经初始化
-      if (typeof window.mermaid !== 'undefined') {
-        // 使用相同的配置
-        window.mermaid.initialize(MERMAID_CONFIG)
-        // 重新渲染所有图表
-        await window.mermaid.init(undefined, mermaidElements)
-      }
+      await initMermaid()
     } catch (error) {
       console.error('Mermaid rendering error:', error)
     }
