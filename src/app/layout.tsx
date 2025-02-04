@@ -6,6 +6,7 @@ import 'katex/dist/katex.min.css'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import { cn } from '@/lib/utils'
 import { Toaster } from '@/components/ui/toaster'
+import { GoogleAnalytics } from '@/components/GoogleAnalytics'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -46,6 +47,7 @@ export default function RootLayout({
         'min-h-screen bg-background font-sans antialiased',
         inter.className
       )}>
+        <GoogleAnalytics />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
