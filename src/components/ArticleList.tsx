@@ -23,9 +23,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { FileText, Trash2, Menu, Plus, Save } from 'lucide-react'
+import { FileText, Trash2, Menu, Plus, Save, Edit2, Check } from 'lucide-react'
 import { useToast } from '@/components/ui/use-toast'
 import { ToastAction } from '@/components/ui/toast'
+import { Input } from '@/components/ui/input'
 
 interface Article {
   id: string
@@ -46,6 +47,9 @@ export function ArticleList({ onSelect, currentContent, onNew }: ArticleListProp
   const { toast } = useToast()
   const [articles, setArticles] = useState<Article[]>([])
   const [articleToDelete, setArticleToDelete] = useState<Article | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editingTitle, setEditingTitle] = useState('')
+  const [isOpen, setIsOpen] = useState(false)
 
   // 加载文章列表
   useEffect(() => {
@@ -119,6 +123,7 @@ export function ArticleList({ onSelect, currentContent, onNew }: ArticleListProp
     // 如果有外部传入的新建处理函数，优先使用
     if (onNew) {
       onNew()
+      setIsOpen(false)
       return
     }
 
@@ -126,23 +131,92 @@ export function ArticleList({ onSelect, currentContent, onNew }: ArticleListProp
     const newArticle: Article = {
       id: Date.now().toString(),
       title: '新文章',
-      content: '# 新文章\n\n开始写作...',
+      content: `# 新文章
+
+## 简介
+在这里写文章的简介...
+
+## 正文
+开始写作你的精彩内容...
+
+## 总结
+在这里总结文章的主要观点...
+
+---
+> 作者：[你的名字]
+> 日期：${new Date().toLocaleDateString()}
+`,
       template: 'default',
       createdAt: Date.now(),
       updatedAt: Date.now()
     }
 
+    // 保存新文章到本地存储
+    const updatedArticles = [newArticle, ...articles]
+    setArticles(updatedArticles)
+    localStorage.setItem('wechat_articles', JSON.stringify(updatedArticles))
+
+    // 选中新文章并关闭列表
     onSelect(newArticle)
+    setIsOpen(false)
+    
     toast({
       title: "新建成功",
-      description: "已创建新文章",
+      description: "已创建新文章，开始写作吧！",
       duration: 2000
     })
   }
 
+  // 开始重命名
+  const startRename = (article: Article) => {
+    setEditingId(article.id)
+    setEditingTitle(article.title)
+  }
+
+  // 保存重命名
+  const saveRename = (article: Article) => {
+    if (!editingTitle.trim()) {
+      toast({
+        variant: "destructive",
+        title: "重命名失败",
+        description: "文章标题不能为空",
+        duration: 2000
+      })
+      return
+    }
+
+    const updatedArticles = articles.map(a => {
+      if (a.id === article.id) {
+        return {
+          ...a,
+          title: editingTitle.trim(),
+          updatedAt: Date.now()
+        }
+      }
+      return a
+    })
+
+    setArticles(updatedArticles)
+    localStorage.setItem('wechat_articles', JSON.stringify(updatedArticles))
+    setEditingId(null)
+    setEditingTitle('')
+
+    toast({
+      title: "重命名成功",
+      description: `文章已重命名为"${editingTitle.trim()}"`,
+      duration: 2000
+    })
+  }
+
+  // 取消重命名
+  const cancelRename = () => {
+    setEditingId(null)
+    setEditingTitle('')
+  }
+
   return (
     <>
-      <Sheet>
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon" className="relative">
             <Menu className="h-5 w-5" />
@@ -175,27 +249,66 @@ export function ArticleList({ onSelect, currentContent, onNew }: ArticleListProp
                   key={article.id}
                   className="flex items-center justify-between p-2 rounded-md hover:bg-muted group"
                 >
-                  <button
-                    onClick={() => onSelect(article)}
-                    className="flex items-center gap-2 flex-1 text-left"
-                  >
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium truncate">{article.title}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {new Date(article.updatedAt).toLocaleString()}
-                      </div>
+                  {editingId === article.id ? (
+                    <div className="flex items-center gap-2 flex-1">
+                      <Input
+                        value={editingTitle}
+                        onChange={(e) => setEditingTitle(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            saveRename(article)
+                          } else if (e.key === 'Escape') {
+                            cancelRename()
+                          }
+                        }}
+                        className="h-8"
+                        autoFocus
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => saveRename(article)}
+                        className="h-8 w-8"
+                      >
+                        <Check className="h-4 w-4" />
+                      </Button>
                     </div>
-                  </button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="shrink-0 hover:bg-destructive/10 hover:text-destructive transition-colors"
-                    onClick={() => deleteArticle(article)}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                    <span className="sr-only">删除</span>
-                  </Button>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => onSelect(article)}
+                        className="flex items-center gap-2 flex-1 text-left"
+                      >
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium truncate">{article.title}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {new Date(article.updatedAt).toLocaleString()}
+                          </div>
+                        </div>
+                      </button>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => startRename(article)}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                          <span className="sr-only">重命名</span>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 shrink-0 hover:bg-destructive/10 hover:text-destructive transition-colors"
+                          onClick={() => deleteArticle(article)}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                          <span className="sr-only">删除</span>
+                        </Button>
+                      </div>
+                    </>
+                  )}
                 </div>
               ))}
               {articles.length === 0 && (
