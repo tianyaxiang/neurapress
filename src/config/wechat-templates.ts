@@ -45,7 +45,7 @@ export const templates: Template[] = [
             h2: {
               display: 'table',
               padding: '0 0.2em',
-              margin: '4em auto 2em',
+              margin: '2em auto 2em',
               color: '#fff',
               background: 'var(--themeColor)',
               fontSize: '1.2em',
