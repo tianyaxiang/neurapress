@@ -105,6 +105,7 @@ export default function WechatEditor() {
     setValue(newValue)
     handleEditorChange(newValue)
     
+    // 使用 requestAnimationFrame 确保在下一帧恢复滚动位置和光标位置
     requestAnimationFrame(() => {
       if (textareaRef.current) {
         textareaRef.current.scrollTop = currentPosition.scrollTop

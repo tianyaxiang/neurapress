@@ -61,8 +61,15 @@ export function DesktopEditor({
             ref={textareaRef}
             value={value}
             onChange={e => {
+              const scrollTop = e.target.scrollTop;
               onValueChange(e.target.value)
               onEditorChange(e.target.value)
+              // 保持滚动位置
+              requestAnimationFrame(() => {
+                if (textareaRef.current) {
+                  textareaRef.current.scrollTop = scrollTop;
+                }
+              });
             }}
             onKeyDown={onKeyDown}
             onScroll={e => {
