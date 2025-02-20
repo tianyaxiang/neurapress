@@ -77,6 +77,10 @@ pnpm start
 - Marked
 - shadcn/ui
 
+## 🌐 Community
+
+ [Email](mailto:tianyaxiang@qq.com) | [Twitter](https://x.com/tianyaxiang)
+
 ## 贡献指南
 
 欢迎提交 Issue 和 Pull Request。在提交 PR 之前，请确保：
