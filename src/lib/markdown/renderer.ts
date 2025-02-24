@@ -37,17 +37,18 @@ export class MarkdownRenderer {
       name: 'latexBlock',
       level: 'block',
       start(src: string) {
-        return src.match(/^\$\$\n/)?.index
+        return src.match(/^\$\$/)?.index
       },
       tokenizer(src: string) {
-        const rule = /^\$\$\n([\s\S]*?)\n\$\$/
+        const rule = /^\$\$([\s\S]*?)\$\$/
         const match = rule.exec(src)
         if (match) {
+          const content = match[1].trim()
           return {
             type: 'latexBlock',
             raw: match[0],
             tokens: [],
-            text: match[1].trim()
+            text: content
           }
         }
       },
@@ -136,17 +137,15 @@ export class MarkdownRenderer {
   private initializeRenderer() {
     // 重写 text 方法来处理行内 LaTeX 公式
     this.renderer.text = (token: Tokens.Text | Tokens.Escape) => {
-      // 处理行内公式 $...$ 和行间公式 $$`...`$$ 
-      return token.text.replace(/\$\$`([^`]+)`\$\$|\$([^$\n]+?)\$/g, (match, backtick, inline) => {
+      // 只处理行内公式
+      return token.text.replace(/(?<!\$)\$([^\n$]+?)\$/g, (match, inline) => {
         try {
-          const formula = backtick || inline
-          const isDisplayMode = !!backtick
-          return katex.renderToString(formula.trim(), {
-            displayMode: isDisplayMode,
+          return katex.renderToString(inline.trim(), {
+            displayMode: false,
             throwOnError: false
           })
         } catch (error) {
-          console.error('LaTeX rendering error:', error)
+          console.error('LaTeX inline rendering error:', error)
           return match
         }
       })
@@ -239,8 +238,7 @@ export class MarkdownRenderer {
       const tokens = marked.Lexer.lexInline(text)
       const content = marked.Parser.parseInline(tokens, { renderer: this.renderer })
       
-      return `<em${styleStr ? ` style="${styleStr}"` : ''}>${content}</em>`
-    }
+      return `<em${styleStr ? ` style="${styleStr}"` : ''}>${content}</em>`    }
 
     // 重写 strong 方法
     this.renderer.strong = ({ text }: Tokens.Strong) => {
@@ -312,23 +310,55 @@ export class MarkdownRenderer {
       }
       const styleStr = cssPropertiesToString(style)
       
-      // 处理嵌套列表
+      // 处理嵌套列表和内容
       let content = item.text
       if (item.tokens) {
         content = item.tokens.map(token => {
           if (token.type === 'list') {
             // 递归处理嵌套列表
             return this.renderer.list(token as Tokens.List)
+          } else if (token.type === 'text' || token.type === 'paragraph') {
+            // 处理文本节点和段落节点
+            // 首先处理块级公式
+            const processedText = (token.text || token.raw).replace(/\$\$([\s\S]+?)\$\$/g, (match: string, formula: string) => {
+              try {
+                const latexStyle = (this.options.block?.latex || {})
+                const style = {
+                  ...latexStyle,
+                  display: 'block',
+                  margin: '1em 0',
+                  textAlign: 'center' as const
+                }
+                const styleStr = cssPropertiesToString(style)
+                const rendered = katex.renderToString(formula.trim(), {
+                  displayMode: true,
+                  throwOnError: false
+                })
+                return `<div${styleStr ? ` style="${styleStr}"` : ''}>${rendered}</div>`
+              } catch (error) {
+                console.error('LaTeX block rendering error:', error)
+                return match
+              }
+            })
+            
+            // 然后处理其他内联标记
+            const inlineTokens = marked.Lexer.lexInline(processedText)
+            return marked.Parser.parseInline(inlineTokens, { renderer: this.renderer })
           } else {
-            // 处理其他类型的 token
-            const tokens = marked.Lexer.lexInline(token.raw)
-            return marked.Parser.parseInline(tokens, { renderer: this.renderer })
+            // 对于其他类型的 token，直接使用其原始内容
+            return token.raw
           }
         }).join('')
       } else {
         // 如果没有 tokens，则按普通文本处理
-        const tokens = marked.Lexer.lexInline(content)
-        content = marked.Parser.parseInline(tokens, { renderer: this.renderer })
+        const inlineTokens = marked.Lexer.lexInline(content)
+        content = marked.Parser.parseInline(inlineTokens, { renderer: this.renderer })
+      }
+      
+      // 处理任务列表项
+      if (item.task) {
+        const checkbox = `<input type="checkbox"${item.checked ? ' checked=""' : ''} disabled="" /> `
+        content = checkbox + content
       }
       
       return `<li${styleStr ? ` style="${styleStr}"` : ''}>${content}</li>`
