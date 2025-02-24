@@ -152,11 +152,14 @@ export function MarkdownToolbar({ onInsert }: MarkdownToolbarProps) {
                   variant="ghost"
                   size="sm"
                   className="h-8 w-8 p-0"
-                  onClick={() => onInsert(buttonTool.text, {
-                    wrap: buttonTool.wrap,
-                    placeholder: buttonTool.placeholder,
-                    suffix: buttonTool.suffix
-                  })}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    onInsert(buttonTool.text, {
+                      wrap: buttonTool.wrap,
+                      placeholder: buttonTool.placeholder,
+                      suffix: buttonTool.suffix
+                    })
+                  }}
                 >
                   {buttonTool.icon}
                 </Button>

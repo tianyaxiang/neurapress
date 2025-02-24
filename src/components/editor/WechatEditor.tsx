@@ -194,6 +194,7 @@ export default function WechatEditor() {
     const start = textarea.selectionStart
     const end = textarea.selectionEnd
     const selectedText = value.substring(start, end)
+    const scrollTop = textarea.scrollTop
     
     let newText = ''
     let newCursorPos = 0
@@ -216,6 +217,7 @@ export default function WechatEditor() {
 
     requestAnimationFrame(() => {
       textarea.focus()
+      textarea.scrollTop = scrollTop
       textarea.setSelectionRange(newCursorPos, newCursorPos)
     })
   }, [value, handleEditorChange])
