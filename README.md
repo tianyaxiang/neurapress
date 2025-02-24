@@ -1,6 +1,7 @@
 # NeuraPress
 
 NeuraPress 是一个现代化的 Markdown 编辑器，专注于提供优质的微信公众号排版体验。响应式设计，支持移动设备。搭配 DeepSeek和微信公众号助手使用，碎片时间也能用手机发有排版的文章了。
+![NeuraPress Website image](/public/assets/img/neurapress-web-app.jpg)
 
 ## 特性
 
