@@ -47,6 +47,64 @@ pnpm build
 pnpm start
 ```
 
+### 使用 Docker
+
+我们提供了两种 Docker 环境配置：开发环境和生产环境。所有 Docker 相关文件都位于 `docker` 目录下。
+
+#### 开发环境
+
+使用 Docker Compose 启动开发环境（支持热重载）：
+
+```bash
+# 启动开发环境
+docker compose -f docker/docker-compose.yml up
+
+# 在后台运行
+docker compose -f docker/docker-compose.yml up -d
+
+# 停止服务
+docker compose -f docker/docker-compose.yml down
+```
+
+#### 生产环境
+
+```bash
+# 构建生产镜像
+docker build -t neurapress:prod -f docker/Dockerfile.prod .
+
+# 运行生产容器
+docker run -p 3000:3000 neurapress:prod
+```
+
+#### 发布到 Docker Hub
+
+```bash
+# 登录到 Docker Hub
+docker login
+
+# 构建并标记镜像
+docker build -t [your-dockerhub-username]/neurapress:latest -f docker/Dockerfile.prod .
+
+# 推送到 Docker Hub
+docker push [your-dockerhub-username]/neurapress:latest
+```
+
+#### 从 Docker Hub 拉取和运行
+
+```bash
+# 拉取镜像
+docker pull [your-dockerhub-username]/neurapress:latest
+
+# 运行容器
+docker run -p 3000:3000 [your-dockerhub-username]/neurapress:latest
+```
+
+注意：
+- 使用 Docker Hub 时，请将 `[your-dockerhub-username]` 替换为你的 Docker Hub 用户名
+- 开发环境支持热重载，代码修改后会自动更新
+- 生产环境使用多阶段构建，优化了镜像大小和安全性
+- 所有环境都使用非 root 用户运行，提高安全性
+
 ## 使用指南
 
 1. **编辑内容**
