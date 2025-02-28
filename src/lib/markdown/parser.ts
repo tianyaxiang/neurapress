@@ -58,13 +58,6 @@ export class MarkdownParser {
             return token as any
           }
           return undefined
-        },
-        renderer(token: any) {
-          const footnoteStyle = (options?.inline?.footnote || {})
-          const styleStr = Object.entries(footnoteStyle)
-            .map(([key, value]) => `${key}:${value}`)
-            .join(';')
-          return `<sup${styleStr ? ` style="${styleStr}"` : ''}><a href="#fn-${token.text}">[${token.text}]</a></sup>`
         }
       }]
     })

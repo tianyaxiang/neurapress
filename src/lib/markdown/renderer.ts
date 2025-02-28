@@ -370,6 +370,13 @@ export class MarkdownRenderer {
       const styleStr = cssPropertiesToString(delStyle)
       return `<del${styleStr ? ` style="${styleStr}"` : ''}>${text}</del>`
     }
+
+    // 添加脚注支持
+    this.renderer.footnote = (token: any) => {
+      const footnoteStyle = (this.options.inline?.footnote || {})
+      const styleStr = cssPropertiesToString(footnoteStyle)
+      return `<sup${styleStr ? ` style="${styleStr}"` : ''}><a href="#fn-${token.text}">[${token.text}]</a></sup>`
+    }
   }
 
   public getRenderer(): typeof marked.Renderer.prototype {
