@@ -24,6 +24,7 @@ import { Button } from '@/components/ui/button'
 import { Copy } from 'lucide-react'
 import { MobileEditor } from './components/MobileEditor'
 import { DesktopEditor } from './components/DesktopEditor'
+import { getExampleContent } from '@/lib/utils/loadExampleContent'
 
 export default function WechatEditor() {
   const { toast } = useToast()
@@ -171,7 +172,8 @@ export default function WechatEditor() {
         description: "当前文章未保存，是否继续？",
         action: (
           <ToastAction altText="继续" onClick={() => {
-            setValue('# 新文章\n\n开始写作...')
+            const exampleContent = getExampleContent()
+            setValue(exampleContent)
             setIsDraft(false)
           }}>
             继续
@@ -182,7 +184,8 @@ export default function WechatEditor() {
       return
     }
 
-    setValue('# 新文章\n\n开始写作...')
+    const exampleContent = getExampleContent()
+    setValue(exampleContent)
     setIsDraft(false)
   }, [isDraft, toast])
 
@@ -262,6 +265,15 @@ export default function WechatEditor() {
       })
     } else if (savedContent) {
       setValue(savedContent)
+    } else {
+      // 如果没有保存的内容或草稿，则加载示例内容
+      const exampleContent = getExampleContent()
+      setValue(exampleContent)
+      toast({
+        title: "欢迎使用 NeuraPress",
+        description: "已加载示例内容，您可以开始编辑或查看效果",
+        duration: 3000,
+      })
     }
   }, [toast, handleDiscardDraft])
 

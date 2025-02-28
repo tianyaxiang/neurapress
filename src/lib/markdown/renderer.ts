@@ -366,16 +366,9 @@ export class MarkdownRenderer {
 
     // 添加删除线支持
     this.renderer.del = ({ text }: Tokens.Del) => {
-      const delStyle = (this.options.inline?.del || {})
-      const styleStr = cssPropertiesToString(delStyle)
+      const styleOptions = (this.options.inline?.del || {})
+      const styleStr = cssPropertiesToString(styleOptions)
       return `<del${styleStr ? ` style="${styleStr}"` : ''}>${text}</del>`
-    }
-
-    // 添加脚注支持
-    this.renderer.footnote = (token: any) => {
-      const footnoteStyle = (this.options.inline?.footnote || {})
-      const styleStr = cssPropertiesToString(footnoteStyle)
-      return `<sup${styleStr ? ` style="${styleStr}"` : ''}><a href="#fn-${token.text}">[${token.text}]</a></sup>`
     }
   }
 

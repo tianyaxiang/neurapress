@@ -2,6 +2,7 @@ import { marked } from 'marked'
 import type { RendererOptions } from './types'
 import { MarkdownRenderer } from './renderer'
 import { baseStylesToString } from './styles'
+import type { Tokens } from 'marked'
 
 export class MarkdownParser {
   private options: RendererOptions
@@ -34,32 +35,6 @@ export class MarkdownParser {
           })
         }
       }
-    })
-
-    // 添加脚注支持
-    const options = this.options // 在闭包中保存 options 引用
-    marked.use({
-      extensions: [{
-        name: 'footnote',
-        level: 'inline',
-        start(src: string) { 
-          const match = src.match(/^\[\^([^\]]+)\]/)
-          return match ? match.index : undefined 
-        },
-        tokenizer(src: string) {
-          const match = /^\[\^([^\]]+)\]/.exec(src)
-          if (match) {
-            const token = {
-              type: 'footnote',
-              raw: match[0],
-              text: match[1],
-              tokens: []
-            }
-            return token as any
-          }
-          return undefined
-        }
-      }]
     })
 
     // 添加 Mermaid 支持
