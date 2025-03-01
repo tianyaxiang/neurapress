@@ -253,19 +253,12 @@ export const templates: Template[] = [
           textIndent: '0em',
           lineHeight: '1.75em',
           margin:'1em 8px',
-          visibility: 'visible',
           fontSize: '16px',
-          textIndent: '0em',
           fontFamily: 'mp-quote, PingFang SC, system-ui, -apple-system, BlinkMacSystemFont, Helvetica Neue, Hiragino Sans GB, Microsoft YaHei UI, Microsoft YaHei, Arial, sans-serif',
           letterSpacing: '1px',
         }
       },
-      inline: { span:{
-        fontSize: '16px',
-        textIndent: '0em',
-        fontFamily: 'mp-quote, PingFang SC, system-ui, -apple-system, BlinkMacSystemFont, Helvetica Neue, Hiragino Sans GB, Microsoft YaHei UI, Microsoft YaHei, Arial, sans-serif',
-        letterSpacing: '1px',
-      },
+      inline: {
         strong: {
           color: '#16a34a',
           fontWeight: 'bold'
