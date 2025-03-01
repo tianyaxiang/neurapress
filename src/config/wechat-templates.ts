@@ -211,6 +211,71 @@ export const templates: Template[] = [
         transform: (html: string) => html
   },
   {
+    id: 'simple',
+    name: '简洁风格',
+    description: '雷军公众号文章样式',
+    styles: '',
+    options: {
+      base: {
+        themeColor: 'rgb(255, 104, 39)',
+        fontSize:'16px',
+        lineHeight: '1.75em',
+      },
+      block: {
+        h1: {
+          textAlign:'justify',
+          textIndent: '0em',
+          lineHeight: '1.75em',
+          margin:'1em 8px',
+          color: 'rgb(255, 104, 39)',
+          fontSize: '24px',
+          letterSpacing: '1px',
+        },
+        h2: {
+          textAlign:'justify',
+          textIndent: '0em',
+          lineHeight: '1.75em',
+          margin:'1em 8px',
+          color: 'rgb(255, 104, 39)',
+          fontSize: '24px',
+          letterSpacing: '1px',
+        },
+        h3: {
+          textAlign:'justify',
+          textIndent: '0em',
+          lineHeight: '1.75em',
+          margin:'1em 8px',
+          fontSize: '16px',
+          fontWeight: 'bold',
+        },
+        p: {
+          textAlign:'justify',
+          textIndent: '0em',
+          lineHeight: '1.75em',
+          margin:'1em 8px',
+          fontSize: '16px',
+          fontFamily: 'mp-quote, PingFang SC, system-ui, -apple-system, BlinkMacSystemFont, Helvetica Neue, Hiragino Sans GB, Microsoft YaHei UI, Microsoft YaHei, Arial, sans-serif',
+          letterSpacing: '1px',
+        }
+      },
+      inline: {
+        strong: {
+          color: '#16a34a',
+          fontWeight: 'bold'
+        },
+        em: {
+          fontStyle: 'italic',
+          color: '#666'
+        },
+        link: {
+          color: '#3b82f6',
+          textDecoration: 'underline'
+        }
+      }
+    },
+    transform: (html: string) => html
+  },
+  {
     id: 'elegant',
     name: '优雅风格',
     description: '适合文学、艺术类文章',
@@ -335,6 +400,7 @@ export const templates: Template[] = [
         }
       },
       inline: {
+       
         strong: {
           color: '#4299e1',
           fontWeight: 'bold'
