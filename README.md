@@ -101,9 +101,6 @@ docker run -p 3000:3000 [your-dockerhub-username]/neurapress:latest
 
 注意：
 - 使用 Docker Hub 时，请将 `[your-dockerhub-username]` 替换为你的 Docker Hub 用户名
-- 开发环境支持热重载，代码修改后会自动更新
-- 生产环境使用多阶段构建，优化了镜像大小和安全性
-- 所有环境都使用非 root 用户运行，提高安全性
 
 ## 使用指南
 
