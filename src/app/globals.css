@@ -694,4 +694,24 @@
   .scrollbar-none::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* 行内代码样式 */
+.inline-code::before,
+.inline-code::after {
+  content: none !important;
+}
+
+.inline-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.9em;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  margin: 0 0.2em;
+}
+
+/* 暗色主题支持 */
+.dark .inline-code {
+  background: rgba(255, 255, 255, 0.1);
 } 

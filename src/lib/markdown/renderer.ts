@@ -224,7 +224,7 @@ export class MarkdownRenderer {
     this.renderer.codespan = ({ text }: Tokens.Codespan) => {  
       const codespanStyle = (this.options.inline?.codespan || {})
       const styleStr = cssPropertiesToString(codespanStyle)
-      return `<code${styleStr ? ` style="${styleStr}"` : ''}>${text}</code>`
+      return `<code class="inline-code"${styleStr ? ` style="${styleStr}"` : ''}>${text}</code>`
     }
 
     // 重写 em 方法
