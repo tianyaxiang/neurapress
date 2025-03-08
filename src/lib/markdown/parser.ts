@@ -124,9 +124,9 @@ export class MarkdownParser {
   // 预处理 markdown 文本
   private preprocessMarkdown(markdown: string): string {
     return markdown
-      // 处理 ** 语法，但排除已经是 HTML 的部分
-      .replace(/(?<!<[^>]*)\*\*([^*]+)\*\*(?![^<]*>)/g, '<strong>$1</strong>')
+      // 移除自定义处理 ** 语法的逻辑，让 marked 库自己处理
+      // .replace(/(?<!<[^>]*)\*\*([^*]+)\*\*(?![^<]*>)/g, '<strong>$1</strong>')
       // 处理无序列表的 - 标记，但排除代码块内的部分
-      .replace(/^(?!\s*```)([ \t]*)-\s+/gm, '$1• ')
+      //.replace(/^(?!\s*```)([ \t]*)-\s+/gm, '$1• ')
   }
 } 
