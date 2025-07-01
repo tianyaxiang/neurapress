@@ -134,6 +134,9 @@ docker run -p 3000:3000 [your-dockerhub-username]/neurapress:latest
 - Marked
 - shadcn/ui
 
+## 赞助
+[![Powered by DartNode](https://dartnode.com/branding/DN-Open-Source-sm.png)](https://dartnode.com "Powered by DartNode - Free VPS for Open Source")
+
 ## 🌐 Community
 
  [Email](mailto:tianyaxiang@qq.com) | [Twitter](https://x.com/tianyaxiang)
