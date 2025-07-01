@@ -1,4 +1,4 @@
-import XiaohongshuMarkdownEditor from '@/components/editor/XiaohongshuMarkdownEditor'
+import XiaohongshuMarkdownEditor from '@/components/editor/xiaohongshu/XiaohongshuMarkdownEditor'
 import { Toaster } from '@/components/ui/toaster'
 
 export default function XiaohongshuPage() {
