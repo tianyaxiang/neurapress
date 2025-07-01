@@ -10,6 +10,10 @@ import { Button } from '@/components/ui/button'
 
 const navigation = [
   { name: '微信公众号', href: '/wechat' },
+  { name: '小红书', href: '/xiaohongshu' },
+  { name: '公众号转Markdown', href: 'https://mp2md.leti.ltd/', target: '_blank' },
+  { name: '关于我们', href: '/about' },
+  { name: '使用帮助', href: '/help' },
 ]
 
 export function MainNav() {
