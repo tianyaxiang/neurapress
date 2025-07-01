@@ -12,4 +12,229 @@
 .xiaohongshu-template p {
   margin-bottom: 0.8em;
   color: #222;
+}
+
+/* 小红书预览样式 */
+.xiaohongshu-preview {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.8;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.xiaohongshu-preview h1 {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  color: #333;
+  text-align: center;
+}
+
+.xiaohongshu-preview h2 {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 20px 0 12px 0;
+  color: #444;
+}
+
+.xiaohongshu-preview h3 {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 16px 0 8px 0;
+  color: #555;
+}
+
+.xiaohongshu-preview p {
+  margin-bottom: 12px;
+  color: #333;
+  text-align: justify;
+}
+
+.xiaohongshu-preview strong {
+  font-weight: bold;
+  color: #e91e63;
+}
+
+.xiaohongshu-preview em {
+  font-style: italic;
+  color: #666;
+}
+
+.xiaohongshu-preview ul, 
+.xiaohongshu-preview ol {
+  margin: 12px 0;
+  padding-left: 20px;
+}
+
+.xiaohongshu-preview li {
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.xiaohongshu-preview blockquote {
+  margin: 16px 0;
+  padding: 12px 16px;
+  background-color: #f8f9fa;
+  border-left: 4px solid #e91e63;
+  border-radius: 4px;
+  font-style: italic;
+  color: #666;
+}
+
+.xiaohongshu-preview code {
+  background-color: #f1f3f4;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+  color: #d63384;
+}
+
+.xiaohongshu-preview pre {
+  background-color: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 16px 0;
+  border: 1px solid #e9ecef;
+}
+
+.xiaohongshu-preview pre code {
+  background-color: transparent;
+  padding: 0;
+  color: #333;
+}
+
+.xiaohongshu-preview hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #e91e63, transparent);
+  margin: 24px 0;
+}
+
+.xiaohongshu-preview a {
+  color: #e91e63;
+  text-decoration: none;
+}
+
+.xiaohongshu-preview a:hover {
+  text-decoration: underline;
+}
+
+.xiaohongshu-preview img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 12px 0;
+}
+
+/* 表格样式 */
+.xiaohongshu-preview table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+}
+
+.xiaohongshu-preview th,
+.xiaohongshu-preview td {
+  border: 1px solid #ddd;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.xiaohongshu-preview th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+}
+
+/* 模板样式 */
+.xiaohongshu-default {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+.xiaohongshu-default .preview-content {
+  padding: 24px;
+  background-color: #fff;
+  border-radius: 12px;
+  line-height: 1.8;
+  max-width: 500px;
+  margin: 0 auto;
+  color: #333;
+}
+
+.xiaohongshu-cute {
+  font-family: "Comic Sans MS", cursive, sans-serif;
+}
+
+.xiaohongshu-cute .preview-content {
+  padding: 24px;
+  background-color: #fff5f5;
+  border-radius: 20px;
+  line-height: 1.8;
+  max-width: 500px;
+  margin: 0 auto;
+  border: 2px solid #ffc1cc;
+  color: #e91e63;
+}
+
+.xiaohongshu-cute strong {
+  color: #ff1744 !important;
+}
+
+.xiaohongshu-minimal {
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+.xiaohongshu-minimal .preview-content {
+  padding: 32px;
+  background-color: #fafafa;
+  border-radius: 8px;
+  line-height: 1.9;
+  max-width: 500px;
+  margin: 0 auto;
+  border: 1px solid #e0e0e0;
+  color: #2c2c2c;
+}
+
+.xiaohongshu-elegant {
+  font-family: "Times New Roman", serif;
+}
+
+.xiaohongshu-elegant .preview-content {
+  padding: 28px;
+  background-color: #f8f8f8;
+  border-radius: 16px;
+  line-height: 1.8;
+  max-width: 500px;
+  margin: 0 auto;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  color: #444;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .xiaohongshu-preview {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  
+  .xiaohongshu-preview h1 {
+    font-size: 20px;
+  }
+  
+  .xiaohongshu-preview h2 {
+    font-size: 18px;
+  }
+  
+  .xiaohongshu-preview h3 {
+    font-size: 16px;
+  }
+
+  .xiaohongshu-default .preview-content,
+  .xiaohongshu-cute .preview-content,
+  .xiaohongshu-minimal .preview-content,
+  .xiaohongshu-elegant .preview-content {
+    max-width: 100%;
+    padding: 16px;
+  }
 } 

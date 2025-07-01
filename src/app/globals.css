@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 导入模板样式 */
+@import '../styles/templates/xiaohongshu.css';
+
 @layer base {
   :root {
     --background: 0 0% 100%;
