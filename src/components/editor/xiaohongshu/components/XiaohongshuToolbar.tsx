@@ -11,9 +11,11 @@ import {
   xiaohongshuTemplates, 
   pageModes,
   pageNumberOptions,
+  pageSizeOptions,
   type XiaohongshuTemplateId, 
   type PageMode,
-  type PageNumberPosition 
+  type PageNumberPosition,
+  type PageSizeOption 
 } from '../constants'
 
 interface XiaohongshuToolbarProps {
@@ -22,6 +24,7 @@ interface XiaohongshuToolbarProps {
   isGeneratingImage: boolean
   pageMode: PageMode
   pageNumberPosition: PageNumberPosition
+  pageSize: PageSizeOption
   totalPages: number
   onTemplateChange: (template: XiaohongshuTemplateId) => void
   onSave: () => void
@@ -30,6 +33,7 @@ interface XiaohongshuToolbarProps {
   onGenerateImage: () => void
   onPageModeChange: (mode: PageMode) => void
   onPageNumberPositionChange: (position: PageNumberPosition) => void
+  onPageSizeChange: (size: PageSizeOption) => void
 }
 
 export function XiaohongshuToolbar({
@@ -38,6 +42,7 @@ export function XiaohongshuToolbar({
   isGeneratingImage,
   pageMode,
   pageNumberPosition,
+  pageSize,
   totalPages,
   onTemplateChange,
   onSave,
@@ -46,6 +51,7 @@ export function XiaohongshuToolbar({
   onGenerateImage,
   onPageModeChange,
   onPageNumberPositionChange,
+  onPageSizeChange,
 }: XiaohongshuToolbarProps) {
   return (
     <div className="flex-none border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-20">
@@ -133,6 +139,28 @@ export function XiaohongshuToolbar({
                     </Select>
                   </div>
 
+                  {/* 分页大小设置 */}
+                  <div className="space-y-3">
+                    <Label htmlFor="page-size">分页大小</Label>
+                    <Select value={pageSize} onValueChange={onPageSizeChange}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(pageSizeOptions).map(([key, option]) => (
+                          <SelectItem key={key} value={key}>
+                            <div>
+                              <div className="font-medium">{option.name}</div>
+                              <div className="text-xs text-muted-foreground">
+                                {option.description}
+                              </div>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
                   {/* 当前状态信息 */}
                   <div className="pt-4 border-t space-y-2 text-sm text-muted-foreground">
                     <div className="flex justify-between">
@@ -146,6 +174,14 @@ export function XiaohongshuToolbar({
                     <div className="flex justify-between">
                       <span>页码位置：</span>
                       <span className="font-medium">{pageNumberOptions[pageNumberPosition].name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>分页大小：</span>
+                      <span className="font-medium">{pageSizeOptions[pageSize].name}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>每页字符数：</span>
+                      <span className="font-medium">{pageSizeOptions[pageSize].maxLength}</span>
                     </div>
                   </div>
                 </div>
@@ -186,6 +222,7 @@ export function XiaohongshuToolbar({
               size="sm"
               onClick={onGenerateImage}
               disabled={isGeneratingImage}
+              title="推荐上传3:4至2:1比例、分辨率不低于720*960的照片"
             >
               {isGeneratingImage ? (
                 <div className="h-4 w-4 mr-1 animate-spin rounded-full border-2 border-b-transparent" />

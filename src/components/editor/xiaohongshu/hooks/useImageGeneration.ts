@@ -13,13 +13,26 @@ export function useImageGeneration() {
     contentElement: HTMLElement,
     filename: string = `xiaohongshu-note-${Date.now()}.png`
   ) => {
+    // 计算合适的缩放比例以确保最小分辨率
+    const minWidth = 720
+    const minHeight = 960
+    const elementWidth = contentElement.scrollWidth
+    const elementHeight = contentElement.scrollHeight
+    
+    // 计算缩放比例，确保至少达到最小分辨率
+    const scaleX = Math.max(minWidth / elementWidth, 1)
+    const scaleY = Math.max(minHeight / elementHeight, 1)
+    const scale = Math.max(scaleX, scaleY, 2) // 最小缩放2倍以保证清晰度
+    
     const canvas = await html2canvas(contentElement, {
       backgroundColor: '#ffffff',
-      scale: 2, // 提高清晰度
+      scale: scale,
       useCORS: true,
       allowTaint: true,
       height: contentElement.scrollHeight,
       width: contentElement.scrollWidth,
+      logging: false, // 关闭日志以提高性能
+      imageTimeout: 15000, // 增加图片加载超时时间
     })
 
     // 下载图片
@@ -63,14 +76,27 @@ export function useImageGeneration() {
         continue
       }
 
+      // 计算合适的缩放比例以确保最小分辨率
+      const minWidth = 720
+      const minHeight = 960
+      const elementWidth = (contentElement as HTMLElement).scrollWidth
+      const elementHeight = (contentElement as HTMLElement).scrollHeight
+      
+      // 计算缩放比例，确保至少达到最小分辨率
+      const scaleX = Math.max(minWidth / elementWidth, 1)
+      const scaleY = Math.max(minHeight / elementHeight, 1)
+      const scale = Math.max(scaleX, scaleY, 2) // 最小缩放2倍以保证清晰度
+
       // 生成当前页的图片
       const canvas = await html2canvas(contentElement as HTMLElement, {
         backgroundColor: '#ffffff',
-        scale: 2,
+        scale: scale,
         useCORS: true,
         allowTaint: true,
         height: (contentElement as HTMLElement).scrollHeight,
         width: (contentElement as HTMLElement).scrollWidth,
+        logging: false, // 关闭日志以提高性能
+        imageTimeout: 15000, // 增加图片加载超时时间
       })
 
       // 将canvas转换为blob并添加到zip
@@ -112,11 +138,16 @@ export function useImageGeneration() {
           throw new Error('预览内容未找到')
         }
 
-        await generateSingleImage(contentElement as HTMLElement)
+        const canvas = await generateSingleImage(contentElement as HTMLElement)
+        
+        // 获取生成的图片尺寸
+        const generatedWidth = canvas.width
+        const generatedHeight = canvas.height
+        const aspectRatio = (generatedWidth / generatedHeight).toFixed(2)
         
         toast({
           title: "图片生成成功",
-          description: "图片已自动下载",
+          description: `图片已自动下载 (${generatedWidth}×${generatedHeight}, 比例${aspectRatio}:1)。建议上传3:4至2:1比例、分辨率不低于720*960的照片获得最佳效果`,
         })
       } else {
         // 多页模式
@@ -127,7 +158,7 @@ export function useImageGeneration() {
         
         toast({
           title: "图片生成成功",
-          description: `已生成 ${pageContents.length} 张图片并打包为ZIP文件`,
+          description: `已生成 ${pageContents.length} 张图片并打包为ZIP文件。建议上传3:4至2:1比例、分辨率不低于720*960的照片获得最佳效果`,
         })
       }
     } catch (error) {

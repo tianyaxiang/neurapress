@@ -58,11 +58,42 @@ export const pageNumberOptions = {
 
 export type PageNumberPosition = keyof typeof pageNumberOptions
 
+// 分页大小配置
+export const pageSizeOptions = {
+  small: {
+    name: '小内容量',
+    id: 'small',
+    description: '每页约800字符，适合短篇内容',
+    maxLength: 800
+  },
+  medium: {
+    name: '中内容量',
+    id: 'medium',
+    description: '每页约1500字符，适合中篇内容',
+    maxLength: 1500
+  },
+  large: {
+    name: '大内容量',
+    id: 'large',
+    description: '每页约2500字符，适合长篇内容',
+    maxLength: 2500
+  },
+  xlarge: {
+    name: '超大内容量',
+    id: 'xlarge',
+    description: '每页约4000字符，适合超长内容',
+    maxLength: 4000
+  }
+} as const
+
+export type PageSizeOption = keyof typeof pageSizeOptions
+
 // 分页设置
 export const PAGE_SETTINGS = {
   maxHeight: 800, // 每页最大高度（像素）
   minHeight: 400, // 每页最小高度（像素）
   pageMargin: 40, // 页面边距
+  defaultPageSize: 'medium' as PageSizeOption, // 默认分页大小
 } as const
 
 // 默认Markdown内容
@@ -121,5 +152,6 @@ export const STORAGE_KEYS = {
   TEMPLATE: 'xiaohongshu_editor_template',
   ZOOM: 'xiaohongshu_editor_zoom',
   PAGE_MODE: 'xiaohongshu_page_mode',
-  PAGE_NUMBER_POSITION: 'xiaohongshu_page_number_position'
+  PAGE_NUMBER_POSITION: 'xiaohongshu_page_number_position',
+  PAGE_SIZE: 'xiaohongshu_page_size'
 } as const 

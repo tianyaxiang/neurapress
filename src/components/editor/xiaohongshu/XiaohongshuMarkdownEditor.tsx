@@ -41,6 +41,7 @@ export default function XiaohongshuMarkdownEditor() {
   const {
     pageMode,
     pageNumberPosition,
+    pageSize,
     currentPage,
     totalPages,
     hasMultiplePages,
@@ -48,6 +49,7 @@ export default function XiaohongshuMarkdownEditor() {
     hasNextPage,
     handlePageModeChange,
     handlePageNumberPositionChange,
+    handlePageSizeChange,
     splitContentToPages,
     goToPage,
     goToNextPage,
@@ -94,6 +96,7 @@ export default function XiaohongshuMarkdownEditor() {
           isGeneratingImage={isGeneratingImage}
           pageMode={pageMode}
           pageNumberPosition={pageNumberPosition}
+          pageSize={pageSize}
           totalPages={totalPages}
           onTemplateChange={setSelectedTemplate}
           onSave={handleSave}
@@ -102,6 +105,7 @@ export default function XiaohongshuMarkdownEditor() {
           onGenerateImage={handleGenerateImage}
           onPageModeChange={handlePageModeChange}
           onPageNumberPositionChange={handlePageNumberPositionChange}
+          onPageSizeChange={handlePageSizeChange}
         />
 
         {/* 编辑器区域 */}
