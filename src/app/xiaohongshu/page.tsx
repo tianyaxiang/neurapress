@@ -7,7 +7,7 @@ export default function XiaohongshuPage() {
       <div className="flex-1 relative">
         <XiaohongshuMarkdownEditor />
       </div>
-      
+
       <Toaster />
     </main>
   )
