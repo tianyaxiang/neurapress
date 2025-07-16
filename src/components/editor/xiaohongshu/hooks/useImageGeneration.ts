@@ -13,15 +13,44 @@ export function useImageGeneration() {
     contentElement: HTMLElement,
     filename: string = `xiaohongshu-note-${Date.now()}.png`
   ) => {
+    // 保存原始样式
+    const originalStyles = {
+      height: contentElement.style.height,
+      minHeight: contentElement.style.minHeight,
+      width: contentElement.style.width,
+      display: contentElement.style.display,
+      flexDirection: contentElement.style.flexDirection,
+      justifyContent: contentElement.style.justifyContent,
+      alignItems: contentElement.style.alignItems,
+      margin: contentElement.style.margin,
+      padding: contentElement.style.padding,
+      boxSizing: contentElement.style.boxSizing,
+    }
+
+    // 设置标准尺寸
+    const standardWidth = 720
+    const standardHeight = Math.max(contentElement.scrollHeight, 960)
+    
+    // 添加生成中的样式类并设置固定尺寸
+    contentElement.classList.add('generating-image')
+    contentElement.style.minHeight = `${standardHeight}px`
+    contentElement.style.height = `${standardHeight}px`
+    contentElement.style.width = `${standardWidth}px`
+    contentElement.style.display = 'flex'
+    contentElement.style.flexDirection = 'column'
+    contentElement.style.justifyContent = 'flex-start'
+    contentElement.style.alignItems = 'center'
+    contentElement.style.margin = '0 auto'
+    contentElement.style.padding = '40px 60px'
+    contentElement.style.boxSizing = 'border-box'
+    
     // 计算合适的缩放比例以确保最小分辨率
     const minWidth = 720
     const minHeight = 960
-    const elementWidth = contentElement.scrollWidth
-    const elementHeight = contentElement.scrollHeight
     
     // 计算缩放比例，确保至少达到最小分辨率
-    const scaleX = Math.max(minWidth / elementWidth, 1)
-    const scaleY = Math.max(minHeight / elementHeight, 1)
+    const scaleX = Math.max(minWidth / standardWidth, 1)
+    const scaleY = Math.max(minHeight / standardHeight, 1)
     const scale = Math.max(scaleX, scaleY, 2) // 最小缩放2倍以保证清晰度
     
     const canvas = await html2canvas(contentElement, {
@@ -29,11 +58,19 @@ export function useImageGeneration() {
       scale: scale,
       useCORS: true,
       allowTaint: true,
-      height: contentElement.scrollHeight,
-      width: contentElement.scrollWidth,
+      height: standardHeight,
+      width: standardWidth,
       logging: false, // 关闭日志以提高性能
       imageTimeout: 15000, // 增加图片加载超时时间
+      x: 0,
+      y: 0,
+      scrollX: 0,
+      scrollY: 0,
     })
+
+    // 恢复原始样式
+    contentElement.classList.remove('generating-image')
+    Object.assign(contentElement.style, originalStyles)
 
     // 下载图片
     const link = document.createElement('a')
@@ -60,6 +97,28 @@ export function useImageGeneration() {
       throw new Error('预览容器未找到')
     }
 
+    // 先遍历所有页面，计算最大高度以确保一致性
+    let maxHeight = 0
+    let maxWidth = 0
+    const pageElements: HTMLElement[] = []
+    
+    for (let i = 0; i < pageContents.length; i++) {
+      const pageNumber = i + 1
+      goToPage(pageNumber)
+      await new Promise(resolve => setTimeout(resolve, 300))
+      
+      const contentElement = previewContainer.querySelector('.preview-content') as HTMLElement
+      if (contentElement) {
+        maxHeight = Math.max(maxHeight, contentElement.scrollHeight)
+        maxWidth = Math.max(maxWidth, contentElement.scrollWidth)
+        pageElements.push(contentElement.cloneNode(true) as HTMLElement)
+      }
+    }
+
+    // 设置统一的最小高度，确保所有页面高度一致
+    const standardHeight = Math.max(maxHeight, 960) // 至少960px高度
+    const standardWidth = Math.max(maxWidth, 720)   // 至少720px宽度
+
     // 为每一页生成图片
     for (let i = 0; i < pageContents.length; i++) {
       const pageNumber = i + 1
@@ -71,33 +130,66 @@ export function useImageGeneration() {
       await new Promise(resolve => setTimeout(resolve, 500))
       
       // 查找预览内容元素
-      const contentElement = previewContainer.querySelector('.preview-content')
+      const contentElement = previewContainer.querySelector('.preview-content') as HTMLElement
       if (!contentElement) {
         continue
       }
 
+      // 保存原始样式
+      const originalStyles = {
+        height: contentElement.style.height,
+        minHeight: contentElement.style.minHeight,
+        width: contentElement.style.width,
+        display: contentElement.style.display,
+        flexDirection: contentElement.style.flexDirection,
+        justifyContent: contentElement.style.justifyContent,
+        alignItems: contentElement.style.alignItems,
+        margin: contentElement.style.margin,
+        padding: contentElement.style.padding,
+        boxSizing: contentElement.style.boxSizing,
+      }
+      
+      // 添加生成中的样式类并设置固定尺寸
+      contentElement.classList.add('generating-image')
+      contentElement.style.minHeight = `${standardHeight}px`
+      contentElement.style.height = `${standardHeight}px`
+      contentElement.style.width = `${standardWidth}px`
+      contentElement.style.display = 'flex'
+      contentElement.style.flexDirection = 'column'
+      contentElement.style.justifyContent = 'flex-start'
+      contentElement.style.alignItems = 'center'
+      contentElement.style.margin = '0 auto'
+      contentElement.style.padding = '40px 60px'
+      contentElement.style.boxSizing = 'border-box'
+
       // 计算合适的缩放比例以确保最小分辨率
       const minWidth = 720
       const minHeight = 960
-      const elementWidth = (contentElement as HTMLElement).scrollWidth
-      const elementHeight = (contentElement as HTMLElement).scrollHeight
       
       // 计算缩放比例，确保至少达到最小分辨率
-      const scaleX = Math.max(minWidth / elementWidth, 1)
-      const scaleY = Math.max(minHeight / elementHeight, 1)
+      const scaleX = Math.max(minWidth / standardWidth, 1)
+      const scaleY = Math.max(minHeight / standardHeight, 1)
       const scale = Math.max(scaleX, scaleY, 2) // 最小缩放2倍以保证清晰度
 
       // 生成当前页的图片
-      const canvas = await html2canvas(contentElement as HTMLElement, {
+      const canvas = await html2canvas(contentElement, {
         backgroundColor: '#ffffff',
         scale: scale,
         useCORS: true,
         allowTaint: true,
-        height: (contentElement as HTMLElement).scrollHeight,
-        width: (contentElement as HTMLElement).scrollWidth,
-        logging: false, // 关闭日志以提高性能
-        imageTimeout: 15000, // 增加图片加载超时时间
+        height: standardHeight, // 使用统一高度
+        width: standardWidth,   // 使用统一宽度
+        logging: false,
+        imageTimeout: 15000,
+        x: 0, // 从左边开始截取
+        y: 0, // 从顶部开始截取
+        scrollX: 0,
+        scrollY: 0,
       })
+
+      // 恢复原始样式
+      contentElement.classList.remove('generating-image')
+      Object.assign(contentElement.style, originalStyles)
 
       // 将canvas转换为blob并添加到zip
       const dataURL = canvas.toDataURL('image/png')
@@ -158,7 +250,7 @@ export function useImageGeneration() {
         
         toast({
           title: "图片生成成功",
-          description: `已生成 ${pageContents.length} 张图片并打包为ZIP文件。建议上传3:4至2:1比例、分辨率不低于720*960的照片获得最佳效果`,
+          description: `已生成 ${pageContents.length} 张高度一致的图片并打包为ZIP文件。所有图片已优化为统一尺寸，确保视觉效果一致。`,
         })
       }
     } catch (error) {

@@ -717,4 +717,182 @@
 /* 暗色主题支持 */
 .dark .inline-code {
   background: rgba(255, 255, 255, 0.1);
+}
+
+/* 小红书分页样式优化 */
+.xiaohongshu-preview {
+  min-height: 600px;
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.xiaohongshu-preview .preview-content {
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: none;
+  text-align: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* 页面内容填充样式 */
+.page-content-padding {
+  flex-grow: 1;
+  min-height: 100px;
+}
+
+/* 页码样式 */
+.page-number {
+  position: absolute;
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+  z-index: 10;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+}
+
+.page-number-bottom {
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.page-number-bottom-right {
+  bottom: 16px;
+  right: 16px;
+}
+
+/* 暗色主题下的页码样式 */
+.dark .page-number {
+  color: hsl(var(--muted-foreground));
+  background: rgba(0, 0, 0, 0.8);
+}
+
+/* 确保分页内容高度一致 */
+.xiaohongshu-preview .preview-content > div {
+  min-height: inherit;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 多页模式下的内容容器 */
+.xiaohongshu-preview.multi-page .preview-content {
+  min-height: 800px;
+  max-height: 1200px;
+  overflow: hidden;
+}
+
+/* 单页模式下的内容容器 */
+.xiaohongshu-preview.single-page .preview-content {
+  min-height: auto;
+  max-height: none;
+}
+
+/* 图片生成时的固定高度样式 */
+.generating-image .preview-content {
+  height: 960px !important;
+  min-height: 960px !important;
+  max-height: 960px !important;
+  overflow: hidden;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  width: 720px !important;
+  margin: 0 auto !important;
+  padding: 40px 60px !important;
+  box-sizing: border-box !important;
+}
+
+/* 确保生成图片时内容居中 */
+.generating-image .preview-content > div {
+  width: 100% !important;
+  max-width: 600px !important;
+  margin: 0 auto !important;
+  text-align: left !important;
+  padding: 0 !important;
+}
+
+/* 生成图片时确保内容容器居中 */
+.generating-image .preview-content .px-6 {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  width: 100% !important;
+  max-width: 600px !important;
+  margin: 0 auto !important;
+}
+
+/* 生成图片时的标题居中 */
+.generating-image .preview-content h1,
+.generating-image .preview-content h2,
+.generating-image .preview-content h3 {
+  text-align: center !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* 生成图片时的段落对齐 */
+.generating-image .preview-content p {
+  text-align: left !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* 生成图片时的列表对齐 */
+.generating-image .preview-content ul,
+.generating-image .preview-content ol {
+  text-align: left !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* 内容分布优化 */
+.xiaohongshu-preview .preview-content h1,
+.xiaohongshu-preview .preview-content h2,
+.xiaohongshu-preview .preview-content h3 {
+  margin-top: 1.5em;
+  margin-bottom: 0.75em;
+}
+
+.xiaohongshu-preview .preview-content p {
+  margin-bottom: 1em;
+  line-height: 1.7;
+}
+
+.xiaohongshu-preview .preview-content ul,
+.xiaohongshu-preview .preview-content ol {
+  margin-bottom: 1em;
+  padding-left: 1.5em;
+}
+
+.xiaohongshu-preview .preview-content li {
+  margin-bottom: 0.5em;
+  line-height: 1.6;
+}
+
+/* 确保最后一页也有合适的高度 */
+.xiaohongshu-preview .preview-content:last-child {
+  min-height: 600px;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .xiaohongshu-preview .preview-content {
+    min-height: 500px;
+    padding: 16px;
+  }
+  
+  .page-number {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
 } 

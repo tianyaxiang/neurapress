@@ -41,6 +41,7 @@ export function usePagination() {
     // 多页模式：按标题或内容长度分页
     const pages: string[] = []
     const maxLength = pageSizeOptions[pageSize].maxLength
+    const minLength = Math.floor(maxLength * 0.4) // 最小页面内容长度为最大长度的40%
     
     // 简单的分页策略：按h2标题分页
     const sections = html.split(/<h2[^>]*>/i)
@@ -58,12 +59,28 @@ export function usePagination() {
           splitIndex = maxLength
         }
         
-        pages.push(currentContent.substring(0, splitIndex))
-        currentContent = currentContent.substring(splitIndex)
+        const pageContent = currentContent.substring(0, splitIndex)
+        const remainingContent = currentContent.substring(splitIndex)
+        
+        // 如果剩余内容太少，合并到当前页
+        if (remainingContent.trim().length < minLength && remainingContent.trim().length > 0) {
+          pages.push(currentContent)
+          break
+        } else {
+          pages.push(pageContent)
+          currentContent = remainingContent
+        }
       }
       
       if (currentContent.trim()) {
-        pages.push(currentContent)
+        // 检查最后一页是否内容太少
+        if (pages.length > 0 && currentContent.trim().length < minLength) {
+          // 将最后一页内容合并到前一页
+          const lastPage = pages.pop()
+          pages.push(lastPage + currentContent)
+        } else {
+          pages.push(currentContent)
+        }
       }
     } else {
       // 按h2标题分页，但也要考虑内容长度限制
@@ -87,21 +104,52 @@ export function usePagination() {
               splitIndex = maxLength
             }
             
-            pages.push(remainingContent.substring(0, splitIndex))
+            const pageContent = remainingContent.substring(0, splitIndex)
             remainingContent = remainingContent.substring(splitIndex)
+            
+            // 如果剩余内容太少，合并到当前页
+            if (remainingContent.trim().length < minLength && remainingContent.trim().length > 0) {
+              pages.push(remainingContent)
+              break
+            } else {
+              pages.push(pageContent)
+            }
           }
           
-          if (remainingContent.trim()) {
+          if (remainingContent.trim() && remainingContent.length >= minLength) {
             pages.push(remainingContent)
           }
         } else {
-          pages.push(sectionContent)
+          // 检查是否应该与前一页合并
+          if (pages.length > 0 && sectionContent.length < minLength) {
+            const lastPage = pages.pop()
+            pages.push(lastPage + sectionContent)
+          } else {
+            pages.push(sectionContent)
+          }
         }
       }
     }
 
-    setPageContents(pages.length > 0 ? pages : [html])
-    setTotalPages(pages.length > 0 ? pages.length : 1)
+    // 最终检查：确保没有过短的页面
+    const optimizedPages: string[] = []
+    for (let i = 0; i < pages.length; i++) {
+      const currentPage = pages[i]
+      
+      if (currentPage.trim().length < minLength && i < pages.length - 1) {
+        // 如果当前页内容太少且不是最后一页，尝试与下一页合并
+        const nextPage = pages[i + 1]
+        if (currentPage.length + nextPage.length <= maxLength * 1.2) {
+          pages[i + 1] = currentPage + nextPage
+          continue
+        }
+      }
+      
+      optimizedPages.push(currentPage)
+    }
+
+    setPageContents(optimizedPages.length > 0 ? optimizedPages : [html])
+    setTotalPages(optimizedPages.length > 0 ? optimizedPages.length : 1)
     setCurrentPage(1)
   }, [pageMode, pageSize])
 
@@ -126,7 +174,14 @@ export function usePagination() {
 
   // 获取当前页内容
   const getCurrentPageContent = useCallback(() => {
-    const content = pageContents[currentPage - 1] || ''
+    let content = pageContents[currentPage - 1] || ''
+    
+    // 为内容较少的页面添加填充，确保高度一致
+    if (totalPages > 1 && content.length < pageSizeOptions[pageSize].maxLength * 0.6) {
+      // 如果当前页内容少于60%的最大长度，添加空白填充
+      const paddingDiv = '<div class="page-content-padding" style="height: 200px; visibility: hidden;"></div>'
+      content += paddingDiv
+    }
     
     // 添加页码（如果需要）
     if (pageNumberPosition !== 'none' && totalPages > 1) {
@@ -135,7 +190,7 @@ export function usePagination() {
     }
     
     return content
-  }, [pageContents, currentPage, pageNumberPosition, totalPages])
+  }, [pageContents, currentPage, pageNumberPosition, totalPages, pageSize])
 
   // 加载保存的设置
   useEffect(() => {

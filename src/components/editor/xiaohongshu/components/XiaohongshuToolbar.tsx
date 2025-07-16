@@ -183,6 +183,12 @@ export function XiaohongshuToolbar({
                       <span>每页字符数：</span>
                       <span className="font-medium">{pageSizeOptions[pageSize].maxLength}</span>
                     </div>
+                    {pageMode === 'multiple' && totalPages > 1 && (
+                      <div className="flex justify-between">
+                        <span>高度优化：</span>
+                        <span className="font-medium text-green-600">已启用</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               </DialogContent>

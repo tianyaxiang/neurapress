@@ -47,7 +47,10 @@
 .xiaohongshu-preview p {
   margin-bottom: 12px;
   color: #333;
-  text-align: justify;
+  text-align: left;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .xiaohongshu-preview strong {
@@ -170,13 +173,16 @@
 }
 
 .xiaohongshu-default .preview-content {
-  padding: 24px;
+  padding: 40px 60px;
   background-color: #fff;
   border-radius: 12px;
   line-height: 1.8;
-  max-width: 500px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
   color: #333;
+  text-align: left;
+  box-sizing: border-box;
 }
 
 .xiaohongshu-cute {
@@ -184,14 +190,17 @@
 }
 
 .xiaohongshu-cute .preview-content {
-  padding: 24px;
+  padding: 40px 60px;
   background-color: #fff5f5;
   border-radius: 20px;
   line-height: 1.8;
-  max-width: 500px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
   border: 2px solid #ffc1cc;
   color: #e91e63;
+  text-align: left;
+  box-sizing: border-box;
 }
 
 .xiaohongshu-cute strong {
@@ -207,14 +216,17 @@
 }
 
 .xiaohongshu-minimal .preview-content {
-  padding: 32px;
+  padding: 40px 60px;
   background-color: #fafafa;
   border-radius: 8px;
   line-height: 1.9;
-  max-width: 500px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
   border: 1px solid #e0e0e0;
   color: #2c2c2c;
+  text-align: left;
+  box-sizing: border-box;
 }
 
 .xiaohongshu-minimal .page-number {
@@ -226,14 +238,17 @@
 }
 
 .xiaohongshu-elegant .preview-content {
-  padding: 28px;
+  padding: 40px 60px;
   background-color: #f8f8f8;
   border-radius: 16px;
   line-height: 1.8;
-  max-width: 500px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
   color: #444;
+  text-align: left;
+  box-sizing: border-box;
 }
 
 .xiaohongshu-elegant .page-number {

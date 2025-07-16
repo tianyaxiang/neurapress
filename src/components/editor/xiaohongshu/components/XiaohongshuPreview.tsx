@@ -155,7 +155,8 @@ export function XiaohongshuPreview({
         <div className={cn(
           "preview-content py-4",
           "prose prose-slate dark:prose-invert max-w-none",
-          "xiaohongshu-preview"
+          "xiaohongshu-preview",
+          pageMode === 'multiple' ? 'multi-page' : 'single-page'
         )}>
           <div 
             className="px-6"
