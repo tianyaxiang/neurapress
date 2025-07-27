@@ -32,7 +32,7 @@ const AdBanner = React.forwardRef<HTMLDivElement, AdBannerProps>(
     ...props 
   }, ref) => {
     const [isVisible, setIsVisible] = React.useState(true)
-    const storageKey = `ad_banner_closed_${id}`
+    const storageKey = `ad_banner2_closed_${id}`
 
     // 检查广告是否已被关闭且未过期
     React.useEffect(() => {
