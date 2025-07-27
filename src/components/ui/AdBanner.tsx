@@ -124,7 +124,7 @@ const AdBanner = React.forwardRef<HTMLDivElement, AdBannerProps>(
               <div className="flex justify-center pt-2">
                 <div className="w-25 h-25 rounded-lg overflow-hidden shadow-sm">
                   <img
-                    src="/assets/img/shici.jpg"
+                    src="/assets/img/qun.png"
                     alt={title}
                     className="w-full h-full object-cover"
                     onError={(e) => {
