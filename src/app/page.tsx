@@ -5,17 +5,19 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { MainNav } from '@/components/nav/MainNav'
 import { Logo } from '@/components/icons/Logo'
-import { 
-  FileText, 
-  Smartphone, 
-  Eye, 
-  Copy, 
-  Palette, 
+import {
+  FileText,
+  Smartphone,
+  Eye,
+  Copy,
+  Palette,
   Zap,
   ArrowRight,
   Github,
   Twitter,
-  Mail
+  Mail,
+  Crown,
+  ExternalLink
 } from 'lucide-react'
 
 const features = [
@@ -70,7 +72,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       <MainNav />
-      
+
       {/* Hero Section */}
       <section className="relative py-20 lg:py-32">
         <div className="container mx-auto px-4">
@@ -99,7 +101,14 @@ export default function Home() {
                 </Link>
               </Button>
             </div>
-            <div className="flex justify-center mt-6">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mt-6">
+              <Button asChild size="lg" variant="outline" className="text-lg px-8 border-2 border-amber-500 text-amber-600 hover:bg-amber-50 hover:text-amber-700">
+                <Link href="https://mp.leti.ltd/" target="_blank">
+                  <Crown className="mr-2 h-5 w-5" />
+                  NeuraPress Pro
+                  <ExternalLink className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
               <Button variant="outline" size="lg" className="text-lg px-8" asChild>
                 <Link href="https://github.com/tianyaxiang/neurapress" target="_blank">
                   <Github className="mr-2 h-5 w-5" />
@@ -199,6 +208,13 @@ export default function Home() {
                 小红书笔记编辑器
               </Link>
             </Button>
+            <Button asChild size="lg" variant="outline" className="text-lg px-8 border-2 border-amber-500 text-amber-600 hover:bg-amber-50 hover:text-amber-700" >
+              <Link href="https://mp.leti.ltd/" target="_blank">
+                <Crown className="mr-2 h-5 w-5" />
+                NeuraPress Pro
+                <ExternalLink className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -212,21 +228,21 @@ export default function Home() {
               <span className="text-xl font-bold">NeuraPress</span>
             </div>
             <div className="flex items-center gap-6">
-              <Link 
-                href="https://github.com/tianyaxiang/neurapress" 
+              <Link
+                href="https://github.com/tianyaxiang/neurapress"
                 target="_blank"
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <Github className="h-5 w-5" />
               </Link>
-              <Link 
-                href="https://x.com/tianyaxiang" 
+              <Link
+                href="https://x.com/tianyaxiang"
                 target="_blank"
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
                 <Twitter className="h-5 w-5" />
               </Link>
-              <Link 
+              <Link
                 href="mailto:tianyaxiang@qq.com"
                 className="text-muted-foreground hover:text-foreground transition-colors"
               >
