@@ -134,7 +134,7 @@ docker run -p 3000:3000 [your-dockerhub-username]/neurapress:latest
 - Marked
 - shadcn/ui
 
-## 🌐 Community
+## 🌐 联系我们
 
  [Email](mailto:tianyaxiang@qq.com) | [Twitter](https://x.com/tianyaxiang)
 
