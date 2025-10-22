@@ -138,6 +138,10 @@ docker run -p 3000:3000 [your-dockerhub-username]/neurapress:latest
 
  [Email](mailto:tianyaxiang@qq.com) | [Twitter](https://x.com/tianyaxiang)
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=tianyaxiang/neurapress&type=date&legend=top-left)](https://www.star-history.com/#tianyaxiang/neurapress&type=date&legend=top-left)
+
 ## 贡献指南
 
 欢迎提交 Issue 和 Pull Request。在提交 PR 之前，请确保：
