@@ -96,7 +96,7 @@ export class MarkdownRenderer {
           // 检查内容是否是 mermaid 图表
           if (content.match(/^(?:pie\s+|graph\s+|sequenceDiagram\s+|gantt\s+|classDiagram\s+|flowchart\s+)/)) {
             // 如果是饼图，添加 showData 选项
-            const processedContent = content.startsWith('pie') 
+            const processedContent = content.startsWith('pie')
               ? `pie showData\n${content.replace(/^pie\s*/, '').trim()}`
               : content
             return {
@@ -119,7 +119,7 @@ export class MarkdownRenderer {
             background: 'transparent'
           }
           const styleStr = cssPropertiesToString(style)
-          
+
           // Remove the random ID generation since it's not needed
           // Return a simple div with the mermaid class and content
           return `<div${styleStr ? ` style="${styleStr}"` : ''} class="mermaid">${token.text}</div>`
@@ -155,9 +155,10 @@ export class MarkdownRenderer {
     this.renderer.heading = ({ text, depth }: Tokens.Heading) => {
       const headingKey = `h${depth}` as keyof RendererOptions['block']
       const headingStyle = (this.options.block?.[headingKey] || {})
+      // 如果 headingStyle 已经定义了 color，则不覆盖；否则使用 themeColor
       const style = {
         ...headingStyle,
-        color: this.options.base?.themeColor
+        ...(headingStyle.color ? {} : { color: this.options.base?.themeColor })
       }
       const styleStr = cssPropertiesToString(style)
       const tokens = marked.Lexer.lexInline(text)
@@ -203,25 +204,35 @@ export class MarkdownRenderer {
       const styleStr = cssPropertiesToString(style)
       const tokens = marked.Lexer.lexInline(text)
       const content = marked.Parser.parseInline(tokens, { renderer: this.renderer })
-      
+
       return `<blockquote${styleStr ? ` style="${styleStr}"` : ''}>${content}</blockquote>`
     }
 
     // 重写 code 方法
-    this.renderer.code = ({ text, lang }: Tokens.Code) => {  
+    this.renderer.code = ({ text, lang }: Tokens.Code) => {
       const codeStyle = (this.options.block?.code_pre || {})
       const style = {
         ...codeStyle
       }
       const styleStr = cssPropertiesToString(style)
-      
       const highlighted = highlightCode(text, lang || '', this.options.codeTheme || 'github')
-      
+
+      // Mac code block with header inside pre for proper theme background - WeChat compatible version
+      if (this.options.base?.macCodeBlock !== false) {
+        const macHeader = `<div class="mac-header" style="padding:10px 12px;margin:0;border-bottom:1px solid rgba(0,0,0,0.1);">
+  <span style="width:14px;height:14px;border-radius:50%;background:#ff5f56;border:1px solid rgba(0,0,0,0.2);display:inline-block;margin-right:10px;"></span>
+  <span style="width:14px;height:14px;border-radius:50%;background:#ffbd2e;border:1px solid rgba(0,0,0,0.2);display:inline-block;margin-right:10px;"></span>
+  <span style="width:14px;height:14px;border-radius:50%;background:#27c93f;border:1px solid rgba(0,0,0,0.2);display:inline-block;"></span>
+</div>`
+
+        return `<pre${styleStr ? ` style="${styleStr}"` : ''}>${macHeader}<code class="language-${lang || ''}">${highlighted}</code></pre>`
+      }
+
       return `<pre${styleStr ? ` style="${styleStr}"` : ''}><code class="language-${lang || ''}">${highlighted}</code></pre>`
     }
 
     // 重写 codespan 方法
-    this.renderer.codespan = ({ text }: Tokens.Codespan) => {  
+    this.renderer.codespan = ({ text }: Tokens.Codespan) => {
       const codespanStyle = (this.options.inline?.codespan || {})
       const styleStr = cssPropertiesToString(codespanStyle)
       return `<code class="inline-code"${styleStr ? ` style="${styleStr}"` : ''}>${text}</code>`
@@ -237,8 +248,9 @@ export class MarkdownRenderer {
       const styleStr = cssPropertiesToString(style)
       const tokens = marked.Lexer.lexInline(text)
       const content = marked.Parser.parseInline(tokens, { renderer: this.renderer })
-      
-      return `<em${styleStr ? ` style="${styleStr}"` : ''}>${content}</em>`    }
+
+      return `<em${styleStr ? ` style="${styleStr}"` : ''}>${content}</em>`
+    }
 
     // 重写 strong 方法
     this.renderer.strong = ({ text }: Tokens.Strong) => {
@@ -251,7 +263,7 @@ export class MarkdownRenderer {
       const styleStr = cssPropertiesToString(style)
       const tokens = marked.Lexer.lexInline(text)
       const content = marked.Parser.parseInline(tokens, { renderer: this.renderer })
-      
+
       return `<strong${styleStr ? ` style="${styleStr}"` : ''}>${content}</strong>`
     }
 
@@ -287,7 +299,7 @@ export class MarkdownRenderer {
       }
       const styleStr = cssPropertiesToString(style)
       const startAttr = token.ordered && token.start !== 1 ? ` start="${token.start}"` : ''
-      
+
       const items = token.items.map(item => {
         let itemText = item.text
         if (item.task) {
@@ -296,7 +308,7 @@ export class MarkdownRenderer {
         }
         return this.renderer.listitem({ ...item, text: itemText })
       }).join('')
-      
+
       return `<${tag}${startAttr}${styleStr ? ` style="${styleStr}"` : ''}>${items}</${tag}>`
     }
 
@@ -309,7 +321,7 @@ export class MarkdownRenderer {
         display: 'list-item'
       }
       const styleStr = cssPropertiesToString(style)
-      
+
       // 处理嵌套列表和内容
       let content = item.text
       if (item.tokens) {
@@ -340,7 +352,7 @@ export class MarkdownRenderer {
                 return match
               }
             })
-            
+
             // 然后处理其他内联标记
             const inlineTokens = marked.Lexer.lexInline(processedText)
             return marked.Parser.parseInline(inlineTokens, { renderer: this.renderer })
@@ -354,13 +366,13 @@ export class MarkdownRenderer {
         const inlineTokens = marked.Lexer.lexInline(content)
         content = marked.Parser.parseInline(inlineTokens, { renderer: this.renderer })
       }
-      
+
       // 处理任务列表项
       if (item.task) {
         const checkbox = `<input type="checkbox"${item.checked ? ' checked=""' : ''} disabled="" /> `
         content = checkbox + content
       }
-      
+
       return `<li${styleStr ? ` style="${styleStr}"` : ''}>${content}</li>`
     }
 
