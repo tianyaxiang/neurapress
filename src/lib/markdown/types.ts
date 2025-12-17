@@ -43,7 +43,8 @@ export interface StyleOptions {
   borderRight?: string
   borderBottom?: string
   borderLeft?: string
-  borderRadius?: string
+  borderRadius?: string | number
+
   borderCollapse?: string
   background?: string
   backgroundColor?: string

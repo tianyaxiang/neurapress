@@ -19,7 +19,15 @@ interface MermaidBlockToken extends Tokens.Generic {
   text: string
 }
 
+// 自定义推荐块的 Token 类型
+interface RecommendBlockToken extends Tokens.Generic {
+  type: 'recommendBlock'
+  raw: string
+  text: string
+}
+
 export class MarkdownRenderer {
+
   private renderer: typeof marked.Renderer.prototype
   private options: RendererOptions
 
@@ -29,7 +37,9 @@ export class MarkdownRenderer {
     this.initializeRenderer()
     this.initializeLatexExtension()
     this.initializeMermaidExtension()
+    this.initializeRecommendBlockExtension()
   }
+
 
   private initializeLatexExtension() {
     // 添加 LaTeX 块的 tokenizer
@@ -133,6 +143,179 @@ export class MarkdownRenderer {
     // 注册扩展
     marked.use({ extensions: [mermaidBlockTokenizer] })
   }
+
+  private initializeRecommendBlockExtension() {
+    const recommendBlockTokenizer: TokenizerAndRendererExtension = {
+      name: 'recommendBlock',
+      level: 'block',
+      start(src: string) {
+        return src.match(/^:::recommend[^\n]*$/m)?.index
+      },
+      tokenizer(src: string) {
+        const rule = /^:::recommend[^\n]*\n([\s\S]+?)\n:::(?:\s*\n|$)/
+        const match = rule.exec(src)
+        if (!match) {
+          return
+        }
+
+        const innerContent = match[1].trim()
+        if (!innerContent) {
+          return
+        }
+
+        const token: RecommendBlockToken = {
+          type: 'recommendBlock',
+          raw: match[0],
+          text: innerContent,
+          tokens: []
+        }
+
+        return token
+      },
+      renderer: (token) => {
+        try {
+          const recommendToken = token as RecommendBlockToken
+          const content = typeof recommendToken.text === 'string' ? recommendToken.text : ''
+
+          const lines = content
+            .split(/\r?\n/)
+            .map((line: string) => line.trim())
+            .filter((line: string) => line.length > 0)
+
+          if (lines.length === 0) {
+            return token.raw
+          }
+
+          const themeColor = this.options.base?.themeColor || '#16a34a'
+
+          const groupStyle = cssPropertiesToString({
+            margin: '24px auto',
+            maxWidth: 560
+          })
+
+
+          const contentStyle = cssPropertiesToString({
+            padding: '18px 20px 16px',
+            borderRadius: 20,
+            border: `1px solid ${themeColor}`,
+            background: '#f8fffb'
+          })
+
+
+          const labelStyle = cssPropertiesToString({
+            display: 'block',
+            margin: '0 auto 12px',
+            padding: '8px 18px',
+            maxWidth: '80%',
+            borderRadius: 9999,
+            background: themeColor,
+            color: '#ffffff',
+            fontSize: '14px',
+            fontWeight: 600,
+            textAlign: 'center',
+            letterSpacing: '0.18em'
+          })
+
+          const listStyle = cssPropertiesToString({
+            marginTop: 20
+          })
+
+          const itemStyle = cssPropertiesToString({
+            margin: '8px 0',
+            padding: '10px 16px',
+            borderRadius: 16,
+            background: '#ffffff',
+            border: '1px solid #e5e7eb'
+          })
+
+
+
+          const titleStyle = cssPropertiesToString({
+            fontSize: '15px',
+            fontWeight: 600,
+            lineHeight: 1.6
+          })
+
+          const descStyle = cssPropertiesToString({
+            display: 'block',
+            marginTop: 4,
+            fontSize: '13px',
+            color: '#4b5563'
+          })
+
+
+
+          const escapeHtml = (value: string) =>
+            value
+              .replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+
+          const buildItemHtml = (line: string): string => {
+            const linkMatch = /^\[([^\]]+)\]\(([^)]+)\)/.exec(line)
+            if (!linkMatch) {
+              return ''
+            }
+
+            const fullText = linkMatch[1].trim()
+            const href = linkMatch[2].trim()
+
+            let titleText = fullText
+            let descText = ''
+            const split = fullText.split(/\s*[-——]\s+/, 2)
+            if (split.length === 2) {
+              titleText = split[0].trim()
+              descText = split[1].trim()
+            }
+
+            const escapedTitle = escapeHtml(titleText || fullText || href)
+            const escapedDesc = descText ? escapeHtml(descText) : ''
+
+            return `
+      <p style="${itemStyle}">
+        <a href="${href}" style="color: #111827; text-decoration: none; font-size: 15px; font-weight: 600; line-height: 1.6;">${escapedTitle}</a>
+        ${escapedDesc ? `<br><span style="${descStyle}">${escapedDesc}</span>` : ''}
+      </p>`
+          }
+
+
+
+
+          const itemsHtml = lines
+            .map(buildItemHtml)
+            .filter((html: string) => html.trim().length > 0)
+            .join('')
+
+          if (!itemsHtml) {
+            return token.raw
+          }
+
+          return `
+<table style="${groupStyle}" cellpadding="0" cellspacing="0">
+  <tr>
+    <td style="${contentStyle}">
+      <p style="${labelStyle}">推荐文章</p>
+      <div style="${listStyle}">
+        ${itemsHtml}
+      </div>
+    </td>
+  </tr>
+</table>`
+
+
+        } catch (error) {
+
+          console.error('Recommend block rendering error:', error)
+          return token.raw
+        }
+      }
+    }
+
+    marked.use({ extensions: [recommendBlockTokenizer] })
+  }
+
+
 
   private initializeRenderer() {
     // 重写 text 方法来处理行内 LaTeX 公式
@@ -267,12 +450,16 @@ export class MarkdownRenderer {
       return `<strong${styleStr ? ` style="${styleStr}"` : ''}>${content}</strong>`
     }
 
-    // 重写 link 方法
+    // 重写 link 方法，支持推荐文章卡片语法
     this.renderer.link = ({ href, title, text }: Tokens.Link) => {
       const linkStyle = (this.options.inline?.link || {})
       const styleStr = cssPropertiesToString(linkStyle)
+
+
+
       return `<a href="${href}"${title ? ` title="${title}"` : ''}${styleStr ? ` style="${styleStr}"` : ''}>${text}</a>`
     }
+
 
     // 重写 image 方法
     this.renderer.image = ({ href, title, text }: Tokens.Image) => {

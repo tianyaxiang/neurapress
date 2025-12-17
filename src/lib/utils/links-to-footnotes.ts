@@ -12,6 +12,23 @@ export function convertExternalLinksToFootnotes(html: string): string {
     const lower = url.toLowerCase()
     if (!lower.startsWith('http://') && !lower.startsWith('https://')) return match
 
+    // 微信域名的链接保持原样，不转换为脚注
+    const isWeChatLink =
+      lower.includes('://mp.weixin.qq.com') ||
+      lower.includes('://weixin.qq.com') ||
+      lower.includes('://open.weixin.qq.com') ||
+      lower.includes('://wx.qq.com')
+
+    if (isWeChatLink) {
+      return match
+    }
+
+    const attrs = `${preAttrs || ''} ${postAttrs || ''}`.toLowerCase()
+    if (attrs.includes('data-wx-recommend') || attrs.includes('wx-article-card')) {
+      return match
+    }
+
+
     let idx = urlIndexMap[url]
     if (!idx) {
       urls.push(url)
@@ -19,10 +36,10 @@ export function convertExternalLinksToFootnotes(html: string): string {
       urlIndexMap[url] = idx
     }
 
-    // 使用上标数字表示引用，保留原始可见文本
     const sup = `<sup style="font-size:0.85em; vertical-align:super; margin-left:4px">[${idx}]</sup>`
     return `${text}${sup}`
   })
+
 
   if (urls.length === 0) return replaced
 
