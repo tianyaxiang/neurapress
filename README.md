@@ -2,7 +2,7 @@
 
 NeuraPress 是一个现代化的 Markdown 编辑器，专注于提供优质的微信公众号排版体验。响应式设计，支持移动设备。搭配 DeepSeek和微信公众号助手使用，碎片时间也能用手机发有排版的文章了。
 
-为了提供更稳定的服务和更快的迭代，我们重构了代码并转为闭源运营。目前产品依然完全免费。 感谢老用户一路的支持！本项目已停止维护，最新免费版请访问最新链接 [Markdown Editor](https://mp.leti.ltd/) ，更多工具请访问[NewKit](https://www.newkit.site/)
+为了提供更稳定的服务和更快的迭代，我们重构了代码并转为闭源运营。目前产品依然完全免费。 感谢老用户一路的支持！本项目已停止维护，最新免费版请访问最新链接 [Markdown Editor](https://md.newkit.site/) ，更多工具请访问[NewKit](https://www.newkit.site/)
 
 ![NeuraPress Website image](/public/assets/img/neurapress-web-app.jpg)
 
