@@ -411,6 +411,296 @@
   overflow-y: auto;
 }
 
+/* 微信推荐文章卡片样式 */
+
+/* 单条推荐（行内链接）卡片 */
+.preview-content a.wx-article-card {
+  position: relative;
+  display: block;
+  margin: 20px 12px;
+  padding: 12px 16px 12px 18px;
+  border-radius: var(--wx-card-radius, 12px);
+  border: 1px solid var(--wx-card-border-color, rgba(15, 23, 42, 0.06));
+  background: var(
+    --wx-card-bg,
+    linear-gradient(135deg, #f7f8fa 0%, #ffffff 55%)
+  );
+  text-decoration: none;
+  color: inherit;
+  box-shadow: var(
+    --wx-card-shadow,
+    0 8px 20px rgba(15, 23, 42, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.5)
+  );
+  overflow: hidden;
+  transition: all 0.18s ease-out;
+}
+
+.preview-content a.wx-article-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 999px;
+  background: var(
+    --wx-card-stripe-bg,
+    linear-gradient(
+      180deg,
+      var(--theme-color, #16a34a),
+      rgba(22, 163, 74, 0.5)
+    )
+  );
+}
+
+.preview-content a.wx-article-card:hover {
+  background: var(
+    --wx-card-bg-hover,
+    linear-gradient(135deg, #f2f4f7 0%, #ffffff 60%)
+  );
+  box-shadow: var(
+    --wx-card-shadow-hover,
+    0 10px 24px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.6)
+  );
+  transform: translateY(-1px);
+}
+
+/* 列表推荐（:::recommend）大卡片容器 */
+.preview-content .wx-article-card--group {
+  position: relative;
+  margin: 28px 12px;
+  padding: 46px 24px 20px;
+  border-radius: 20px;
+  border: 2px solid
+    var(--wx-group-border-color, var(--theme-color, #16a34a));
+  background: var(--wx-group-bg, #f8fffb);
+  box-shadow: 0 12px 30px rgba(22, 163, 74, 0.12);
+  overflow: hidden;
+}
+
+/* 顶部小把手 + 竖线 */
+.preview-content .wx-article-card--group::before {
+  content: none;
+}
+
+
+.preview-content .wx-article-card--group::after {
+  content: none;
+}
+
+
+
+/* 标题：使用内联样式的小标签，取消整条顶栏效果 */
+.preview-content .wx-article-card--group .wx-article-card__label {
+  position: static;
+  box-shadow: none;
+}
+
+
+/* 为单条推荐保留小标签样式 */
+.preview-content a.wx-article-card .wx-article-card__label {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  background: var(--wx-card-label-bg, rgba(87, 107, 149, 0.08));
+  color: var(--wx-card-label-color, var(--theme-color, #576b95));
+  margin: 0 0 4px;
+}
+
+
+/* 列表内容区域 */
+.preview-content .wx-article-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-left: 0;
+}
+
+.preview-content .wx-article-card__list {
+  margin-top: 40px;
+}
+
+/* 列表中的每一条文章 */
+.preview-content .wx-article-card--group .wx-article-card__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 10px 16px 10px 40px;
+  margin: 6px 0;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+  text-decoration: none;
+  color: inherit;
+}
+
+
+
+/* 单条推荐中的文章 item（不使用大卡片样式） */
+.preview-content a.wx-article-card .wx-article-card__item {
+  padding: 7px 0 6px;
+}
+
+/* 去掉旧的分割线，改用卡片间距 */
+.preview-content .wx-article-card__item + .wx-article-card__item {
+  border-top: none;
+}
+
+/* 标题与描述 */
+.preview-content .wx-article-card__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--wx-card-title-color, #111827);
+  line-height: 1.6;
+}
+
+.preview-content .wx-article-card--group .wx-article-card__title {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* 列表内不再展示域名和“阅读原文” */
+.preview-content .wx-article-card--group .wx-article-card__meta {
+  display: none;
+}
+
+.preview-content .wx-article-card__desc {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--wx-card-desc-color, #6b7280);
+}
+
+/* 单条推荐保留 meta 行 */
+.preview-content a.wx-article-card .wx-article-card__meta {
+  margin-top: 2px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--wx-card-meta-color, #9ca3af);
+}
+
+.preview-content .wx-article-card__arrow {
+  font-weight: 500;
+}
+
+.preview-content .wx-article-card__arrow::after {
+  content: '›';
+  margin-left: 4px;
+}
+
+/* 深色模式适配 */
+.dark .preview-content a.wx-article-card {
+  background: linear-gradient(
+    135deg,
+    hsl(var(--muted)) 0%,
+    hsl(var(--background)) 55%
+  );
+  border-color: hsl(var(--border));
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+}
+
+.dark .preview-content .wx-article-card--group {
+  background: radial-gradient(
+      circle at top left,
+      rgba(148, 163, 184, 0.16),
+      transparent 55%
+    ),
+    hsl(var(--background));
+  border-color: var(--wx-group-border-color, hsl(var(--primary)));
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+}
+
+.dark .preview-content .wx-article-card--group .wx-article-card__item {
+  background: hsl(var(--muted));
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+
+.dark .preview-content a.wx-article-card .wx-article-card__label {
+  background: var(--wx-card-label-bg, hsl(var(--primary)));
+  color: hsl(var(--primary-foreground));
+}
+
+
+.dark .preview-content .wx-article-card__title {
+  color: hsl(var(--foreground));
+}
+
+.dark .preview-content .wx-article-card__desc,
+.dark .preview-content .wx-article-card__meta {
+  color: hsl(var(--muted-foreground));
+}
+
+/* 不同模板的推荐卡片主题适配 */
+.preview-container.prose-emerald,
+.preview-content.prose-emerald {
+  --wx-card-bg: linear-gradient(135deg, #f0faf7 0%, #f5fffe 100%);
+  --wx-card-border-color: #d1e8e0;
+  --wx-card-shadow: 0 8px 22px rgba(0, 75, 60, 0.18);
+  --wx-card-label-bg: rgba(0, 152, 116, 0.08);
+  --wx-card-label-color: #006651;
+  --wx-card-title-color: #006651;
+  --wx-card-desc-color: #4a5568;
+  --wx-card-meta-color: #718096;
+  --wx-card-divider-color: rgba(0, 152, 116, 0.16);
+  --wx-group-border-color: #009874;
+  --wx-group-bg: #f2fbf7;
+  --wx-group-line-color: #00a37a;
+}
+
+.preview-container.prose-creative,
+.preview-content.prose-creative {
+  --wx-card-bg: linear-gradient(135deg, #ebf3ff 0%, #ffffff 55%);
+  --wx-card-border-color: rgba(37, 99, 235, 0.22);
+  --wx-card-shadow: 0 10px 26px rgba(37, 99, 235, 0.18);
+  --wx-card-label-bg: rgba(59, 130, 246, 0.14);
+  --wx-card-label-color: #2563eb;
+  --wx-card-title-color: #1e293b;
+  --wx-card-desc-color: #4b5563;
+  --wx-card-meta-color: #64748b;
+  --wx-card-divider-color: rgba(148, 163, 184, 0.65);
+}
+
+.preview-container.prose-elegant,
+.preview-content.prose-elegant {
+  --wx-card-bg: linear-gradient(135deg, #f7faf7 0%, #ffffff 55%);
+  --wx-card-label-bg: rgba(22, 163, 74, 0.08);
+  --wx-card-title-color: #14532d;
+}
+
+.preview-container.prose-smartisan,
+.preview-content.prose-smartisan {
+  --wx-card-radius: 10px;
+  --wx-card-bg: #f8f9fa;
+  --wx-card-border-color: rgba(0, 0, 0, 0.08);
+  --wx-card-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  --wx-card-label-bg: rgba(99, 87, 83, 0.08);
+  --wx-card-label-color: #635753;
+  --wx-card-title-color: #333333;
+  --wx-card-desc-color: #4b5563;
+  --wx-card-meta-color: #6b7280;
+  --wx-card-divider-color: rgba(156, 163, 175, 0.55);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .editor-container .bytemd-editor::-webkit-scrollbar-thumb,
 .preview-container .preview-content::-webkit-scrollbar-thumb,
 .CodeMirror-vscrollbar::-webkit-scrollbar-thumb,
