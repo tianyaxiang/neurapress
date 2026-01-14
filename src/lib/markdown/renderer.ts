@@ -1,6 +1,7 @@
 import { marked } from 'marked'
 import type { Tokens, TokenizerAndRendererExtension } from 'marked'
-import type { RendererOptions } from './types'
+import type { RendererOptions, StyleOptions } from './types'
+
 import { cssPropertiesToString } from './styles'
 import { highlightCode } from './code-highlight'
 import katex from 'katex'
@@ -337,12 +338,13 @@ export class MarkdownRenderer {
     // 重写 heading 方法
     this.renderer.heading = ({ text, depth }: Tokens.Heading) => {
       const headingKey = `h${depth}` as keyof RendererOptions['block']
-      const headingStyle = (this.options.block?.[headingKey] || {})
+      const headingStyle: StyleOptions = this.options.block?.[headingKey] || {}
       // 如果 headingStyle 已经定义了 color，则不覆盖；否则使用 themeColor
-      const style = {
+      const style: StyleOptions = {
         ...headingStyle,
         ...(headingStyle.color ? {} : { color: this.options.base?.themeColor })
       }
+
       const styleStr = cssPropertiesToString(style)
       const tokens = marked.Lexer.lexInline(text)
       const content = marked.Parser.parseInline(tokens, { renderer: this.renderer })

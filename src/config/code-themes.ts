@@ -254,8 +254,77 @@ export const codeThemes = [
       variable: '#7dd3fc',
       operator: '#89ddff'
     }
+  },
+  {
+    id: 'tokyo-night',
+    name: 'Tokyo Night',
+    description: '日系霓虹色彩的暗色主题',
+    theme: {
+      background: '#1a1b26',
+      text: '#c0caf5',
+      comment: '#565f89',
+      keyword: '#bb9af7',
+      string: '#9ece6a',
+      number: '#ff9e64',
+      function: '#7aa2f7',
+      class: '#e0af68',
+      variable: '#c0caf5',
+      operator: '#f7768e'
+    }
+  },
+  {
+    id: 'ayu-dark',
+    name: 'Ayu Dark',
+    description: '高对比度的 Ayu 暗色主题',
+    theme: {
+      background: '#0f1419',
+      text: '#e6e1cf',
+      comment: '#5c6773',
+      keyword: '#ff7733',
+      string: '#b8cc52',
+      number: '#ffcc66',
+      function: '#36a3d9',
+      class: '#ffb454',
+      variable: '#e6e1cf',
+      operator: '#ff7733'
+    }
+  },
+  {
+    id: 'ayu-light',
+    name: 'Ayu Light',
+    description: '明亮清晰的 Ayu 浅色主题',
+    theme: {
+      background: '#fafafa',
+      text: '#5c6773',
+      comment: '#abb0b6',
+      keyword: '#fa6e32',
+      string: '#86b300',
+      number: '#f29718',
+      function: '#36a3d9',
+      class: '#ffb454',
+      variable: '#5c6773',
+      operator: '#fa6e32'
+    }
+  },
+  {
+    id: 'vs-code-dark',
+    name: 'VS Code Dark',
+    description: '接近 VS Code 默认 Dark+ 的主题',
+    theme: {
+      background: '#1e1e1e',
+      text: '#d4d4d4',
+      comment: '#6a9955',
+      keyword: '#c586c0',
+      string: '#ce9178',
+      number: '#b5cea8',
+      function: '#dcdcaa',
+      class: '#4ec9b0',
+      variable: '#9cdcfe',
+      operator: '#d4d4d4'
+    }
   }
 ] as const
+
 
 export type CodeTheme = typeof codeThemes[number]
 export type CodeThemeId = CodeTheme['id'] 
