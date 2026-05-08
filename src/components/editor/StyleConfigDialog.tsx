@@ -85,9 +85,89 @@ export function StyleConfigDialog({ value, onChangeAction }: StyleConfigDialogPr
     onChangeAction(newOptions)
   }
 
+  const handleBooleanChange = (
+    category: keyof RendererOptions,
+    subcategory: string,
+    value: boolean | null
+  ) => {
+    setCustomizedFields(prev => {
+      const next = new Set(prev)
+      if (value === null) {
+        next.delete(`${category}.${subcategory}`)
+      } else {
+        next.add(`${category}.${subcategory}`)
+      }
+      return next
+    })
+
+    const newOptions = {
+      ...currentOptions,
+      [category]: {
+        ...(currentOptions[category] as object || {}),
+        // set boolean or undefined (null -> remove)
+        [subcategory]: value === null ? undefined : value
+      }
+    }
+
+    setCurrentOptions(newOptions)
+    onChangeAction(newOptions)
+  }
+
+  const handleStyleObjectChange = (
+    category: keyof RendererOptions,
+    subcategory: string,
+    field: string,
+    value: string | null
+  ) => {
+    setCustomizedFields(prev => {
+      const next = new Set(prev)
+      if (value === null) {
+        next.delete(`${category}.${subcategory}.${field}`)
+      } else {
+        next.add(`${category}.${subcategory}.${field}`)
+      }
+      return next
+    })
+
+    const currentCategory = (currentOptions[category] as any) || {}
+    const currentSub = (currentCategory[subcategory] as any) || {}
+
+    const newSub = {
+      ...currentSub,
+      [field]: value === null ? undefined : value
+    }
+
+    const newOptions = {
+      ...currentOptions,
+      [category]: {
+        ...currentCategory,
+        [subcategory]: newSub
+      }
+    }
+
+    setCurrentOptions(newOptions)
+    onChangeAction(newOptions)
+  }
+
   const resetToDefault = (field: string) => {
+    const parts = field.split('.')
+    if (parts.length === 2) {
+      const [category, subcategory] = parts
+      // boolean field special-case
+      if (category === 'base' && subcategory === 'macCodeBlock') {
+        handleBooleanChange(category as keyof RendererOptions, subcategory, null)
+      } else {
+        handleOptionChange(category as keyof RendererOptions, subcategory, null)
+      }
+    } else if (parts.length === 3) {
+      const [category, subcategory, subfield] = parts
+      handleStyleObjectChange(category as keyof RendererOptions, subcategory, subfield, null)
+    }
+  }
+
+  const resetBooleanToDefault = (field: string) => {
     const [category, subcategory] = field.split('.')
-    handleOptionChange(category as keyof RendererOptions, subcategory, null)
+    handleBooleanChange(category as keyof RendererOptions, subcategory, null)
   }
 
   return (
@@ -207,6 +287,31 @@ export function StyleConfigDialog({ value, onChangeAction }: StyleConfigDialogPr
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
+                <Label>Mac 代码块头部</Label>
+                {customizedFields.has('base.macCodeBlock') && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => resetToDefault('base.macCodeBlock')}
+                  >
+                    重置
+                  </Button>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  id="mac-code-toggle"
+                  type="checkbox"
+                  checked={currentOptions.base?.macCodeBlock !== false}
+                  onChange={(e) => handleBooleanChange('base', 'macCodeBlock', e.target.checked)}
+                  className="h-4 w-4"
+                />
+                <label htmlFor="mac-code-toggle" className="text-sm text-muted-foreground">启用 Mac 风格代码块头部（兼容公众号）</label>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
                 <Label>行高</Label>
                 {customizedFields.has('base.lineHeight') && (
                   <Button 
@@ -226,6 +331,34 @@ export function StyleConfigDialog({ value, onChangeAction }: StyleConfigDialogPr
                 value={parseFloat(String(currentOptions.base?.lineHeight || '1.75'))}
                 onChange={(e) => handleOptionChange('base', 'lineHeight', e.target.value)}
               />
+            </div>
+            
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <Label>代码块行高</Label>
+                {customizedFields.has('block.code_pre.lineHeight') && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => resetToDefault('block.code_pre.lineHeight')}
+                  >
+                    重置
+                  </Button>
+                )}
+              </div>
+              <div className="flex gap-2 items-center">
+                <Input
+                  type="number"
+                  min="1"
+                  max="3"
+                  step="0.1"
+                  value={parseFloat(String(currentOptions.block?.code_pre?.lineHeight ?? currentOptions.base?.lineHeight ?? '1.5'))}
+                  onChange={(e) => handleStyleObjectChange('block', 'code_pre', 'lineHeight', e.target.value)}
+                  className="w-24"
+                />
+                <span className="text-sm">行高（无单位）</span>
+              </div>
+              <p className="text-sm text-muted-foreground">仅影响代码块（pre）内部文本的行高。</p>
             </div>
           </div>
         </div>

@@ -43,7 +43,8 @@ export interface StyleOptions {
   borderRight?: string
   borderBottom?: string
   borderLeft?: string
-  borderRadius?: string
+  borderRadius?: string | number
+
   borderCollapse?: string
   background?: string
   backgroundColor?: string
@@ -90,6 +91,7 @@ export interface RendererOptions {
     wordBreak?: string
     whiteSpace?: string
     color?: string
+    macCodeBlock?: boolean
   }
   block?: {
     h1?: StyleOptions

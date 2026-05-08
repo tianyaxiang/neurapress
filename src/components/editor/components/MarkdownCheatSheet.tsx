@@ -49,6 +49,8 @@ const cheatSheet = [
       { label: '图片', syntax: '![替代文本](图片URL)' },
     ]
   },
+
+
   {
     title: '表格',
     items: [
@@ -71,8 +73,11 @@ const cheatSheet = [
     items: [
       { label: '水平分割线', syntax: '---' },
       { label: '注脚', syntax: '这里是文字[^1]\n\n[^1]: 这里是注脚' },
+      { label: '推荐文章卡片（统一使用 :::recommend）', syntax: ':::recommend\n[标题1 - 简短描述](https://example.com/a)\n[标题2](https://example.com/b)\n:::' },
+
     ]
   },
+
 ]
 
 export function MarkdownCheatSheet() {

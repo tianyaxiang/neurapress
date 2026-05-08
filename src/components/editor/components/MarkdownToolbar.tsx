@@ -18,6 +18,8 @@ import {
   Minus,
   CheckSquare
 } from 'lucide-react'
+
+
 import { MarkdownCheatSheet } from './MarkdownCheatSheet'
 
 interface MarkdownToolbarProps {
@@ -113,6 +115,7 @@ export function MarkdownToolbar({ onInsert }: MarkdownToolbarProps) {
       suffix: '](url)',
       placeholder: '链接文本'
     },
+
     {
       icon: <Image className="h-4 w-4" />,
       title: '图片',
@@ -122,6 +125,7 @@ export function MarkdownToolbar({ onInsert }: MarkdownToolbarProps) {
       placeholder: '图片描述'
     },
     { type: 'separator' },
+
     {
       icon: <Table className="h-4 w-4" />,
       title: '表格',

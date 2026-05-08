@@ -179,6 +179,53 @@ pre {
   line-height: 1.5;
 }
 
+/* Mac code block header styles for preview */
+.mac-header {
+  padding: 0px 0px 8px 1px !important;
+  margin: 0 !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+  white-space: nowrap !important;
+  font-size: 0 !important;
+}
+
+.mac-header span {
+  width: 14px !important;
+  height: 14px !important;
+  border-radius: 50% !important;
+  display: inline-block !important;
+  border: 1px solid rgba(0, 0, 0, 0.2) !important;
+  vertical-align: middle !important;
+  margin-right: 10px !important;
+  font-size: 14px !important;
+}
+
+.mac-header span:last-child {
+  margin-right: 0 !important;
+}
+
+.mac-header span:nth-child(1) {
+  background: #ff5f56 !important;
+}
+
+.mac-header span:nth-child(2) {
+  background: #ffbd2e !important;
+}
+
+.mac-header span:nth-child(3) {
+  background: #27c93f !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  .mac-header {
+    background: linear-gradient(180deg, rgba(60, 60, 60, 0.4) 0%, rgba(40, 40, 40, 0.3) 100%) !important;
+    border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+  }
+  
+  .mac-header span {
+    border-color: rgba(0, 0, 0, 0.4) !important;
+  }
+}
+
 code {
   font-family: inherit;
 }
@@ -251,4 +298,4 @@ code {
   .code-header .copy-button:hover {
     background-color: rgba(255, 255, 255, 0.1);
   }
-} 
+}
